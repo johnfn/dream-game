@@ -1,4 +1,4 @@
-import { Sprite, Renderer } from 'pixi.js'
+import { Sprite, Renderer, RenderTexture } from 'pixi.js'
 import { Rect } from './rect'
 import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON } from './tilemap_types';
 import { TextureCache } from './texture_cache';
@@ -111,30 +111,38 @@ export class TiledTilemap {
       }
     }
 
-    const { data, width, name: layername } = layer;
+    const { chunks, width, name: layername } = layer;
 
-    for (let idx = 0; idx < data.length; idx++) {
-      const value = data[idx];
+    // TODO: If the world gets very large, loading in all chunks like this might
+    // not be the best idea - lazy loading could be better.
 
-      if (value === 0) { continue; } // empty
-      if (value > 200000) { continue; } // tiled bug ? TODO does this actually happen?
+    for (const chunk of chunks) {
+      for (let i = 0; i < chunk.data.length; i++) {
+        const value = chunk.data[i];
 
-      const x = (idx % width);
-      const y = Math.floor(idx / width);
+        if (value === 0) { continue; } // empty
+        if (value > 200000) { continue; } // tiled bug? (TODO: does this actually happen?)
 
-      tiles[x][y] = {
-        x: x * this.data.tilewidth,
-        y: y * this.data.tileheight,
-        tile: this.gidToTileset(value),
-        layername: layername,
-      };
+        const relTileX = (i % chunk.width);
+        const relTileY = Math.floor(i / chunk.width);
+
+        const absTileX = relTileX + chunk.x;
+        const absTileY = relTileY + chunk.x;
+
+        tiles[absTileX][absTileY] = {
+          x        : absTileX * this.data.tilewidth,
+          y        : absTileY * this.data.tileheight,
+          tile     : this.gidToTileset(value),
+          layername: layername,
+        }
+      }
     }
 
     this.tiles = tiles;
   }
 
   public loadRegion(region: Rect): Sprite {
-    const renderer = PIXI.RenderTexture.create({
+    const renderer = RenderTexture.create({
       width: region.w,
       height: region.h,
     });

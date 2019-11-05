@@ -6,9 +6,9 @@
 // targetted than a generic blob of data.
 
 export const ResourcesToLoad = {
-  "logo192.png"    : true,
-  "art/tileset.png": true,
-  "maps/map.json"  : true,
+  "logo192.png"   : true,
+  "art/tileset"   : true,
+  "maps/map.json" : true,
 };
 
 export type ResourceName = keyof typeof ResourcesToLoad;

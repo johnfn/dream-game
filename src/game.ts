@@ -30,6 +30,10 @@ export class Game {
 
     this.app.stage.addChild(cat);
 
+    /*
+
+    TODO: Make this API work
+
     const tilemap = new TiledTilemap({
       json      : C.Loader.getResource("maps/map.json").data,
       renderer  : C.Renderer,
@@ -45,5 +49,6 @@ export class Game {
     }));
 
     this.app.stage.addChild(newRegion);
+    */
   }
 }

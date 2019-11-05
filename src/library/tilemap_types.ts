@@ -1,17 +1,24 @@
-export interface TiledTileLayerJSON {
+export interface TiledTileLayerChunkJSON {
   data: number[];
+  height: number;
+  width: number;
+  x: number;
+  y: number;
+}
 
-  height  : number;
-  name    : string;
-  opacity : number;
-  startx  : number;
-  starty  : number;
-  visible : boolean;
-  width   : number;
-  x       : number;
-  y       : number;
-
+export interface TiledTileLayerJSON {
+  chunks: TiledTileLayerChunkJSON[];
+  height: number;
+  id: number;
+  name: string;
+  opacity: number;
+  startx: number;
+  starty: number;
   type: "tilelayer";
+  visible: boolean;
+  width: number;
+  x: number;
+  y: number;
 }
 
 export interface TiledObjectJSON {
