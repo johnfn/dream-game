@@ -3,10 +3,12 @@ import { C } from './constants';
 import { TypesafeLoader } from './library/typesafe_loader';
 import { ResourcesToLoad } from './resources';
 import { TiledTilemap } from './library/tilemap';
+import { Entity } from './entity';
 import { Rect } from './library/rect';
 
 export class Game {
   app: Application;
+  entities: Entity[] = [];
 
   constructor() {
     this.app = new Application({
@@ -46,5 +48,29 @@ export class Game {
     }));
 
     this.app.stage.addChild(newRegion);
+
+    this.app.ticker.add(() => this.gameLoop())
+  }
+
+  gameLoop = () => {
+    // Update obj state
+    for (let e of this.entities) {
+      e.update();
+    }
+
+    // Check for collisions
+    for (let i = 0; i < this.entities.length; i++) {
+      for (let j = i; j < this.entities.length; j++) {
+
+        if (i === j) continue;
+
+        const ent1: Entity = this.entities[i];
+        const ent2: Entity = this.entities[j];
+
+        if (ent1.bounds.intersects(ent2.bounds, {edgesOnlyIsAnIntersection: false})) {
+          //There's probably an intersection
+        }
+      }
+    }
   }
 }
