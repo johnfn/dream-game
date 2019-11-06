@@ -44,8 +44,6 @@ export class TypesafeLoader<Resources> {
       }
     }
 
-    console.log(allTilemapDependencyPaths);
-
     for (const tilemapDependencyPath of allTilemapDependencyPaths) {
       this.loader.add(tilemapDependencyPath);
     }

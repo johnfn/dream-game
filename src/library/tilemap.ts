@@ -47,8 +47,6 @@ export class TiledTilemap {
       const imageUrlRelativeToGame = 
         new URL(pathToTilemap + "/" + imageUrlRelativeToTilemap, "http://a").href.slice("http://a".length + 1); // slice off the initial / too
 
-        debugger;
-
       tilesets.push({
         name,
         imageUrlRelativeToTilemap,
