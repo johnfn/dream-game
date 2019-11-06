@@ -5,10 +5,15 @@
 // the type was, so later when you do getResource() you get something more
 // targetted than a generic blob of data.
 
+export enum ResourceType {
+  Image,
+  Tileset,
+}
+
 export const ResourcesToLoad = {
-  "logo192.png"   : true,
-  "art/tileset"   : true,
-  "maps/map.json" : true,
+  "logo192.png"   : ResourceType.Image,
+  "art/tileset"   : ResourceType.Image,
+  "maps/map.json" : ResourceType.Tileset,
 };
 
 export type ResourceName = keyof typeof ResourcesToLoad;

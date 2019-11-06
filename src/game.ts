@@ -6,7 +6,7 @@ import { TiledTilemap } from './library/tilemap';
 import { Rect } from './library/rect';
 
 export class Game {
-  app: PIXI.Application;
+  app: Application;
 
   constructor() {
     this.app = new Application({
@@ -30,15 +30,12 @@ export class Game {
 
     this.app.stage.addChild(cat);
 
-    /*
-
-    TODO: Make this API work
-
     const tilemap = new TiledTilemap({
-      json      : C.Loader.getResource("maps/map.json").data,
-      renderer  : C.Renderer,
-      tileWidth : C.TILE_WIDTH,
-      tileHeight: C.TILE_HEIGHT,
+      pathToTilemap: "maps",
+      json         : C.Loader.getResource("maps/map.json").data,
+      renderer     : C.Renderer,
+      tileWidth    : C.TILE_WIDTH,
+      tileHeight   : C.TILE_HEIGHT,
     })
 
     const newRegion = tilemap.loadRegion(new Rect({
@@ -49,6 +46,5 @@ export class Game {
     }));
 
     this.app.stage.addChild(newRegion);
-    */
   }
 }
