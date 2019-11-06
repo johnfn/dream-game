@@ -2,8 +2,10 @@ import { Sprite, Renderer, RenderTexture } from 'pixi.js'
 import { Rect } from './rect'
 import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON } from './tilemap_types';
 import { TextureCache } from './texture_cache';
-import { ResourceName, ResourcesToLoad } from '../resources';
-import { TypesafeLoader } from './typesafe_loader';
+import { ResourceName } from '../resources';
+
+// TODO: Handle the weird new file format where tilesets link to ANOTHER json file
+// TODO: don't pass in tileWidth and tileHeight (because they can vary between tilesets)
 
 export class TiledTilemap {
   private data: TiledJSON;
