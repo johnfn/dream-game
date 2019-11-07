@@ -55,15 +55,12 @@ export class Game {
 
     // this.app.stage.addChild(cat);
 
-    /*
-
-    TODO: Make this API work
-
     const tilemap = new TiledTilemap({
-      json      : C.Loader.getResource("maps/map.json").data,
-      renderer  : C.Renderer,
-      tileWidth : C.TILE_WIDTH,
-      tileHeight: C.TILE_HEIGHT,
+      pathToTilemap: "maps",
+      json         : C.Loader.getResource("maps/map.json").data,
+      renderer     : C.Renderer,
+      tileWidth    : C.TILE_WIDTH,
+      tileHeight   : C.TILE_HEIGHT,
     })
 
     const newRegion = tilemap.loadRegion(new Rect({
@@ -74,7 +71,6 @@ export class Game {
     }));
 
     this.app.stage.addChild(newRegion);
-    */
 
     for (let i = 0; i < 50; i++) {
       const entity = new Entity({

@@ -92,7 +92,8 @@ export interface Tileset {
   gidEnd: number;
 
   name: string;
-  image: string;
+  imageUrlRelativeToTilemap: string;
+  imageUrlRelativeToGame: string;
 
   imagewidth: number;
   imageheight: number;
@@ -113,7 +114,7 @@ export interface TiledObject {
 }
 
 export interface SpritesheetTile {
-  name: string;
+  imageUrlRelativeToGame: string;
   spritesheetx: number;
   spritesheety: number;
   tilewidth: number;

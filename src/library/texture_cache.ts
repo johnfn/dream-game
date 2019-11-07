@@ -1,4 +1,4 @@
-import { Sprite } from 'pixi.js'
+import { Sprite, Rectangle } from 'pixi.js'
 import { C } from '../constants';
 import { ResourceName } from '../resources';
 
@@ -17,10 +17,10 @@ export class TextureCache {
     if (!TextureCache.Cache[key]) {
       const texture = C.Loader.getResource(textureName).texture.clone();
 
-      texture.frame = new PIXI.Rectangle(x * tilewidth, y * tileheight, tilewidth, tileheight);
+      texture.frame = new Rectangle(x * tilewidth, y * tileheight, tilewidth, tileheight);
 
       // TODO: I don't understand why I use Sprite here rather than just saving the texture itself
-      this.Cache[key] = new PIXI.Sprite(texture);
+      this.Cache[key] = new Sprite(texture);
     }
 
     return this.Cache[key];

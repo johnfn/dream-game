@@ -4,6 +4,9 @@ import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledT
 import { TextureCache } from './texture_cache';
 import { ResourceName } from '../resources';
 
+// TODO: Handle the weird new file format where tilesets link to ANOTHER json file
+// TODO: don't pass in tileWidth and tileHeight (because they can vary between tilesets)
+
 export class TiledTilemap {
   private data: TiledJSON;
   private tileWidth: number;
@@ -12,30 +15,44 @@ export class TiledTilemap {
   private tiles: (Tile | undefined)[][] = [];
   private renderer: Renderer;
 
-  constructor({ json: data, renderer, tileWidth, tileHeight }: { 
-    json: TiledJSON; 
-    renderer: Renderer; 
-    tileWidth: number; 
-    tileHeight: number; 
+  constructor({ json: data, renderer, tileWidth, tileHeight, pathToTilemap }: { 
+
+    // this is required to calculate the relative paths of the tileset images.
+    json         : TiledJSON; 
+    renderer     : Renderer; 
+    tileWidth    : number; 
+    tileHeight   : number; 
+    pathToTilemap: string;
   }) {
     this.data = data;
     this.tileHeight = tileHeight;
     this.tileWidth = tileWidth;
     this.renderer = renderer;
 
-    this.tilesets = this.loadTilesets();
+    this.tilesets = TiledTilemap.LoadTilesets(pathToTilemap ,this.data);
+
     this.loadLayers();
   }
 
-  private loadTilesets(): Tileset[] {
+  public static GetAllTilesetsOf(
+    pathToTilemap: string,
+    json: TiledJSON
+  ): string[] {
+    return TiledTilemap.LoadTilesets(pathToTilemap, json).map(tileset => tileset.imageUrlRelativeToGame);
+  }
+
+  private static LoadTilesets(pathToTilemap: string, json: TiledJSON): Tileset[] {
     const tilesets: Tileset[] = [];
 
-    for (const { image, name, firstgid, imageheight, imagewidth, tileheight, tilewidth } of this.data.tilesets) {
+    for (const { image: imageUrlRelativeToTilemap, name, firstgid, imageheight, imagewidth, tileheight, tilewidth } of json.tilesets) {
       const tiles = (imageheight * imagewidth) / (tileheight * tilewidth);
+      const imageUrlRelativeToGame = 
+        new URL(pathToTilemap + "/" + imageUrlRelativeToTilemap, "http://a").href.slice("http://a".length + 1); // slice off the initial / too
 
       tilesets.push({
         name,
-        image,
+        imageUrlRelativeToTilemap,
+        imageUrlRelativeToGame,
         imagewidth,
         imageheight,
         tilewidth,
@@ -50,7 +67,7 @@ export class TiledTilemap {
   }
 
   private gidToTileset(gid: number): SpritesheetTile {
-    for (const { gidStart, gidEnd, name, imagewidth, tilewidth, tileheight } of this.tilesets) {
+    for (const { gidStart, gidEnd, imageUrlRelativeToGame, imagewidth, tilewidth, tileheight } of this.tilesets) {
       if (gid >= gidStart && gid < gidEnd) {
         const normalizedGid = gid - gidStart;
         const tilesWide = imagewidth / tilewidth;
@@ -59,7 +76,7 @@ export class TiledTilemap {
         const y = Math.floor(normalizedGid / tilesWide);
 
         return {
-          name,
+          imageUrlRelativeToGame,
           spritesheetx: x,
           spritesheety: y,
           tilewidth,
@@ -143,7 +160,7 @@ export class TiledTilemap {
 
   public loadRegion(region: Rect): Sprite {
     const renderer = RenderTexture.create({
-      width: region.w,
+      width : region.w,
       height: region.h,
     });
     const tileWidth  = this.data.tilewidth;
@@ -159,14 +176,14 @@ export class TiledTilemap {
           x,
           y,
           tile: {
-            name: spritesheet,
+            imageUrlRelativeToGame,
             spritesheetx,
             spritesheety,
           },
         } = tile;
 
         const spriteTex = TextureCache.GetTextureFromSpritesheet({ 
-          textureName: spritesheet as ResourceName, // TODO: Is there any way to improve this cast?
+          textureName: imageUrlRelativeToGame as ResourceName, // TODO: Is there any way to improve this cast?
           x          : spritesheetx, 
           y          : spritesheety, 
           tilewidth  : this.tileWidth, 
@@ -183,7 +200,7 @@ export class TiledTilemap {
       }
     }
 
-    return new PIXI.Sprite(renderer);
+    return new Sprite(renderer);
   }
 
   public getTileAt(x: number, y: number): Tile | undefined {

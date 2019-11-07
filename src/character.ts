@@ -13,7 +13,7 @@ export class Character extends Entity {
     });
   }
 
-  handleInput = (keys: { [index: string]: boolean }) => {
+  handleInput = (keys: { [index: string]: boolean }) => { 
     let direction = Point.Zero;
     if (keys["w"]) {
       direction = new Point({ x: direction.x, y: -1 });
