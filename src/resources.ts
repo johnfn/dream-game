@@ -8,6 +8,8 @@
 export const ResourcesToLoad = {
   "logo192.png"   : true,
   "art/tileset"   : true,
+  "art/temp.png"  : true,
+  "art/char.png"  : true,
   "maps/map.json" : true,
 };
 

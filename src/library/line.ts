@@ -238,6 +238,10 @@ export class Line {
     };
   }
 
+  toString(): string {
+    return `Line: [(${ this.x1 },${ this.y1 }) -> (${ this.x2 },${ this.y2 })]`;
+  }
+
   static Deserialize(obj: any): Line {
     if (
       !obj.hasOwnProperty("x1") ||

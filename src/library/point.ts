@@ -150,6 +150,13 @@ export class Point {
     });
   }
 
+  // Normalize a vector.
+  normalize(): Point {
+    if (this.x === 0 && this.y === 0) { return this; }
+    const length = Math.sqrt(this.x * this.x + this.y * this.y);
+    return new Point({x: this.x / length, y: this.y / length});
+  }
+
   static Deserialize(obj: any): Point {
     if (!obj.hasOwnProperty("x") || !obj.hasOwnProperty("y")) {
       console.error("Failed deserializing point");

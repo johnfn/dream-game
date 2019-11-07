@@ -1,27 +1,86 @@
-import { Game } from './game';
-import { Point } from './library/point';
-import { Rect } from './library/rect';
+import { Game } from "./game";
+import { Point } from "./library/point";
+import { Rect } from "./library/rect";
+import * as PIXI from "pixi.js";
+import { C } from "./constants";
+import { Line } from "./library/line";
 
 export class Entity extends PIXI.Sprite {
-    private _velocity: Point = Point.Zero;
-    
-    constructor(texture: PIXI.Texture, game: Game) {
-        super(texture);
-        game.entities.push(this);
-    }
+  private _direction: Point = Point.Zero;
+  private _collidable: boolean;
+  private _dynamic: boolean;
+  private _maxSpeed: number = 50;
 
-    public get bounds(): Rect {
-        const b = this._bounds;
-        return new Rect({
-            x: b.minX,
-            y: b.minY,
-            w: b.maxX - b.minX,
-            h: b.maxY- b.minY
-        })
-    }
+  constructor(props: {
+    game: Game;
+    texture: PIXI.Texture;
+    collidable: boolean;
+    dynamic: boolean;
+  }) {
+    super(props.texture);
 
-    update = () => {
-        this.position.x += this._velocity.x / 60;
-        this.position.y += this._velocity.y / 60;
+    const { game, collidable, dynamic } = props;
+    this._collidable = collidable;
+    this._dynamic = dynamic;
+
+    if (collidable) {
+      game.entities.collidable.push(this);
+      this.direction = new Point({
+        x: 2 * (0.5 - Math.random()),
+        y: 2 * (0.5 - Math.random())
+      });
+    } else {
+      game.entities.static.push(this);
     }
+    this.position = new PIXI.Point(
+      C.CANVAS_WIDTH * Math.random(),
+      C.CANVAS_HEIGHT * Math.random()
+    );
+  }
+
+  public get bounds(): Rect {
+    const b = this.getBounds();
+    return new Rect({
+      x: b.x,
+      y: b.y,
+      w: b.width,
+      h: b.height
+    });
+  }
+
+  public get direction(): Point {
+      return this._direction;
+  }
+
+  public set direction(dir: Point) {
+    this._direction = dir;
+}
+
+  public get maxSpeed(): number {
+      return this._maxSpeed;
+  }
+
+  // TODO: Use correct framerate
+  update = () => {
+    if (!this._dynamic) return;
+    this.position.x += this.maxSpeed * this.direction.x / 60;
+    this.position.y += this.maxSpeed * this.direction.y / 60;
+  };
+
+  // Currently just stops moving.
+  collide = (other: Entity, intersection: Rect) => {
+    if (!this._collidable) return;
+    if (other == this) return;
+    this.direction = Point.Zero;
+  };
+
+  // Checks if the center of the entity is on screen.
+  isOnScreen = () => {
+    return (
+      this.position.x > 0 &&
+      this.position.x < C.CANVAS_WIDTH &&
+      this.position.y > 0 &&
+      this.position.y < C.CANVAS_HEIGHT
+    );
+  };
 }

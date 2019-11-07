@@ -1,4 +1,4 @@
-import { Line } from './line';
+import { Line } from "./line";
 import { Point, IPoint } from "./point";
 
 export class Rect {
@@ -7,21 +7,43 @@ export class Rect {
   private _w: number;
   private _h: number;
 
-  public get x(): number { return this._x; }
-  public get y(): number { return this._y; }
+  public get x(): number {
+    return this._x;
+  }
+  public get y(): number {
+    return this._y;
+  }
 
-  public get w(): number { return this._w; }
-  public get h(): number { return this._h; }
+  public get w(): number {
+    return this._w;
+  }
+  public get h(): number {
+    return this._h;
+  }
 
-  public get centerX(): number { return this._x + this._w / 2; }
-  public get centerY(): number { return this._y + this._h / 2; }
+  public get centerX(): number {
+    return this._x + this._w / 2;
+  }
+  public get centerY(): number {
+    return this._y + this._h / 2;
+  }
 
-  public get right() : number { return this._x + this._w; }
-  public get bottom(): number { return this._y + this._h; }
-  public get top()   : number { return this._y; }
-  public get left()  : number { return this._x; }
+  public get right(): number {
+    return this._x + this._w;
+  }
+  public get bottom(): number {
+    return this._y + this._h;
+  }
+  public get top(): number {
+    return this._y;
+  }
+  public get left(): number {
+    return this._x;
+  }
 
-  public get pos(): Point { return new Point({ x: this.x, y: this.y })};
+  public get pos(): Point {
+    return new Point({ x: this.x, y: this.y });
+  }
 
   public get center(): Point {
     return new Point({ x: this.x + this.w / 2, y: this.y + this.h / 2 });
@@ -36,7 +58,7 @@ export class Rect {
       x: point.x,
       y: point.y,
       w: size,
-      h: size,
+      h: size
     });
   }
 
@@ -45,7 +67,7 @@ export class Rect {
       x: Math.min(p1.x, p2.x),
       y: Math.min(p1.y, p2.y),
       w: Math.abs(p1.x - p2.x),
-      h: Math.abs(p1.y - p2.y),
+      h: Math.abs(p1.y - p2.y)
     });
   }
 
@@ -54,7 +76,7 @@ export class Rect {
       x: this.x,
       y: this.y,
       w: value - this.x,
-      h: this.h,
+      h: this.h
     });
   }
 
@@ -63,7 +85,7 @@ export class Rect {
       x: this.x,
       y: this.y,
       w: value,
-      h: this.h,
+      h: this.h
     });
   }
 
@@ -72,7 +94,7 @@ export class Rect {
       x: this.x,
       y: this.y,
       w: this.w,
-      h: value,
+      h: value
     });
   }
 
@@ -81,7 +103,7 @@ export class Rect {
       x: this.x,
       y: this.y,
       w: this.w,
-      h: value - this.y,
+      h: value - this.y
     });
   }
 
@@ -90,7 +112,7 @@ export class Rect {
       x: value,
       y: this.y,
       w: this.w,
-      h: this.h,
+      h: this.h
     });
   }
 
@@ -99,7 +121,7 @@ export class Rect {
       x: this.x,
       y: value,
       w: this.w,
-      h: this.h,
+      h: this.h
     });
   }
 
@@ -142,32 +164,32 @@ export class Rect {
   public get topLeft(): Point {
     return new Point({
       x: this.x,
-      y: this.y,
+      y: this.y
     });
   }
 
   public get topRight(): Point {
     return new Point({
       x: this.right,
-      y: this.y,
+      y: this.y
     });
   }
 
   public get bottomRight(): Point {
     return new Point({
       x: this.right,
-      y: this.bottom,
+      y: this.bottom
     });
   }
 
   public get bottomLeft(): Point {
     return new Point({
       x: this.x,
-      y: this.bottom,
+      y: this.bottom
     });
   }
 
-  constructor(props: { x: number, y: number, w: number, h: number }) {
+  constructor(props: { x: number; y: number; w: number; h: number }) {
     this._x = props.x;
     this._y = props.y;
     this._w = props.w;
@@ -175,62 +197,87 @@ export class Rect {
   }
 
   static DeserializeRect(s: string): Rect {
-    const [ x, y, w, h ] = s.split("|").map(x => Number(x));
+    const [x, y, w, h] = s.split("|").map(x => Number(x));
 
     return new Rect({ x, y, w, h });
   }
 
   getLinesFromRect(): Line[] {
     return [
-      new Line({ x1: this.x         , y1: this.y         , x2: this.x + this.w, y2: this.y          }),
-      new Line({ x1: this.x         , y1: this.y         , x2: this.x         , y2: this.y + this.h }),
-      new Line({ x1: this.x + this.w, y1: this.y + this.h, x2: this.x + this.w, y2: this.y          }),
-      new Line({ x1: this.x + this.w, y1: this.y + this.h, x2: this.x         , y2: this.y + this.h }),
+      new Line({ x1: this.x, y1: this.y, x2: this.x + this.w, y2: this.y }),
+      new Line({ x1: this.x, y1: this.y, x2: this.x, y2: this.y + this.h }),
+      new Line({
+        x1: this.x + this.w,
+        y1: this.y + this.h,
+        x2: this.x + this.w,
+        y2: this.y
+      }),
+      new Line({
+        x1: this.x + this.w,
+        y1: this.y + this.h,
+        x2: this.x,
+        y2: this.y + this.h
+      })
+    ];
+  }
+
+  getPointsFromRect(): Point[] {
+    return [
+      new Point({ x: this.x, y: this.y }),
+      new Point({ x: this.x + this.w, y: this.y }),
+      new Point({ x: this.x, y: this.y + this.h }),
+      new Point({ x: this.x + this.w, y: this.y + this.h })
     ];
   }
 
   serialize(): string {
-    return `${ this.x }|${ this.y }|${ this.w }|${ this.h }`;
+    return `${this.x}|${this.y}|${this.w}|${this.h}`;
   }
 
   // consider overlapping edges as intersection, but not overlapping corners.
-  intersects(other: Rect, props: { edgesOnlyIsAnIntersection: boolean }): boolean {
+  intersects(
+    other: Rect,
+    props: { edgesOnlyIsAnIntersection: boolean }
+  ): boolean {
     const intersection = this.getIntersection(other, true);
 
     if (props.edgesOnlyIsAnIntersection) {
-      return !!intersection && (
-              intersection.w > 0 ||
-              intersection.h > 0 );
+      return !!intersection && (intersection.w > 0 || intersection.h > 0);
     } else {
-      return !!intersection && (intersection.w * intersection.h > 0);
+      return !!intersection && intersection.w * intersection.h > 0;
     }
   }
 
   completelyContains(smaller: Rect): boolean {
-    return this.x          <= smaller.x             &&
-           this.x + this.w >= smaller.x + smaller.w &&
-           this.y          <= smaller.y             &&
-           this.y + this.h >= smaller.y + smaller.h ;
+    return (
+      this.x <= smaller.x &&
+      this.x + this.w >= smaller.x + smaller.w &&
+      this.y <= smaller.y &&
+      this.y + this.h >= smaller.y + smaller.h
+    );
   }
 
-  getIntersection(other: Rect, edgesOnlyIsAnIntersection = false): Rect | undefined {
+  getIntersection(
+    other: Rect,
+    edgesOnlyIsAnIntersection = false
+  ): Rect | undefined {
     const xmin = Math.max(this.x, other.x);
     const xmax1 = this.x + this.w;
     const xmax2 = other.x + other.w;
     const xmax = Math.min(xmax1, xmax2);
 
     if (xmax > xmin || (edgesOnlyIsAnIntersection && xmax >= xmin)) {
-      const ymin  = Math.max(this.y, other.y);
+      const ymin = Math.max(this.y, other.y);
       const ymax1 = this.y + this.h;
       const ymax2 = other.y + other.h;
-      const ymax  = Math.min(ymax1, ymax2);
+      const ymax = Math.min(ymax1, ymax2);
 
       if (ymax >= ymin || (edgesOnlyIsAnIntersection && ymax >= ymin)) {
         return new Rect({
           x: xmin,
           y: ymin,
           w: xmax - xmin,
-          h: ymax - ymin,
+          h: ymax - ymin
         });
       }
     }
@@ -239,8 +286,12 @@ export class Rect {
   }
 
   contains(p: Point): boolean {
-    return p.x >= this.x && p.x < this.x + this.w &&
-           p.y >= this.y && p.y < this.y + this.h;
+    return (
+      p.x >= this.x &&
+      p.x < this.x + this.w &&
+      p.y >= this.y &&
+      p.y < this.y + this.h
+    );
   }
 
   clone(): Rect {
@@ -256,7 +307,7 @@ export class Rect {
       x: this.x + p.x,
       y: this.y + p.y,
       w: this.w,
-      h: this.h,
+      h: this.h
     });
   }
 
@@ -265,7 +316,7 @@ export class Rect {
       x: this.x,
       y: this.y,
       w: this.w * p.x,
-      h: this.h * p.y,
+      h: this.h * p.y
     });
   }
 
@@ -274,27 +325,26 @@ export class Rect {
       x: -this.w / 2,
       y: -this.h / 2,
       w: this.w,
-      h: this.h,
+      h: this.h
     });
   }
 
   equals(o: Rect | undefined): boolean {
-    if (!o) { return false; }
+    if (!o) {
+      return false;
+    }
 
-    return this.x === o.x &&
-           this.y === o.y &&
-           this.w === o.w &&
-           this.h === o.h;
+    return this.x === o.x && this.y === o.y && this.w === o.w && this.h === o.h;
   }
 
   toJSON(): any {
     return {
-      x      : this.x,
-      y      : this.y,
-      w      : this.w,
-      h      : this.h,
-      reviver: "Rect",
-    }
+      x: this.x,
+      y: this.y,
+      w: this.w,
+      h: this.h,
+      reviver: "Rect"
+    };
   }
 
   /**
@@ -305,7 +355,7 @@ export class Rect {
       x: this.x,
       y: this.y,
       w: this.w + amount,
-      h: this.h + amount,
+      h: this.h + amount
     });
   }
 
@@ -314,7 +364,7 @@ export class Rect {
       x: this.x + amount,
       y: this.y + amount,
       w: Math.max(this.w - amount * 2, 0),
-      h: Math.max(this.h - amount * 2, 0),
+      h: Math.max(this.h - amount * 2, 0)
     });
   }
 
@@ -323,7 +373,7 @@ export class Rect {
       x: Math.floor(this.x),
       y: Math.floor(this.y),
       w: Math.floor(this.w),
-      h: Math.floor(this.h),
+      h: Math.floor(this.h)
     });
   }
 
@@ -342,7 +392,7 @@ export class Rect {
       x: topLeft.x,
       y: topLeft.y,
       w: botRight.x - topLeft.x,
-      h: botRight.y - topLeft.y,
+      h: botRight.y - topLeft.y
     });
   }
 
@@ -351,8 +401,8 @@ export class Rect {
       !obj.hasOwnProperty("x") ||
       !obj.hasOwnProperty("y") ||
       !obj.hasOwnProperty("w") ||
-      !obj.hasOwnProperty("h")) {
-
+      !obj.hasOwnProperty("h")
+    ) {
       console.error("Failed deserializing Rect");
     }
 
@@ -360,7 +410,7 @@ export class Rect {
       x: obj.x,
       y: obj.y,
       w: obj.w,
-      h: obj.h,
+      h: obj.h
     });
   }
 
@@ -369,7 +419,11 @@ export class Rect {
       x: r.x,
       y: r.y,
       w: r.w,
-      h: r.h,
+      h: r.h
     });
+  }
+
+  toString(): string {
+    return `[${this.x}, ${this.y}]`;
   }
 }
