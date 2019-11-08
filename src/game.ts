@@ -7,6 +7,7 @@ import { Entity } from "./entity";
 import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
+import { Camera } from "./camera";
 
 export class Game {
   app: PIXI.Application;
@@ -18,6 +19,7 @@ export class Game {
   debugMode: boolean;
   keys: { [index: string]: boolean } = {};
   player!: Character;
+  camera!: Camera;
 
   constructor() {
     this.debugMode = true;
@@ -82,44 +84,25 @@ export class Game {
 
     this.app.stage.addChild(this.player);
 
+    this.camera = new Camera({
+      stage: this.app.stage,
+      width: C.CANVAS_WIDTH,
+      height: C.CANVAS_HEIGHT
+    });
+    this.camera.follow(this.player);
+
     this.app.ticker.add(() => this.gameLoop());
   };
 
   gameLoop = () => {
-    // Get input
     this.player.handleInput(this.keys);
 
-    // Update obj state
     for (let e of this.entities.collidable) {
       e.update();
     }
 
-    this.grid.clear();
+    this.grid.checkCollisions(this.entities.collidable);
 
-    for (let e of this.entities.collidable) {
-      if (e.isOnScreen()) this.grid.add(e);
-    }
-
-    // Check for collisions using grid
-    for (let cell of this.grid.cells) {
-      const cellEntities = cell.entities;
-      for (let i = 0; i < cellEntities.length; i++) {
-        for (let j = i; j < cellEntities.length; j++) {
-          if (i === j) continue;
-
-          const ent1 = cellEntities[i];
-          const ent2 = cellEntities[j];
-          const bounds1: Rect = ent1.bounds;
-          const bounds2: Rect = ent2.bounds; 
-
-          const intersection = bounds1.getIntersection(bounds2, false);
-
-          if (!!intersection) {
-            ent1.collide(ent2, intersection);
-            ent2.collide(ent1, intersection);
-          }
-        }
-      }
-    }
+    this.camera.update();
   };
 }

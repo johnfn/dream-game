@@ -7,6 +7,7 @@ import { Game } from "./game";
 import { Point } from "./library/point";
 
 export class CollisionGrid {
+  private _position: Point = Point.Zero;
   private _game: Game;
   private _width: number;
   private _height: number;
@@ -14,6 +15,7 @@ export class CollisionGrid {
   private _numCellsPerRow: number;
   private _numCellsPerCol: number;
   private _cells: { [index: number]: Cell } = {};
+  private _target: Entity | undefined;
 
   constructor(props: {
     game: Game;
@@ -46,6 +48,45 @@ export class CollisionGrid {
     if (debug) this.drawGrid();
   }
 
+  public get topLeft() {
+    return this._position;
+  }
+
+  public get center() {
+    return this._position.add({x: this._width/2, y: this._height/2})
+  }
+
+  checkCollisions = (entities: Entity[]) => {
+    
+    this.clear();
+
+    for (let e of entities) {
+      if (e.isOnScreen()) this.add(e);
+    }
+
+    // Check for collisions using grid
+    for (let cell of this.cells) {
+      const cellEntities = cell.entities;
+      for (let i = 0; i < cellEntities.length; i++) {
+        for (let j = i; j < cellEntities.length; j++) {
+          if (i === j) continue;
+
+          const ent1 = cellEntities[i];
+          const ent2 = cellEntities[j];
+          const bounds1: Rect = ent1.bounds;
+          const bounds2: Rect = ent2.bounds;
+
+          const intersection = bounds1.getIntersection(bounds2, false);
+
+          if (!!intersection) {
+            ent1.collide(ent2, intersection);
+            ent2.collide(ent1, intersection);
+          }
+        }
+      }
+    }
+  }
+
   // Computes the hash of a position, which corresponds to a single cell in the grid.
   hashPosition = (pos: Point): number => {
     return (
@@ -75,12 +116,19 @@ export class CollisionGrid {
     }
   };
 
+  follow(e: Entity) {
+    this._target = e;
+  }
   // Add an entity to the hash grid.
   // Checks each corner, to handle entities that span multiply grid cells.
   add = (e: Entity) => {
     // Remove duplicate hashes
     const hashes = Array.from(new Set(this.hashCorners(e.bounds)));
     for (let hash of hashes) {
+      if (!(hash in this._cells)) {
+        console.error("Collision grid hash out of bounds :(");
+        continue;
+      }
       this._cells[hash].add(e);
     }
   };
@@ -94,7 +142,7 @@ export class CollisionGrid {
           x1: x * this._cellSize,
           x2: x * this._cellSize,
           y1: 0,
-          y2: C.CANVAS_HEIGHT
+          y2: this._height
         })
       );
     }
@@ -102,7 +150,7 @@ export class CollisionGrid {
       lines.push(
         new Line({
           x1: 0,
-          x2: C.CANVAS_WIDTH,
+          x2: this._width,
           y1: y * this._cellSize,
           y2: y * this._cellSize
         })

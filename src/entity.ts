@@ -35,6 +35,13 @@ export abstract class Entity extends PIXI.Sprite {
     });
   }
 
+  public get center(): Point {
+    return new Point(this.position).add({
+      x: this.width / 2,
+      y: this.height / 2
+    });
+  }
+
   // Checks the center
   isOnScreen = () => {
     return (
@@ -61,7 +68,7 @@ export class BaseEntity extends Entity {
   }) {
     super(props);
 
-    this._collidable = props.collidable; 
+    this._collidable = props.collidable;
     this._dynamic = props.dynamic;
 
     this._direction = new Point({
