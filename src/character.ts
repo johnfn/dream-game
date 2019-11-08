@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Entity, BaseEntity } from "./entity";
+import { Entity } from "./entity";
 import { Game } from "./game";
 import { Point } from "./library/point";
 import { Rect } from "./library/rect";

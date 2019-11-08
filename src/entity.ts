@@ -61,9 +61,8 @@ export class BaseEntity extends Entity {
   }) {
     super(props);
 
-    const { game, collidable, dynamic } = props;
-    this._collidable = collidable;
-    this._dynamic = dynamic;
+    this._collidable = props.collidable; 
+    this._dynamic = props.dynamic;
 
     this._direction = new Point({
       x: 2 * (0.5 - Math.random()),

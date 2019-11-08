@@ -1,13 +1,12 @@
-import { Application, Sprite, SCALE_MODES, settings } from "pixi.js";
+import { Application, SCALE_MODES, settings } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
 import { TiledTilemap } from "./library/tilemap";
-import { Entity, BaseEntity } from "./entity";
+import { Entity } from "./entity";
 import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
-import { Point } from "./library/point";
 
 export class Game {
   app: PIXI.Application;
@@ -111,7 +110,7 @@ export class Game {
           const ent1 = cellEntities[i];
           const ent2 = cellEntities[j];
           const bounds1: Rect = ent1.bounds;
-          const bounds2: Rect = ent2.bounds;
+          const bounds2: Rect = ent2.bounds; 
 
           const intersection = bounds1.getIntersection(bounds2, false);
 
