@@ -1,7 +1,6 @@
 import { Loader, LoaderResource } from 'pixi.js'
 import { ResourceName, ResourcesToLoad, ResourceType } from '../resources';
 import { TiledTilemap } from './tilemap';
-import { tsParenthesizedType } from '@babel/types';
 
 /** 
  * TypeSafe loader is intended to be a wrapper around PIXI.Loader which gives a

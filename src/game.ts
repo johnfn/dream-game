@@ -1,12 +1,12 @@
-import { Application, Sprite } from "pixi.js";
+import { Application, Sprite, SCALE_MODES, settings } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
 import { TiledTilemap } from "./library/tilemap";
-import { Entity } from "./entity";
+import { Entity, BaseEntity } from "./entity";
 import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
-import {Character} from "./character";
+import { Character } from "./character";
 import { Point } from "./library/point";
 
 export class Game {
@@ -30,6 +30,8 @@ export class Game {
       resolution: 1
     });
 
+    settings.SCALE_MODE = SCALE_MODES.NEAREST;
+
     C.Renderer = this.app.renderer;
     C.Loader = new TypesafeLoader(ResourcesToLoad);
 
@@ -37,54 +39,46 @@ export class Game {
 
     this.grid = new CollisionGrid({
       game: this,
-      width: 2*C.CANVAS_WIDTH,
-      height: 2*C.CANVAS_HEIGHT,
-      cellSize: C.TILE_WIDTH,
+      width: 2 * C.CANVAS_WIDTH,
+      height: 2 * C.CANVAS_HEIGHT,
+      cellSize: 8 * C.TILE_WIDTH,
       debug: this.debugMode
     });
 
-    window.onkeyup = (e: KeyboardEvent ):void => { this.keys[e.key] = false; }
-    window.onkeydown = (e: KeyboardEvent ):void => { this.keys[e.key] = true; }
+    window.onkeyup = (e: KeyboardEvent): void => {
+      this.keys[e.key] = false;
+    };
+    window.onkeydown = (e: KeyboardEvent): void => {
+      this.keys[e.key] = true;
+    };
 
     C.Loader.onLoadComplete(this.startGame);
-    
   }
 
   startGame = () => {
-    // const cat = new Sprite(C.Loader.getResource("logo192.png").texture);
-
-    // this.app.stage.addChild(cat);
-
     const tilemap = new TiledTilemap({
       pathToTilemap: "maps",
-      json         : C.Loader.getResource("maps/map.json").data,
-      renderer     : C.Renderer,
-      tileWidth    : C.TILE_WIDTH,
-      tileHeight   : C.TILE_HEIGHT,
-    })
+      json: C.Loader.getResource("maps/map.json").data,
+      renderer: C.Renderer,
+      tileWidth: C.TILE_WIDTH,
+      tileHeight: C.TILE_HEIGHT
+    });
 
-    const newRegion = tilemap.loadRegion(new Rect({
-      x: 0,
-      y: 0,
-      w: 1024,
-      h: 1024,
-    }));
+    const newRegion = tilemap.loadRegion(
+      new Rect({
+        x: 0,
+        y: 0,
+        w: 1024,
+        h: 1024
+      })
+    );
 
     this.app.stage.addChild(newRegion);
 
-    for (let i = 0; i < 50; i++) {
-      const entity = new Entity({
-        game: this,
-        texture: C.Loader.getResource("art/temp.png").texture,
-        collidable: true,
-        dynamic: true
-      });
-      this.app.stage.addChild(entity);
-    }
-
     this.player = new Character({
       game: this,
-      texture: C.Loader.getResource("art/char.png").texture,
+      spritesheet: C.Loader.getResource("art/char_spritesheet.json")
+        .spritesheet!
     });
 
     this.app.stage.addChild(this.player);
@@ -93,7 +87,6 @@ export class Game {
   };
 
   gameLoop = () => {
-
     // Get input
     this.player.handleInput(this.keys);
 
@@ -130,6 +123,4 @@ export class Game {
       }
     }
   };
-
-  
 }

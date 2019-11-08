@@ -3,19 +3,21 @@
 
 // TODO: It would be nice for the keys of this object to somehow indicate what
 // the type was, so later when you do getResource() you get something more
-// targetted than a generic blob of data.
+// targeted than a generic blob of data.
 
 export enum ResourceType {
   Image,
   Tileset,
+  Spritesheet,
 }
 
 export const ResourcesToLoad = {
-  "logo192.png"   : ResourceType.Image,
-  "art/tileset"   : ResourceType.Image,
-  "art/temp.png"  : ResourceType.Image,
-  "art/char.png"  : ResourceType.Image,
-  "maps/map.json" : ResourceType.Tileset,
+  "logo192.png"              : ResourceType.Image,
+  "art/tileset"              : ResourceType.Image,
+  "art/temp.png"             : ResourceType.Image,
+  "art/char.png"             : ResourceType.Image,
+  "art/char_spritesheet.json": ResourceType.Spritesheet,
+  "maps/map.json"            : ResourceType.Tileset,
 };
 
 export type ResourceName = keyof typeof ResourcesToLoad;
