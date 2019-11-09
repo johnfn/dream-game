@@ -1,5 +1,5 @@
 import { Game } from "../game";
-import { Vector2 } from "./point";
+import { Vector2 } from "./vector2";
 import { Rect } from "./rect";
 import { Sprite, Texture }from "pixi.js";
 import { C } from "../constants";

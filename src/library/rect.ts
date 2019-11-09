@@ -1,5 +1,5 @@
 import { Line } from "./line";
-import { Vector2, IVector2 } from "./point";
+import { Vector2, IVector2 } from "./vector2";
 
 export class Rect {
   private _x: number;
@@ -301,6 +301,11 @@ export class Rect {
   add(p: IVector2): Rect {
     return this.translate(p);
   }
+
+  subtract(p: IVector2): Rect {
+    return this.translate({ x: -p.x, y: -p.y });
+  }
+
 
   translate(p: IVector2): Rect {
     return new Rect({

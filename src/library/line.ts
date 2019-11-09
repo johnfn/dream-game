@@ -1,4 +1,4 @@
-import { Vector2 } from "./point"
+import { Vector2 } from "./vector2"
 
 export class Line {
   private _x1: number;

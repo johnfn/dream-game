@@ -11,6 +11,7 @@ import { Camera } from "./camera";
 import { GameState } from "./state";
 import { MovingEntity } from "./library/moving_entity";
 import { TestEntity } from "./test_entity";
+import { Vector2 } from "./library/vector2";
 
 export class Game {
   app: PIXI.Application;
@@ -106,6 +107,29 @@ export class Game {
     this.app.ticker.add(() => this.gameLoop());
   };
 
+  private doesRectHitAnything = (rect: Rect): boolean => {
+    const tiles = [
+      this.gameState.map.getTileAt(rect.x         , rect.y),
+      this.gameState.map.getTileAt(rect.x + rect.w, rect.y),
+      this.gameState.map.getTileAt(rect.x         , rect.y + rect.h),
+      this.gameState.map.getTileAt(rect.x + rect.w, rect.y + rect.h),
+    ];
+
+    for (const tile of tiles) {
+      if (tile !== null) {
+        if (tile.isCollider) {
+          return true;
+        }
+      }
+    }
+
+    if (this.grid.checkForCollision(rect)) {
+      return true;
+    }
+
+    return false;
+  };
+
   private resolveCollisions = () => {
     this.grid.clear();
 
@@ -119,39 +143,32 @@ export class Game {
       ent => ent.entityType === EntityType.MovingEntity
     ) as MovingEntity[];
 
-    outer: 
     for (const entity of movingEntities) {
-      const newPosition = new Point(
-        entity.position.x + entity.velocity.x,
-        entity.position.y + entity.velocity.y
-      );
+      let updatedBounds = entity.bounds;
 
-      const tiles = [
-        this.gameState.map.getTileAt(newPosition.x               , newPosition.y),
-        this.gameState.map.getTileAt(newPosition.x + entity.width, newPosition.y),
-        this.gameState.map.getTileAt(newPosition.x               , newPosition.y + entity.height),
-        this.gameState.map.getTileAt(newPosition.x + entity.width, newPosition.y + entity.height),
-      ];
+      continue;
 
-      for (const tile of tiles) {
-        if (tile !== null) {
-          if (tile.isCollider) {
-            continue outer;
-          }
-        }
+      const xVelocity = new Vector2({ x: entity.velocity.x, y: 0                 });
+      const yVelocity = new Vector2({ x: 0                , y: entity.velocity.y });
+
+      // resolve x-axis
+
+      updatedBounds = updatedBounds.add(xVelocity);
+
+      if (this.doesRectHitAnything(updatedBounds)) {
+        updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
-      if (this.grid.checkForCollision(new Rect({
-          x: newPosition.x,
-          y: newPosition.y,
-          w: newPosition.x + entity.width,
-          h: newPosition.x + entity.height,
-        }))) {
+      // resolve y-axis
 
-        continue;
+      updatedBounds = updatedBounds.add(yVelocity);
+
+      if (this.doesRectHitAnything(updatedBounds)) {
+        updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
-      entity.position = newPosition;
+      entity.x = updatedBounds.x;
+      entity.y = updatedBounds.y;
     }
 
     // console.log(this.grid.getAllCollisions());

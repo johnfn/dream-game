@@ -1,4 +1,4 @@
-import { Vector2 } from "./library/point";
+import { Vector2 } from "./library/vector2";
 import { Entity } from "./library/entity";
 import * as PIXI from "pixi.js";
 

@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { Entity } from "./library/entity";
 import { Game } from "./game";
-import { Vector2 } from "./library/point";
+import { Vector2 } from "./library/vector2";
 import { Rect } from "./library/rect";
 import { GameState } from "./state";
 import { KeyboardState } from "./library/keyboard";

@@ -1,5 +1,5 @@
 import { Entity, EntityType } from "./entity";
-import { Vector2 } from "./point";
+import { Vector2 } from "./vector2";
 import { Game } from "../game";
 import { Texture } from "pixi.js";
 import { GameState } from "../state";
