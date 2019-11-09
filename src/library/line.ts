@@ -1,4 +1,4 @@
-import { Point } from "./point"
+import { Vector2 } from "./point"
 
 export class Line {
   private _x1: number;
@@ -11,8 +11,8 @@ export class Line {
   public get y1(): number { return this._y1; }
   public get y2(): number { return this._y2; }
 
-  public get start(): Point { return new Point({ x: this.x1, y: this.y1 }); }
-  public get end()  : Point { return new Point({ x: this.x2, y: this.y2 }); }
+  public get start(): Vector2 { return new Vector2({ x: this.x1, y: this.y1 }); }
+  public get end()  : Vector2 { return new Vector2({ x: this.x2, y: this.y2 }); }
 
   public get angleInDegrees(): number {
     const cx = this._x1;
@@ -38,7 +38,7 @@ export class Line {
   public serialized = "";
 
   constructor(props: { x1: number, x2: number, y1: number, y2: number } |
-                     { one: Point, two: Point }) {
+                     { one: Vector2, two: Vector2 }) {
     let x1, x2, y1, y2;
 
     if (typeof (props as any).x1 !== "undefined") {
@@ -49,7 +49,7 @@ export class Line {
       y1 = p.y1;
       y2 = p.y2;
     } else {
-      const p = props as { one: Point, two: Point };
+      const p = props as { one: Vector2, two: Vector2 };
 
       x1 = p.one.x;
       x2 = p.two.x;
@@ -83,7 +83,7 @@ export class Line {
     return this.length === 0;
   }
 
-  public rotateAbout(origin: Point, angle: number): Line {
+  public rotateAbout(origin: Vector2, angle: number): Line {
     const start = this.start;
     const end = this.end;
 
@@ -93,7 +93,7 @@ export class Line {
     });
   }
 
-  public scaleAbout(about: Point, amount: Point): Line {
+  public scaleAbout(about: Vector2, amount: Vector2): Line {
     return new Line({
       one: this.start.scale(about, amount),
       two: this.end.scale(about, amount),
@@ -211,7 +211,7 @@ export class Line {
     return new Line({ x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 });
   }
 
-  translate(p: Point): Line {
+  translate(p: Vector2): Line {
     return new Line({
       x1: this.x1 + p.x,
       x2: this.x2 + p.x,
@@ -221,7 +221,7 @@ export class Line {
     });
   }
 
-  transform(trans: Point, scale: number): Line {
+  transform(trans: Vector2, scale: number): Line {
     return new Line({
       one: this.start.transform(trans, scale),
       two: this.end.transform(trans, scale),

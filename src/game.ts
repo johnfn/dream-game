@@ -1,14 +1,16 @@
-import { Application, SCALE_MODES, settings } from "pixi.js";
+import { Application, SCALE_MODES, settings, Point, Sprite } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
 import { TiledTilemap } from "./library/tilemap";
-import { Entity } from "./entity";
+import { Entity, EntityType } from "./library/entity";
 import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
 import { Camera } from "./camera";
 import { GameState } from "./state";
+import { MovingEntity } from "./library/moving_entity";
+import { TestEntity } from "./test_entity";
 
 export class Game {
   app: PIXI.Application;
@@ -22,6 +24,7 @@ export class Game {
   debugMode: boolean;
   player!: Character;
   camera!: Camera;
+  testEntity: TestEntity;
 
   constructor() {
     this.debugMode = true;
@@ -34,6 +37,17 @@ export class Game {
       transparent: false,
       resolution : 1
     });
+
+    this.testEntity = new TestEntity({ game: this });
+
+    // This is insanity: 
+
+    // this.testEntity.position = new Point(0, 0);
+    // const oldPosition = this.testEntity.position;
+    // this.testEntity.position = new Point(10, 10);
+    // console.log(oldPosition); // (10, 10)
+
+    this.app.stage.addChild(this.testEntity);
 
     settings.SCALE_MODE = SCALE_MODES.NEAREST;
 
@@ -92,14 +106,66 @@ export class Game {
     this.app.ticker.add(() => this.gameLoop());
   };
 
+  private resolveCollisions = () => {
+    this.grid.clear();
+
+    for (const e of this.entities.collidable) {
+      if (e.isOnScreen()) {
+        this.grid.add(e);
+      }
+    }
+
+    const movingEntities: MovingEntity[] = this.entities.collidable.filter(
+      ent => ent.entityType === EntityType.MovingEntity
+    ) as MovingEntity[];
+
+    for (const entity of movingEntities) {
+      const newPosition = new Point(
+        entity.position.x + entity.velocity.x,
+        entity.position.y + entity.velocity.y
+      );
+
+      const tile = this.gameState.map.getTileAt(newPosition.x, newPosition.y);
+      let wouldHitSomething = false;
+
+      if (tile !== null) {
+        if (tile.isCollider) {
+          wouldHitSomething = true;
+        }
+      }
+
+      if (wouldHitSomething) { continue; }
+
+      // this is a hack and eventually we should just pass in a Rect to grid
+      // rather than an entire entity so we dont have to speculatively update
+      // the position of the entity
+
+      const oldX = entity.position.x;
+      const oldY = entity.position.y;
+
+      entity.position = newPosition;
+
+      if (this.grid.checkForCollision(entity)) {
+        wouldHitSomething = true;
+      }
+
+      if (wouldHitSomething) {
+        entity.x = oldX;
+        entity.y = oldY;
+      }
+    }
+
+    console.log(this.grid.getAllCollisions());
+  }
+
   gameLoop = () => {
     this.gameState.keys.update();
 
-    for (let e of this.entities.collidable) {
+    for (const e of this.entities.collidable) {
       e.update(this.gameState);
     }
 
-    this.grid.checkCollisions(this.entities.collidable);
+    this.resolveCollisions();
 
     this.camera.update();
   };

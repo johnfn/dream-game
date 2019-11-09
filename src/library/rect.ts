@@ -1,5 +1,5 @@
 import { Line } from "./line";
-import { Point, IPoint } from "./point";
+import { Vector2, IVector2 } from "./point";
 
 export class Rect {
   private _x: number;
@@ -41,19 +41,19 @@ export class Rect {
     return this._x;
   }
 
-  public get pos(): Point {
-    return new Point({ x: this.x, y: this.y });
+  public get pos(): Vector2 {
+    return new Vector2({ x: this.x, y: this.y });
   }
 
-  public get center(): Point {
-    return new Point({ x: this.x + this.w / 2, y: this.y + this.h / 2 });
+  public get center(): Vector2 {
+    return new Vector2({ x: this.x + this.w / 2, y: this.y + this.h / 2 });
   }
 
-  public get dimensions(): Point {
-    return new Point({ x: this.w, y: this.h });
+  public get dimensions(): Vector2 {
+    return new Vector2({ x: this.w, y: this.h });
   }
 
-  public static FromPoint(point: IPoint, size: number): Rect {
+  public static FromPoint(point: IVector2, size: number): Rect {
     return new Rect({
       x: point.x,
       y: point.y,
@@ -62,7 +62,7 @@ export class Rect {
     });
   }
 
-  public static FromPoints(p1: IPoint, p2: IPoint): Rect {
+  public static FromPoints(p1: IVector2, p2: IVector2): Rect {
     return new Rect({
       x: Math.min(p1.x, p2.x),
       y: Math.min(p1.y, p2.y),
@@ -136,54 +136,54 @@ export class Rect {
   /**
    * bottomRight is held constant.
    */
-  public withTopLeft(topLeft: IPoint): Rect {
+  public withTopLeft(topLeft: IVector2): Rect {
     return Rect.FromPoints(topLeft, this.bottomRight);
   }
 
   /**
    * bottomLeft is held constant.
    */
-  public withTopRight(topRight: IPoint): Rect {
+  public withTopRight(topRight: IVector2): Rect {
     return Rect.FromPoints(topRight, this.bottomLeft);
   }
 
   /**
    * topLeft is held constant.
    */
-  public withBottomRight(bottomRight: IPoint): Rect {
+  public withBottomRight(bottomRight: IVector2): Rect {
     return Rect.FromPoints(bottomRight, this.topLeft);
   }
 
   /**
    * topRight is held constant.
    */
-  public withBottomLeft(bottomLeft: IPoint): Rect {
+  public withBottomLeft(bottomLeft: IVector2): Rect {
     return Rect.FromPoints(bottomLeft, this.topRight);
   }
 
-  public get topLeft(): Point {
-    return new Point({
+  public get topLeft(): Vector2 {
+    return new Vector2({
       x: this.x,
       y: this.y
     });
   }
 
-  public get topRight(): Point {
-    return new Point({
+  public get topRight(): Vector2 {
+    return new Vector2({
       x: this.right,
       y: this.y
     });
   }
 
-  public get bottomRight(): Point {
-    return new Point({
+  public get bottomRight(): Vector2 {
+    return new Vector2({
       x: this.right,
       y: this.bottom
     });
   }
 
-  public get bottomLeft(): Point {
-    return new Point({
+  public get bottomLeft(): Vector2 {
+    return new Vector2({
       x: this.x,
       y: this.bottom
     });
@@ -221,12 +221,12 @@ export class Rect {
     ];
   }
 
-  getPointsFromRect(): Point[] {
+  getPointsFromRect(): Vector2[] {
     return [
-      new Point({ x: this.x, y: this.y }),
-      new Point({ x: this.x + this.w, y: this.y }),
-      new Point({ x: this.x, y: this.y + this.h }),
-      new Point({ x: this.x + this.w, y: this.y + this.h })
+      new Vector2({ x: this.x, y: this.y }),
+      new Vector2({ x: this.x + this.w, y: this.y }),
+      new Vector2({ x: this.x, y: this.y + this.h }),
+      new Vector2({ x: this.x + this.w, y: this.y + this.h })
     ];
   }
 
@@ -285,7 +285,7 @@ export class Rect {
     return undefined;
   }
 
-  contains(p: Point): boolean {
+  contains(p: Vector2): boolean {
     return (
       p.x >= this.x &&
       p.x < this.x + this.w &&
@@ -298,11 +298,11 @@ export class Rect {
     return new Rect({ x: this.x, y: this.y, w: this.w, h: this.h });
   }
 
-  add(p: IPoint): Rect {
+  add(p: IVector2): Rect {
     return this.translate(p);
   }
 
-  translate(p: IPoint): Rect {
+  translate(p: IVector2): Rect {
     return new Rect({
       x: this.x + p.x,
       y: this.y + p.y,
@@ -311,7 +311,7 @@ export class Rect {
     });
   }
 
-  scale(p: Point): Rect {
+  scale(p: Vector2): Rect {
     return new Rect({
       x: this.x,
       y: this.y,
@@ -384,7 +384,7 @@ export class Rect {
     return this.shrink(-amount);
   }
 
-  transform(trans: Point, scale: number): Rect {
+  transform(trans: Vector2, scale: number): Rect {
     const topLeft = this.topLeft.transform(trans, scale);
     const botRight = this.bottomRight.transform(trans, scale);
 
