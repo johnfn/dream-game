@@ -205,8 +205,6 @@ export class TiledTilemap {
         const absTileX = relTileX + chunk.x;
         const absTileY = relTileY + chunk.x;
 
-        console.log(gid, this.gidHasCollision[gid]);
-
         this.tiles.set(absTileX, absTileY, {
           x         : absTileX * this.data.tilewidth,
           y         : absTileY * this.data.tileheight,

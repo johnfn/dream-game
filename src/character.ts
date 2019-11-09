@@ -52,8 +52,6 @@ export class Character extends Entity {
     const tile = gameState.map.getTileAt(this.position.x, this.position.y);
 
     if (tile !== null) {
-      console.log(tile);
-
       if (tile.isCollider) {
         this.position.x -= (this._maxSpeed * this.direction.x) / 60;
         this.position.y -= (this._maxSpeed * this.direction.y) / 60;
