@@ -4,6 +4,41 @@ import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledT
 import { TextureCache } from './texture_cache';
 import { ResourceName } from '../resources';
 
+// 2D array that allows for negative indices
+class Grid<T> {
+  private _data: { [key: number]: { [key: number]: T} } = {};
+
+  set(x: number, y: number, value: T) {
+    if (!this._data[x]) {
+      this._data[x] = {};
+    }
+
+    this._data[x][y] = value;
+  }
+
+  get(x: number, y: number): T | null {
+    if (!this._data[x]) {
+      return null;
+    }
+
+    if (this._data[x][y] === undefined) {
+      return null;
+    }
+
+    return this._data[x][y];
+  }
+
+  getOrDefault(x: number, y: number, otherwise: T): T {
+    const result = this.get(x, y);
+
+    if (result === null) {
+      return otherwise;
+    } else {
+      return result;
+    }
+  }
+}
+
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
 // TODO: don't pass in tileWidth and tileHeight (because they can vary between tilesets)
 
@@ -12,7 +47,7 @@ export class TiledTilemap {
   private tileWidth: number;
   private tileHeight: number;
   private tilesets: Tileset[];
-  private tiles: (Tile | undefined)[][] = [];
+  private tiles: Grid<Tile> = new Grid();
   private renderer: Renderer;
 
   constructor({ json: data, renderer, pathToTilemap }: { 
@@ -144,16 +179,14 @@ export class TiledTilemap {
         const absTileX = relTileX + chunk.x;
         const absTileY = relTileY + chunk.x;
 
-        tiles[absTileX][absTileY] = {
+        this.tiles.set(absTileX, absTileY, {
           x        : absTileX * this.data.tilewidth,
           y        : absTileY * this.data.tileheight,
           tile     : this.gidToTileset(value),
           layername: layername,
-        }
+        });
       }
     }
-
-    this.tiles = tiles;
   }
 
   public loadRegion(region: Rect): Sprite {
@@ -166,7 +199,7 @@ export class TiledTilemap {
 
     for (let i = region.x / tileWidth; i < region.right / tileWidth; i++) {
       for (let j = region.y / tileHeight; j < region.bottom / tileHeight; j++) {
-        const tile = this.tiles[i][j];
+        const tile = this.tiles.get(i, j);
 
         if (!tile) { continue; }
 
@@ -201,18 +234,13 @@ export class TiledTilemap {
     return new Sprite(renderer);
   }
 
-  public getTileAt(x: number, y: number): Tile | undefined {
+  public getTileAt(x: number, y: number): Tile | null {
     const tileWidth  = this.data.tilewidth;
     const tileHeight = this.data.tileheight;
 
-    if (x < 0 || 
-        y < 0 || 
-        Math.floor(x / tileWidth ) >= this.tiles.length ||
-        Math.floor(y / tileHeight) >= this.tiles[0].length
-      ) {
-      return undefined;
-    }
-
-    return this.tiles[Math.floor(x / tileWidth)][Math.floor(y / tileHeight)];
+    return this.tiles.get(
+      Math.floor(x / tileWidth),
+      Math.floor(y / tileHeight)
+    );
   }
 }
