@@ -128,7 +128,7 @@ export class TiledTilemap {
       }
     }
 
-    const { chunks, width, name: layername } = layer;
+    const { chunks, name: layername } = layer;
 
     // TODO: If the world gets very large, loading in all chunks like this might
     // not be the best idea - lazy loading could be better.

@@ -3,6 +3,7 @@ import { Point } from "./library/point";
 import { Rect } from "./library/rect";
 import * as PIXI from "pixi.js";
 import { C } from "./constants";
+import { GameState } from "./state";
 
 // TODO: probably make less of these methods abstract?
 export abstract class Entity extends PIXI.Sprite {
@@ -21,7 +22,7 @@ export abstract class Entity extends PIXI.Sprite {
     }
   }
 
-  abstract update: () => void;
+  abstract update: (state: GameState) => void;
   abstract collide: (other: Entity, intersection: Rect) => void;
   abstract interact: (other: Entity) => void;
 
@@ -95,7 +96,7 @@ export class BaseEntity extends Entity {
   }
 
   // TODO: Use correct framerate??
-  update = () => {
+  update = (gameState: GameState) => {
     if (!this._dynamic) return;
     this.position.x += (this.maxSpeed * this.direction.x) / 60;
     this.position.y += (this.maxSpeed * this.direction.y) / 60;

@@ -8,27 +8,31 @@ import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
 import { Camera } from "./camera";
+import { GameState } from "./state";
 
 export class Game {
   app: PIXI.Application;
+  gameState: GameState;
+
   entities: { collidable: Entity[]; static: Entity[] } = {
     collidable: [],
     static: []
   };
   grid: CollisionGrid;
   debugMode: boolean;
-  keys: { [index: string]: boolean } = {};
   player!: Character;
   camera!: Camera;
 
   constructor() {
     this.debugMode = true;
+    this.gameState = new GameState();
+
     this.app = new Application({
-      width: C.CANVAS_WIDTH,
-      height: C.CANVAS_HEIGHT,
-      antialias: true,
+      width      : C.CANVAS_WIDTH,
+      height     : C.CANVAS_HEIGHT,
+      antialias  : true,
       transparent: false,
-      resolution: 1
+      resolution : 1
     });
 
     settings.SCALE_MODE = SCALE_MODES.NEAREST;
@@ -39,19 +43,12 @@ export class Game {
     document.body.appendChild(this.app.view);
 
     this.grid = new CollisionGrid({
-      game: this,
-      width: 2 * C.CANVAS_WIDTH,
-      height: 2 * C.CANVAS_HEIGHT,
+      game    : this,
+      width   : 2 * C.CANVAS_WIDTH,
+      height  : 2 * C.CANVAS_HEIGHT,
       cellSize: 8 * C.TILE_WIDTH,
-      debug: this.debugMode
+      debug   : this.debugMode
     });
-
-    window.onkeyup = (e: KeyboardEvent): void => {
-      this.keys[e.key] = false;
-    };
-    window.onkeydown = (e: KeyboardEvent): void => {
-      this.keys[e.key] = true;
-    };
 
     C.Loader.onLoadComplete(this.startGame);
   }
@@ -59,10 +56,10 @@ export class Game {
   startGame = () => {
     const tilemap = new TiledTilemap({
       pathToTilemap: "maps",
-      json: C.Loader.getResource("maps/map.json").data,
-      renderer: C.Renderer,
-      tileWidth: C.TILE_WIDTH,
-      tileHeight: C.TILE_HEIGHT
+      json         : C.Loader.getResource("maps/map.json").data,
+      renderer     : C.Renderer,
+      tileWidth    : C.TILE_WIDTH,
+      tileHeight   : C.TILE_HEIGHT
     });
 
     const newRegion = tilemap.loadRegion(
@@ -95,10 +92,10 @@ export class Game {
   };
 
   gameLoop = () => {
-    this.player.handleInput(this.keys);
+    this.gameState.keys.update();
 
     for (let e of this.entities.collidable) {
-      e.update();
+      e.update(this.gameState);
     }
 
     this.grid.checkCollisions(this.entities.collidable);

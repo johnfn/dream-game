@@ -1,10 +1,6 @@
 // Put all resources the game uses in this file and we'll preload them before
 // the game starts.
 
-// TODO: It would be nice for the keys of this object to somehow indicate what
-// the type was, so later when you do getResource() you get something more
-// targeted than a generic blob of data.
-
 export enum ResourceType {
   Image,
   Tileset,

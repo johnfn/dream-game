@@ -2,7 +2,6 @@ import * as PIXI from "pixi.js";
 import { Rect } from "./library/rect";
 import { Entity } from "./entity";
 import { Line } from "./library/line";
-import { C } from "./constants";
 import { Game } from "./game";
 import { Point } from "./library/point";
 
