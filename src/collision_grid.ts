@@ -1,14 +1,13 @@
 import * as PIXI from "pixi.js";
 import { Rect } from "./library/rect";
-import { Entity } from "./library/entity";
 import { Line } from "./library/line";
 import { Game } from "./game";
 import { Vector2 } from "./library/point";
 
 type CollisionResult = {
-  firstEntity : Entity;
-  secondEntity: Entity;
-  overlap     : Rect;
+  firstRect : Rect;
+  secondRect: Rect;
+  overlap   : Rect;
 };
 
 export class CollisionGrid {
@@ -20,7 +19,6 @@ export class CollisionGrid {
   private _numCellsPerRow: number;
   private _numCellsPerCol: number;
   private _cells: { [index: number]: Cell } = {};
-  private _target: Entity | undefined;
 
   constructor(props: {
     game: Game;
@@ -47,8 +45,6 @@ export class CollisionGrid {
         });
         const hash = this.hashPosition(pos);
 
-        console.log(hash);
-
         this._cells[hash] = new Cell(pos, cellSize);
       }
     }
@@ -65,21 +61,23 @@ export class CollisionGrid {
   }
 
   /** 
-   * Checks if the entity would collide with anything on the grid. (Does not add
-   * the entity to the grid.)
+   * Checks if the rect would collide with anything on the grid. (Does not add
+   * the rect to the grid.)
    */
-  checkForCollision = (entity: Entity): CollisionResult | null => {
-    const hashes = Array.from(new Set(this.hashCorners(entity.bounds)));
+  checkForCollision = (rect: Rect): CollisionResult | null => {
+    const hashes = Array.from(new Set(this.hashCorners(rect)));
     const cells = hashes.map(hash => this._cells[hash]);
 
     for (const cell of cells) {
-      for (const cellEntity of cell.entities) {
-        const overlap = entity.bounds.getIntersection(cellEntity.bounds, false);
+      if (!cell) { continue; } // TODO: i think this means the cell is at a negative coordinate
+
+      for (const rectInCell of cell.rects) {
+        const overlap = rect.getIntersection(rectInCell, false);
 
         if (overlap) {
           return {
-            firstEntity : cellEntity,
-            secondEntity: entity,
+            firstRect : rectInCell,
+            secondRect: rect,
             overlap
           }
         }
@@ -96,24 +94,22 @@ export class CollisionGrid {
     const result: CollisionResult[] = [];
 
     for (let cell of this.cells) {
-      const cellEntities = cell.entities;
+      const cellRects = cell.rects;
 
-      for (let i = 0; i < cellEntities.length; i++) {
-        for (let j = i; j < cellEntities.length; j++) {
+      for (let i = 0; i < cellRects.length; i++) {
+        for (let j = i; j < cellRects.length; j++) {
           if (i === j) continue;
 
-          const ent1 = cellEntities[i];
-          const ent2 = cellEntities[j];
-          const bounds1 = ent1.bounds;
-          const bounds2 = ent2.bounds;
+          const rect1 = cellRects[i];
+          const rect2 = cellRects[j];
 
-          const intersection = bounds1.getIntersection(bounds2, false);
+          const intersection = rect1.getIntersection(rect2, false);
 
           if (intersection !== undefined) {
             result.push({
-              firstEntity: ent1,
-              secondEntity: ent2,
-              overlap: intersection,
+              firstRect : rect1,
+              secondRect: rect2,
+              overlap   : intersection,
             })
           }
         }
@@ -154,23 +150,20 @@ export class CollisionGrid {
     }
   };
 
-  follow(e: Entity) {
-    this._target = e;
-  }
-
-  // Add an entity to the hash grid.
+  // Add a rect to the hash grid.
   // Checks each corner, to handle entities that span multiply grid cells.
-  add = (e: Entity) => {
+  add = (rect: Rect) => {
     // Remove duplicate hashes
-    const hashes = Array.from(new Set(this.hashCorners(e.bounds)));
+    const hashes = Array.from(new Set(this.hashCorners(rect)));
 
     for (let hash of hashes) {
       if (!(hash in this._cells)) {
         console.error("Collision grid hash out of bounds :(");
+
         continue;
       }
 
-      this._cells[hash].add(e);
+      this._cells[hash].add(rect);
     }
   };
 
@@ -211,21 +204,21 @@ export class CollisionGrid {
 
 export class Cell {
   private _bounds: Rect;
-  private _entities: Entity[] = [];
+  private _rects: Rect[] = [];
 
   constructor(topLeft: Vector2, cellSize: number) {
     this._bounds = Rect.FromPoint(topLeft, cellSize);
   }
 
-  public get entities(): Entity[] {
-    return this._entities;
+  public get rects(): Rect[] {
+    return this._rects;
   }
 
-  add = (e: Entity) => {
-    this._entities.push(e);
+  add = (e: Rect) => {
+    this._rects.push(e);
   };
 
   removeAll = () => {
-    this._entities = [];
+    this._rects = [];
   };
 }

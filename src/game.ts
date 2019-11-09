@@ -1,4 +1,4 @@
-import { Application, SCALE_MODES, settings, Point, Sprite } from "pixi.js";
+import { Application, SCALE_MODES, settings, Point } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -111,7 +111,7 @@ export class Game {
 
     for (const e of this.entities.collidable) {
       if (e.isOnScreen()) {
-        this.grid.add(e);
+        this.grid.add(e.bounds);
       }
     }
 
@@ -119,43 +119,42 @@ export class Game {
       ent => ent.entityType === EntityType.MovingEntity
     ) as MovingEntity[];
 
+    outer: 
     for (const entity of movingEntities) {
       const newPosition = new Point(
         entity.position.x + entity.velocity.x,
         entity.position.y + entity.velocity.y
       );
 
-      const tile = this.gameState.map.getTileAt(newPosition.x, newPosition.y);
-      let wouldHitSomething = false;
+      const tiles = [
+        this.gameState.map.getTileAt(newPosition.x               , newPosition.y),
+        this.gameState.map.getTileAt(newPosition.x + entity.width, newPosition.y),
+        this.gameState.map.getTileAt(newPosition.x               , newPosition.y + entity.height),
+        this.gameState.map.getTileAt(newPosition.x + entity.width, newPosition.y + entity.height),
+      ];
 
-      if (tile !== null) {
-        if (tile.isCollider) {
-          wouldHitSomething = true;
+      for (const tile of tiles) {
+        if (tile !== null) {
+          if (tile.isCollider) {
+            continue outer;
+          }
         }
       }
 
-      if (wouldHitSomething) { continue; }
+      if (this.grid.checkForCollision(new Rect({
+          x: newPosition.x,
+          y: newPosition.y,
+          w: newPosition.x + entity.width,
+          h: newPosition.x + entity.height,
+        }))) {
 
-      // this is a hack and eventually we should just pass in a Rect to grid
-      // rather than an entire entity so we dont have to speculatively update
-      // the position of the entity
-
-      const oldX = entity.position.x;
-      const oldY = entity.position.y;
+        continue;
+      }
 
       entity.position = newPosition;
-
-      if (this.grid.checkForCollision(entity)) {
-        wouldHitSomething = true;
-      }
-
-      if (wouldHitSomething) {
-        entity.x = oldX;
-        entity.y = oldY;
-      }
     }
 
-    console.log(this.grid.getAllCollisions());
+    // console.log(this.grid.getAllCollisions());
   }
 
   gameLoop = () => {
