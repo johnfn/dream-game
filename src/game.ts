@@ -69,6 +69,8 @@ export class Game {
       })
     );
 
+    this.gameState.map = tilemap;
+
     this.app.stage.addChild(newRegion);
 
     this.player = new Character({

@@ -47,11 +47,11 @@ export class TiledTilemap {
   private tileWidth: number;
   private tileHeight: number;
   private tilesets: Tileset[];
-  private tiles: Grid<Tile> = new Grid();
+  private tiles = new Grid<Tile>();
   private renderer: Renderer;
+  private gidHasCollision: { [id: number]: boolean } = {};
 
   constructor({ json: data, renderer, pathToTilemap }: { 
-
     // this is required to calculate the relative paths of the tileset images.
     json         : TiledJSON; 
     renderer     : Renderer; 
@@ -62,9 +62,35 @@ export class TiledTilemap {
     this.tileWidth = data.tilewidth;
     this.renderer = renderer;
 
-    this.tilesets = TiledTilemap.LoadTilesets(pathToTilemap ,this.data);
+    this.tilesets = TiledTilemap.LoadTilesets(pathToTilemap, this.data);
+
+    this.gidHasCollision = this.buildCollisionInfoForTiles()
 
     this.loadLayers();
+  }
+
+  private buildCollisionInfoForTiles(): { [key: number]: boolean } {
+    // Build a dumb (for now) object of collision ids by just checking if the
+    // tile literally has any collision object at all and takes that to mean the
+    // entire thing is covered.
+
+    // We could improve this if we want!
+
+    const gidHasCollision: { [id: number]: boolean } = {};
+
+    for (const tileset of this.data.tilesets) {
+      if (tileset.tiles) {
+        for (const tileAndCollisionObjects of tileset.tiles) {
+          if (tileAndCollisionObjects.objectgroup.objects.length > 0) {
+            gidHasCollision[
+              tileAndCollisionObjects.id + tileset.firstgid
+            ] = true;
+          }
+        }
+      }
+    }
+
+    return gidHasCollision;
   }
 
   public static GetAllTilesetsOf(
@@ -118,7 +144,7 @@ export class TiledTilemap {
       }
     }
 
-    throw new Error("gid out of range. very bad?!?");
+    throw new Error("gid out of range. ask gabby what to do?!?");
   }
 
   private loadLayers(): void {
@@ -168,10 +194,10 @@ export class TiledTilemap {
 
     for (const chunk of chunks) {
       for (let i = 0; i < chunk.data.length; i++) {
-        const value = chunk.data[i];
+        const gid = chunk.data[i];
 
-        if (value === 0) { continue; } // empty
-        if (value > 200000) { continue; } // tiled bug? (TODO: does this actually happen?)
+        if (gid === 0) { continue; } // empty
+        if (gid > 200000) { continue; } // tiled bug? (TODO: does this actually happen?)
 
         const relTileX = (i % chunk.width);
         const relTileY = Math.floor(i / chunk.width);
@@ -179,11 +205,15 @@ export class TiledTilemap {
         const absTileX = relTileX + chunk.x;
         const absTileY = relTileY + chunk.x;
 
+        console.log(gid, this.gidHasCollision[gid]);
+
         this.tiles.set(absTileX, absTileY, {
-          x        : absTileX * this.data.tilewidth,
-          y        : absTileY * this.data.tileheight,
-          tile     : this.gidToTileset(value),
-          layername: layername,
+          x         : absTileX * this.data.tilewidth,
+          y         : absTileY * this.data.tileheight,
+          tile      : this.gidToTileset(gid),
+          layername : layername,
+          isCollider: this.gidHasCollision[gid] || false,
+          gid       : gid,
         });
       }
     }

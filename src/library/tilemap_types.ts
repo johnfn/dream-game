@@ -38,31 +38,36 @@ export interface TiledObjectJSON {
 }
 
 export interface TiledObjectLayerJSON {
-  draworder: "topdown";
-  height: number;
-  name: string;
-  objects: TiledObjectJSON[];
-  opacity: number;
-  visible: boolean;
-  width: number;
-  x: number;
-  y: number;
+  draworder: "topdown" | "index";
+  height   : number;
+  name     : string;
+  objects  : TiledObjectJSON[];
+  opacity  : number;
+  visible  : boolean;
+  width    : number;
+  x        : number;
+  y        : number;
 
   type: "objectgroup";
 }
 
 export interface TilesetJSON {
-  columns: number;
-  firstgid: number;
-  image: string;
+  columns    : number;
+  firstgid   : number;
+  image      : string;
   imageheight: number;
-  imagewidth: number;
-  margin: number;
-  name: string;
-  spacing: number;
-  tilecount: number;
-  tileheight: number;
-  tilewidth: number;
+  imagewidth : number;
+  margin     : number;
+  name       : string;
+  spacing    : number;
+  tilecount  : number;
+  tileheight : number;
+  tilewidth  : number;
+
+  tiles     ?: { 
+    id: number;
+    objectgroup: TiledObjectLayerJSON;
+  }[]
 }
 
 export interface TiledJSON {
@@ -80,11 +85,12 @@ export interface TiledJSON {
 }
 
 export interface Tile {
-  x: number;
-  y: number;
-
-  tile: SpritesheetTile;
-  layername: string;
+  x         : number;
+  y         : number;
+  gid       : number;
+  tile      : SpritesheetTile;
+  layername : string;
+  isCollider: boolean;
 }
 
 export interface Tileset {
