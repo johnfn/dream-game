@@ -15,18 +15,16 @@ export class TiledTilemap {
   private tiles: (Tile | undefined)[][] = [];
   private renderer: Renderer;
 
-  constructor({ json: data, renderer, tileWidth, tileHeight, pathToTilemap }: { 
+  constructor({ json: data, renderer, pathToTilemap }: { 
 
     // this is required to calculate the relative paths of the tileset images.
     json         : TiledJSON; 
     renderer     : Renderer; 
-    tileWidth    : number; 
-    tileHeight   : number; 
     pathToTilemap: string;
   }) {
     this.data = data;
-    this.tileHeight = tileHeight;
-    this.tileWidth = tileWidth;
+    this.tileHeight = data.tileheight;
+    this.tileWidth = data.tilewidth;
     this.renderer = renderer;
 
     this.tilesets = TiledTilemap.LoadTilesets(pathToTilemap ,this.data);

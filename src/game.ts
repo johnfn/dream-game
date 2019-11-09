@@ -58,16 +58,14 @@ export class Game {
       pathToTilemap: "maps",
       json         : C.Loader.getResource("maps/map.json").data,
       renderer     : C.Renderer,
-      tileWidth    : C.TILE_WIDTH,
-      tileHeight   : C.TILE_HEIGHT
     });
 
     const newRegion = tilemap.loadRegion(
       new Rect({
         x: 0,
         y: 0,
-        w: 1024,
-        h: 1024
+        w: 2048,
+        h: 2048
       })
     );
 
@@ -82,10 +80,11 @@ export class Game {
     this.app.stage.addChild(this.player);
 
     this.camera = new Camera({
-      stage: this.app.stage,
-      width: C.CANVAS_WIDTH,
+      stage : this.app.stage,
+      width : C.CANVAS_WIDTH,
       height: C.CANVAS_HEIGHT
     });
+
     this.camera.follow(this.player);
 
     this.app.ticker.add(() => this.gameLoop());
