@@ -41,14 +41,22 @@ export abstract class Entity extends Sprite {
   abstract update: (state: GameState) => void;
   abstract collide: (other: Entity, intersection: Rect) => void;
 
-  public get bounds(): Rect {
-    const b = this.getBounds();
-
+  // TODO: rename once this isnt a name collision
+  public myGetBounds(): Rect {
     return new Rect({
-      x: b.x,
-      y: b.y,
-      w: b.width,
-      h: b.height
+      x: this.x,
+      y: this.y,
+      w: this.width,
+      h: this.height
+    });
+  }
+
+  public get bounds(): Rect {
+    return new Rect({
+      x: this.x,
+      y: this.y,
+      w: this.width,
+      h: this.height
     });
   }
 

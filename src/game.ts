@@ -84,7 +84,9 @@ export class Game {
       renderer: C.Renderer
     });
 
-    const newRegion = tilemap.loadRegion(
+    this.gameState.map = tilemap;
+
+    const layers = tilemap.loadRegionLayers(
       new Rect({
         x: 0,
         y: 0,
@@ -93,15 +95,18 @@ export class Game {
       })
     );
 
-    this.gameState.map = tilemap;
-
-    this.app.stage.addChild(newRegion);
+    for (const { layerName, sprite } of layers) {
+      this.app.stage.addChild(sprite);
+    }
 
     this.player = new Character({
       game: this,
       spritesheet: C.Loader.getResource("art/char_spritesheet.json")
         .spritesheet!
     });
+
+    this.player.x = 0;
+    this.player.y = 200;
 
     this.app.stage.addChild(this.player);
 
@@ -122,12 +127,14 @@ export class Game {
     this.app.ticker.add(() => this.gameLoop());
   };
 
-  private doesRectHitAnything = (rect: Rect): boolean => {
+  // Note: For now, we treat map as a special case.
+  // TODO: Load map into collision grid and use collision grid ONLY.
+  private doesRectHitAnything = (rect: Rect, associatedEntity: Entity): boolean => {
     const tiles = [
-      this.gameState.map.getTileAt(rect.x, rect.y),
-      this.gameState.map.getTileAt(rect.x + rect.w, rect.y),
-      this.gameState.map.getTileAt(rect.x, rect.y + rect.h),
-      this.gameState.map.getTileAt(rect.x + rect.w, rect.y + rect.h)
+      ...this.gameState.map.getTilesAt(rect.x         , rect.y),
+      ...this.gameState.map.getTilesAt(rect.x + rect.w, rect.y),
+      ...this.gameState.map.getTilesAt(rect.x         , rect.y + rect.h),
+      ...this.gameState.map.getTilesAt(rect.x + rect.w, rect.y + rect.h),
     ];
 
     for (const tile of tiles) {
@@ -138,7 +145,9 @@ export class Game {
       }
     }
 
-    if (this.grid.checkForCollision(rect)) {
+    const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
+
+    if (gridCollisions.length > 0) {
       return true;
     }
 
@@ -148,9 +157,9 @@ export class Game {
   private resolveCollisions = () => {
     this.grid.clear();
 
-    for (const e of this.entities.collidable) {
-      if (e.isOnScreen()) {
-        this.grid.add(e.bounds);
+    for (const entity of this.entities.collidable) {
+      if (entity.isOnScreen()) {
+        this.grid.add(entity.myGetBounds(), entity);
       }
     }
 
@@ -159,9 +168,7 @@ export class Game {
     ) as MovingEntity[];
 
     for (const entity of movingEntities) {
-      let updatedBounds = entity.bounds;
-
-      continue;
+      let updatedBounds = entity.myGetBounds();
 
       const xVelocity = new Vector2({ x: entity.velocity.x, y: 0 });
       const yVelocity = new Vector2({ x: 0, y: entity.velocity.y });
@@ -170,7 +177,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(xVelocity);
 
-      if (this.doesRectHitAnything(updatedBounds)) {
+      if (this.doesRectHitAnything(updatedBounds, entity)) {
         updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
@@ -178,16 +185,14 @@ export class Game {
 
       updatedBounds = updatedBounds.add(yVelocity);
 
-      if (this.doesRectHitAnything(updatedBounds)) {
+      if (this.doesRectHitAnything(updatedBounds, entity)) {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
       entity.x = updatedBounds.x;
       entity.y = updatedBounds.y;
     }
-
-    // console.log(this.grid.getAllCollisions());
-  };
+  }
 
   gameLoop = () => {
     this.gameState.keys.update();
