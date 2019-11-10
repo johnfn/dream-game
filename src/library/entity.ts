@@ -1,7 +1,7 @@
 import { Game } from "../game";
 import { Vector2 } from "./vector2";
 import { Rect } from "./rect";
-import { Sprite, Texture }from "pixi.js";
+import { Sprite, Texture } from "pixi.js";
 import { C } from "../constants";
 import { GameState } from "../state";
 
@@ -40,7 +40,6 @@ export abstract class Entity extends Sprite {
 
   abstract update: (state: GameState) => void;
   abstract collide: (other: Entity, intersection: Rect) => void;
-  abstract interact: (other: Entity) => void;
 
   // TODO: rename once this isnt a name collision
   public myGetBounds(): Rect {
