@@ -1,5 +1,6 @@
 import { Entity } from "./library/entity";
 import { Game } from "./game";
+import { Point } from "pixi.js";
 import { Rect } from "./library/rect";
 import { C } from "./constants";
 import { Vector2 } from "./library/vector2";
@@ -8,6 +9,9 @@ import { InteractableEntity } from "./library/interactable_entity";
 
 // TODO: Allow shard color customization in constructor
 export class DreamShard extends InteractableEntity {
+  private _animFrame: number = 0;
+  private _endPos: Vector2;
+  private _startPos: Vector2;
   constructor(props: { game: Game }) {
     super({
       game: props.game,
@@ -17,6 +21,8 @@ export class DreamShard extends InteractableEntity {
     });
 
     props.game.entities.interactable.push(this);
+    this._startPos = new Vector2(this.position);
+    this._endPos = this._startPos.add({x: 0, y: 10});
   }
 
   // Nothing should be able to collide with a dream shard,
@@ -46,7 +52,7 @@ export class DreamShard extends InteractableEntity {
   toggleDream = (gameState: GameState) => {
     if (!gameState.inDreamWorld) {
       gameState.inDreamWorld = true;
-      C.Stage.filters = [C.NoiseFilter];
+      C.Stage.filters = C.DreamFilters;
     } else {
       gameState.inDreamWorld = false;
       C.Stage.filters = [];
@@ -57,7 +63,10 @@ export class DreamShard extends InteractableEntity {
   };
 
   update = () => {
-    // TODO: Maybe animate a float cycle
-    return;
+    this._animFrame += 1;
+    this._animFrame %= 200;
+    const nextPos = new Vector2(this._startPos).coserp(this._endPos, this._animFrame/200);
+    this.sprite.position = new Point(nextPos.x, nextPos.y);
+    this.sprite.rotation = Math.PI * this._animFrame/200
   };
 }

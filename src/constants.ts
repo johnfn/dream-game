@@ -1,6 +1,19 @@
-import { Renderer, Filter, filters, Container } from 'pixi.js'
-import { TypesafeLoader } from './library/typesafe_loader';
-import { ResourcesToLoad } from './resources';
+import {
+  Renderer,
+  Filter,
+  filters,
+  Container,
+  Sprite,
+  WRAP_MODES
+} from "pixi.js";
+import { AdvancedBloomFilter, GlitchFilter } from "pixi-filters";
+import { TypesafeLoader } from "./library/typesafe_loader";
+import { ResourcesToLoad } from "./resources";
+
+const displacementSprite: Sprite = Sprite.from(
+  "https://res.cloudinary.com/dvxikybyi/image/upload/v1486634113/2yYayZk_vqsyzx.png"
+);
+displacementSprite.texture.baseTexture.wrapMode = WRAP_MODES.REPEAT;
 
 export class C {
   public static CANVAS_WIDTH = 640;
@@ -13,5 +26,9 @@ export class C {
   public static Loader: TypesafeLoader<typeof ResourcesToLoad>;
   public static Stage: Container;
 
-  public static NoiseFilter: Filter = new filters.NoiseFilter(0.9);
+  public static DreamFilters: Filter[] = [
+    new AdvancedBloomFilter({ bloomScale: 0.5 }),
+    new GlitchFilter(),
+    new filters.DisplacementFilter(displacementSprite)
+  ];
 }

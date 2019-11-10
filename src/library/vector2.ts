@@ -150,11 +150,22 @@ export class Vector2 {
     });
   }
 
-  // Normalize a vector.
   normalize(): Vector2 {
     if (this.x === 0 && this.y === 0) { return this; }
     const length = Math.sqrt(this.x * this.x + this.y * this.y);
     return new Vector2({x: this.x / length, y: this.y / length});
+  }
+
+  lerp(other: Vector2, t: number): Vector2 {
+    if (t > 1 || t < 0) {console.error("Lerp t must be between 0 and 1.")}
+    if (t === 0) return this;
+    if (t === 1) return other;
+    return this.scale({x:0, y:0}, {x:1-t, y:1-t}).add(other.scale({x:0, y:0}, {x:t, y:t}))
+  }
+
+  coserp(other: Vector2, t: number): Vector2 {
+    t = 0.5*(1+Math.cos(2*t*Math.PI));
+    return this.lerp(other, t);
   }
 
   static Deserialize(obj: any): Vector2 {

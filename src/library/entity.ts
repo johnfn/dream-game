@@ -1,7 +1,7 @@
 import { Game } from "../game";
 import { Vector2 } from "./vector2";
 import { Rect } from "./rect";
-import { Sprite, Texture } from "pixi.js";
+import { Sprite, Texture, Container }from "pixi.js";
 import { C } from "../constants";
 import { GameState } from "../state";
 
@@ -20,8 +20,9 @@ export enum EntityType {
 // own Point and Rect classes which aren't as good as ours)
 
 // TODO: probably make less of these methods abstract?
-export abstract class Entity extends Sprite {
+export abstract class Entity extends Container {
   entityType = EntityType.NormalEntity;
+  sprite: Sprite;
 
   constructor(props: {
     game      : Game;
@@ -29,13 +30,16 @@ export abstract class Entity extends Sprite {
     collidable: boolean;
     dynamic   : boolean;
   }) {
-    super(props.texture);
-
+    super();
+    this.sprite = new Sprite(props.texture);
+    props.game.entities.all.push(this);
     if (props.collidable) {
       props.game.entities.collidable.push(this);
     } else {
       props.game.entities.static.push(this);
     }
+    this.sprite.anchor.set(0.5);
+    this.addChild(this.sprite)
   }
 
   abstract update: (state: GameState) => void;
@@ -46,8 +50,8 @@ export abstract class Entity extends Sprite {
     return new Rect({
       x: this.x,
       y: this.y,
-      w: this.width,
-      h: this.height
+      w: this.sprite.width,
+      h: this.sprite.height
     });
   }
 
@@ -55,15 +59,15 @@ export abstract class Entity extends Sprite {
     return new Rect({
       x: this.x,
       y: this.y,
-      w: this.width,
-      h: this.height
+      w: this.sprite.width,
+      h: this.sprite.height
     });
   }
 
   public get center(): Vector2 {
     return new Vector2(this.position).add({
-      x: this.width / 2,
-      y: this.height / 2
+      x: this.sprite.width / 2,
+      y: this.sprite.height / 2
     });
   }
 
