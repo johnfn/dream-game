@@ -87,6 +87,12 @@ export class Game {
     );
 
     for (const { layerName, sprite } of layers) {
+      if (layerName === "Dream Layer") {
+        this.gameState.dreamMapLayer   = sprite;
+      } else if (layerName === "Reality Ground Layer") {
+        this.gameState.realityMapLayer = sprite;
+      }
+
       this.app.stage.addChild(sprite);
     }
 

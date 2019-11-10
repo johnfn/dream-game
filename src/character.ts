@@ -40,7 +40,14 @@ export class Character extends MovingEntity {
   };
 
   update = (gameState: GameState) => {
-    this.handleInput(gameState.keys);
+    this.velocity = this.getVelocity(gameState.keys);
+
+    if (gameState.keys.justDown.Spacebar) {
+      gameState.inDreamWorld = !gameState.inDreamWorld;
+
+      gameState.dreamMapLayer.visible   = gameState.inDreamWorld;
+      gameState.realityMapLayer.visible = !gameState.inDreamWorld;
+    }
 
     this._animFrame += 1;
     this._animFrame %= 60;
@@ -56,7 +63,7 @@ export class Character extends MovingEntity {
     return;
   };
 
-  handleInput = (keys: KeyboardState) => {
+  getVelocity = (keys: KeyboardState): Vector2 => {
     let velocity = Vector2.Zero;
 
     if (keys.down.W) {
@@ -75,6 +82,6 @@ export class Character extends MovingEntity {
       velocity = new Vector2({ x: 1, y: velocity.y });
     }
 
-    this.velocity = velocity.normalize().multiply(5);
+    return velocity.normalize().multiply(5);
   };
 }
