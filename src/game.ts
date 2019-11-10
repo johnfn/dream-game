@@ -75,7 +75,9 @@ export class Game {
       renderer     : C.Renderer,
     });
 
-    const newRegion = tilemap.loadRegion(
+    this.gameState.map = tilemap;
+
+    const layers = tilemap.loadRegionLayers(
       new Rect({
         x: 0,
         y: 0,
@@ -84,9 +86,9 @@ export class Game {
       })
     );
 
-    this.gameState.map = tilemap;
-
-    this.app.stage.addChild(newRegion);
+    for (const { layerName, sprite } of layers) {
+      this.app.stage.addChild(sprite);
+    }
 
     this.player = new Character({
       game: this,
@@ -114,10 +116,10 @@ export class Game {
   // TODO: Load map into collision grid and use collision grid ONLY.
   private doesRectHitAnything = (rect: Rect, associatedEntity: Entity): boolean => {
     const tiles = [
-      this.gameState.map.getTileAt(rect.x         , rect.y),
-      this.gameState.map.getTileAt(rect.x + rect.w, rect.y),
-      this.gameState.map.getTileAt(rect.x         , rect.y + rect.h),
-      this.gameState.map.getTileAt(rect.x + rect.w, rect.y + rect.h),
+      ...this.gameState.map.getTilesAt(rect.x         , rect.y),
+      ...this.gameState.map.getTilesAt(rect.x + rect.w, rect.y),
+      ...this.gameState.map.getTilesAt(rect.x         , rect.y + rect.h),
+      ...this.gameState.map.getTilesAt(rect.x + rect.w, rect.y + rect.h),
     ];
 
     for (const tile of tiles) {

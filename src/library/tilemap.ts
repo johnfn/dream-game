@@ -40,14 +40,13 @@ class Grid<T> {
 }
 
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
-// TODO: don't pass in tileWidth and tileHeight (because they can vary between tilesets)
 
 export class TiledTilemap {
   private data: TiledJSON;
   private tileWidth: number;
   private tileHeight: number;
   private tilesets: Tileset[];
-  private tiles = new Grid<Tile>();
+  private layers: { [tilesetName: string]: Grid<Tile> };
   private renderer: Renderer;
   private gidHasCollision: { [id: number]: boolean } = {};
 
@@ -66,7 +65,7 @@ export class TiledTilemap {
 
     this.gidHasCollision = this.buildCollisionInfoForTiles()
 
-    this.loadLayers();
+    this.layers = this.loadLayers();
   }
 
   private buildCollisionInfoForTiles(): { [key: number]: boolean } {
@@ -147,17 +146,25 @@ export class TiledTilemap {
     throw new Error("gid out of range. ask gabby what to do?!?");
   }
 
-  private loadLayers(): void {
+  private loadLayers(): { [layerName: string]: Grid<Tile> } {
+    const result: { [layerName: string]: Grid<Tile> } = {};
+
     for (const layer of this.data.layers) {
       if (layer.type === "objectgroup") {
         this.loadObjects(layer);
       } else if (layer.type === "tilelayer") {
-        this.loadTiles(layer);
+        const grid = this.loadTiles(layer);
+
+        result[layer.name] = grid;
       }
     }
+
+    return result;
   }
 
   private loadObjects(_layer: TiledObjectLayerJSON): void {
+    console.error("grant has not handled object group layers yet!!!");
+
     /*
     const objects: Entity<any, any>[] = [];
     for (const object of layer.objects) {
@@ -176,17 +183,8 @@ export class TiledTilemap {
   }
 
 
-  private loadTiles(layer: TiledTileLayerJSON): void {
-    const tiles: (Tile | undefined)[][] = [];
-
-    for (let i = 0; i < this.data.width; i++) {
-      tiles[i] = [];
-
-      for (let j = 0; j < this.data.height; j++) {
-        tiles[i][j] = undefined;
-      }
-    }
-
+  private loadTiles(layer: TiledTileLayerJSON): Grid<Tile> {
+    const result = new Grid<Tile>();
     const { chunks, name: layername } = layer;
 
     // TODO: If the world gets very large, loading in all chunks like this might
@@ -205,7 +203,7 @@ export class TiledTilemap {
         const absTileX = relTileX + chunk.x;
         const absTileY = relTileY + chunk.x;
 
-        this.tiles.set(absTileX, absTileY, {
+        result.set(absTileX, absTileY, {
           x         : absTileX * this.data.tilewidth,
           y         : absTileY * this.data.tileheight,
           tile      : this.gidToTileset(gid),
@@ -215,60 +213,88 @@ export class TiledTilemap {
         });
       }
     }
+
+    return result;
   }
 
-  public loadRegion(region: Rect): Sprite {
-    const renderer = RenderTexture.create({
-      width : region.w,
-      height: region.h,
-    });
+  public loadRegionLayers(region: Rect): {
+    layerName: string;
+    sprite: Sprite;
+  }[] {
+    const layers: {
+      layerName: string;
+      sprite: Sprite;
+    }[] = [];
+
+    for (const layerName of Object.keys(this.layers)) {
+      const layer = this.layers[layerName];
+      const renderTexture = RenderTexture.create({
+        width : region.w,
+        height: region.h,
+      });
+      const tileWidth  = this.data.tilewidth;
+      const tileHeight = this.data.tileheight;
+
+      for (let i = region.x / tileWidth; i < region.right / tileWidth; i++) {
+        for (let j = region.y / tileHeight; j < region.bottom / tileHeight; j++) {
+          const tile = layer.get(i, j);
+
+          if (!tile) { continue; }
+
+          const {
+            x,
+            y,
+            tile: {
+              imageUrlRelativeToGame,
+              spritesheetx,
+              spritesheety,
+            },
+          } = tile;
+
+          const spriteTex = TextureCache.GetTextureFromSpritesheet({ 
+            textureName: imageUrlRelativeToGame as ResourceName, // TODO: Is there any way to improve this cast?
+            x          : spritesheetx, 
+            y          : spritesheety, 
+            tilewidth  : this.tileWidth, 
+            tileheight : this.tileHeight 
+          });
+
+          // We have to offset here because we'd be drawing outside of the
+          // bounds of the RenderTexture otherwise.
+
+          spriteTex.x = x - region.x;
+          spriteTex.y = y - region.y;
+
+          this.renderer.render(spriteTex, renderTexture, false);
+        }
+      }
+
+      layers.push({
+        sprite   : new Sprite(renderTexture),
+        layerName,
+      })
+    }
+
+    return layers;
+  }
+
+  public getTilesAt(x: number, y: number): Tile[] {
     const tileWidth  = this.data.tilewidth;
     const tileHeight = this.data.tileheight;
 
-    for (let i = region.x / tileWidth; i < region.right / tileWidth; i++) {
-      for (let j = region.y / tileHeight; j < region.bottom / tileHeight; j++) {
-        const tile = this.tiles.get(i, j);
+    const tiles: Tile[] = [];
 
-        if (!tile) { continue; }
+    for (const layerName of Object.keys(this.layers)) {
+      const tile = this.layers[layerName].get(
+        Math.floor(x / tileWidth),
+        Math.floor(y / tileHeight)
+      );
 
-        const {
-          x,
-          y,
-          tile: {
-            imageUrlRelativeToGame,
-            spritesheetx,
-            spritesheety,
-          },
-        } = tile;
-
-        const spriteTex = TextureCache.GetTextureFromSpritesheet({ 
-          textureName: imageUrlRelativeToGame as ResourceName, // TODO: Is there any way to improve this cast?
-          x          : spritesheetx, 
-          y          : spritesheety, 
-          tilewidth  : this.tileWidth, 
-          tileheight : this.tileHeight 
-        });
-
-        // We have to offset here because we'd be drawing outside of the
-        // bounds of the RenderTexture otherwise.
-
-        spriteTex.x = x - region.x;
-        spriteTex.y = y - region.y;
-
-        this.renderer.render(spriteTex, renderer, false);
+      if (tile !== null) {
+        tiles.push(tile);
       }
     }
 
-    return new Sprite(renderer);
-  }
-
-  public getTileAt(x: number, y: number): Tile | null {
-    const tileWidth  = this.data.tilewidth;
-    const tileHeight = this.data.tileheight;
-
-    return this.tiles.get(
-      Math.floor(x / tileWidth),
-      Math.floor(y / tileHeight)
-    );
+    return tiles;
   }
 }
