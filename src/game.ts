@@ -94,6 +94,9 @@ export class Game {
         .spritesheet!
     });
 
+    this.player.x = 0;
+    this.player.y = 200;
+
     this.app.stage.addChild(this.player);
 
     this.camera = new Camera({
@@ -107,7 +110,9 @@ export class Game {
     this.app.ticker.add(() => this.gameLoop());
   };
 
-  private doesRectHitAnything = (rect: Rect): boolean => {
+  // Note: For now, we treat map as a special case.
+  // TODO: Load map into collision grid and use collision grid ONLY.
+  private doesRectHitAnything = (rect: Rect, associatedEntity: Entity): boolean => {
     const tiles = [
       this.gameState.map.getTileAt(rect.x         , rect.y),
       this.gameState.map.getTileAt(rect.x + rect.w, rect.y),
@@ -123,7 +128,9 @@ export class Game {
       }
     }
 
-    if (this.grid.checkForCollision(rect)) {
+    const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
+
+    if (gridCollisions.length > 0) {
       return true;
     }
 
@@ -133,9 +140,9 @@ export class Game {
   private resolveCollisions = () => {
     this.grid.clear();
 
-    for (const e of this.entities.collidable) {
-      if (e.isOnScreen()) {
-        this.grid.add(e.bounds);
+    for (const entity of this.entities.collidable) {
+      if (entity.isOnScreen()) {
+        this.grid.add(entity.myGetBounds(), entity);
       }
     }
 
@@ -144,9 +151,7 @@ export class Game {
     ) as MovingEntity[];
 
     for (const entity of movingEntities) {
-      let updatedBounds = entity.bounds;
-
-      continue;
+      let updatedBounds = entity.myGetBounds();
 
       const xVelocity = new Vector2({ x: entity.velocity.x, y: 0                 });
       const yVelocity = new Vector2({ x: 0                , y: entity.velocity.y });
@@ -155,7 +160,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(xVelocity);
 
-      if (this.doesRectHitAnything(updatedBounds)) {
+      if (this.doesRectHitAnything(updatedBounds, entity)) {
         updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
@@ -163,15 +168,13 @@ export class Game {
 
       updatedBounds = updatedBounds.add(yVelocity);
 
-      if (this.doesRectHitAnything(updatedBounds)) {
+      if (this.doesRectHitAnything(updatedBounds, entity)) {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
       entity.x = updatedBounds.x;
       entity.y = updatedBounds.y;
     }
-
-    // console.log(this.grid.getAllCollisions());
   }
 
   gameLoop = () => {
