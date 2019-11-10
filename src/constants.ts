@@ -1,12 +1,10 @@
 import {
   Renderer,
   Filter,
-  filters,
   Container,
   Sprite,
   WRAP_MODES
 } from "pixi.js";
-import { AdvancedBloomFilter, GlitchFilter } from "pixi-filters";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
 
@@ -27,8 +25,5 @@ export class C {
   public static Stage: Container;
 
   public static DreamFilters: Filter[] = [
-    new AdvancedBloomFilter({ bloomScale: 0.5 }),
-    new GlitchFilter(),
-    new filters.DisplacementFilter(displacementSprite)
   ];
 }
