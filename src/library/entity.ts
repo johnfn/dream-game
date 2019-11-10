@@ -40,7 +40,6 @@ export abstract class Entity extends Sprite {
 
   abstract update: (state: GameState) => void;
   abstract collide: (other: Entity, intersection: Rect) => void;
-  abstract interact: (other: Entity) => void;
 
   public get bounds(): Rect {
     const b = this.getBounds();

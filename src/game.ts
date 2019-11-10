@@ -1,4 +1,4 @@
-import { Application, SCALE_MODES, settings, Point } from "pixi.js";
+import { Application, SCALE_MODES, settings, filters } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -8,40 +8,48 @@ import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
 import { Camera } from "./camera";
-import { GameState } from "./state";
+import { GameState, DreamState } from "./state";
 import { MovingEntity } from "./library/moving_entity";
 import { TestEntity } from "./test_entity";
 import { Vector2 } from "./library/vector2";
+import { DreamShard } from "./dream_shard";
+import { InteractableEntity } from "./library/interactable_entity";
 
 export class Game {
   app: PIXI.Application;
   gameState: GameState;
 
-  entities: { collidable: Entity[]; static: Entity[] } = {
+  entities: {
+    collidable: Entity[];
+    static: Entity[];
+    interactable: InteractableEntity[];
+  } = {
     collidable: [],
-    static: []
+    static: [],
+    interactable: []
   };
   grid: CollisionGrid;
   debugMode: boolean;
   player!: Character;
   camera!: Camera;
   testEntity: TestEntity;
+  dreamShader!: PIXI.Graphics;
 
   constructor() {
     this.debugMode = true;
     this.gameState = new GameState();
 
     this.app = new Application({
-      width      : C.CANVAS_WIDTH,
-      height     : C.CANVAS_HEIGHT,
-      antialias  : true,
+      width: C.CANVAS_WIDTH,
+      height: C.CANVAS_HEIGHT,
+      antialias: true,
       transparent: false,
-      resolution : 1
+      resolution: 1
     });
 
     this.testEntity = new TestEntity({ game: this });
 
-    // This is insanity: 
+    // This is insanity:
 
     // this.testEntity.position = new Point(0, 0);
     // const oldPosition = this.testEntity.position;
@@ -54,15 +62,16 @@ export class Game {
 
     C.Renderer = this.app.renderer;
     C.Loader = new TypesafeLoader(ResourcesToLoad);
+    C.Stage = this.app.stage;
 
     document.body.appendChild(this.app.view);
 
     this.grid = new CollisionGrid({
-      game    : this,
-      width   : 2 * C.CANVAS_WIDTH,
-      height  : 2 * C.CANVAS_HEIGHT,
+      game: this,
+      width: 2 * C.CANVAS_WIDTH,
+      height: 2 * C.CANVAS_HEIGHT,
       cellSize: 8 * C.TILE_WIDTH,
-      debug   : this.debugMode
+      debug: this.debugMode
     });
 
     C.Loader.onLoadComplete(this.startGame);
@@ -71,8 +80,8 @@ export class Game {
   startGame = () => {
     const tilemap = new TiledTilemap({
       pathToTilemap: "maps",
-      json         : C.Loader.getResource("maps/map.json").data,
-      renderer     : C.Renderer,
+      json: C.Loader.getResource("maps/map.json").data,
+      renderer: C.Renderer
     });
 
     const newRegion = tilemap.loadRegion(
@@ -97,22 +106,28 @@ export class Game {
     this.app.stage.addChild(this.player);
 
     this.camera = new Camera({
-      stage : this.app.stage,
-      width : C.CANVAS_WIDTH,
+      stage: this.app.stage,
+      width: C.CANVAS_WIDTH,
       height: C.CANVAS_HEIGHT
     });
 
     this.camera.follow(this.player);
+
+    const testShard = new DreamShard({ game: this });
+    testShard.position.set(5, 5);
+    this.app.stage.addChild(testShard);
+
+    this.app.stage.addChild(this.gameState.shader);
 
     this.app.ticker.add(() => this.gameLoop());
   };
 
   private doesRectHitAnything = (rect: Rect): boolean => {
     const tiles = [
-      this.gameState.map.getTileAt(rect.x         , rect.y),
+      this.gameState.map.getTileAt(rect.x, rect.y),
       this.gameState.map.getTileAt(rect.x + rect.w, rect.y),
-      this.gameState.map.getTileAt(rect.x         , rect.y + rect.h),
-      this.gameState.map.getTileAt(rect.x + rect.w, rect.y + rect.h),
+      this.gameState.map.getTileAt(rect.x, rect.y + rect.h),
+      this.gameState.map.getTileAt(rect.x + rect.w, rect.y + rect.h)
     ];
 
     for (const tile of tiles) {
@@ -148,8 +163,8 @@ export class Game {
 
       continue;
 
-      const xVelocity = new Vector2({ x: entity.velocity.x, y: 0                 });
-      const yVelocity = new Vector2({ x: 0                , y: entity.velocity.y });
+      const xVelocity = new Vector2({ x: entity.velocity.x, y: 0 });
+      const yVelocity = new Vector2({ x: 0, y: entity.velocity.y });
 
       // resolve x-axis
 
@@ -172,13 +187,17 @@ export class Game {
     }
 
     // console.log(this.grid.getAllCollisions());
-  }
+  };
 
   gameLoop = () => {
     this.gameState.keys.update();
 
     for (const e of this.entities.collidable) {
       e.update(this.gameState);
+    }
+
+    for (const e of this.entities.interactable) {
+      e.interact(this.player, this.gameState);
     }
 
     this.resolveCollisions();
