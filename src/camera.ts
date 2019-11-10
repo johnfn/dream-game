@@ -2,21 +2,19 @@ import { Vector2 } from "./library/vector2";
 import { Entity } from "./library/entity";
 import * as PIXI from "pixi.js";
 
-export class Camera {
+export class FollowCamera {
   private _position: Vector2 = Vector2.Zero;
-  private _target: Entity | undefined;
+  private _target: Entity;
   private _stage: PIXI.Container;
   private _width: number;
   private _height: number;
 
-  constructor(props: { stage: PIXI.Container; width: number; height: number }) {
+  constructor(props: { stage: PIXI.Container; followTarget: Entity, width: number; height: number }) {
     this._stage = props.stage;
     this._width = props.width;
     this._height = props.height;
-  }
-
-  follow(e: Entity) {
-    this._target = e;
+    this._target = props.followTarget;
+    this.centerOn(new Vector2(this._target.position));
   }
 
   public get center(): Vector2 {
@@ -35,7 +33,7 @@ export class Camera {
 
   update = () => {
     if (this._target) {
-      this.centerOn(new Vector2(this._target.center));
+      this.centerOn(this.center.lerp(new Vector2(this._target.center), 0.09));
     }
     this._stage.position = new PIXI.Point(-this._position.x, -this._position.y);
   };

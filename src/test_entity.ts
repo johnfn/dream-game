@@ -16,10 +16,9 @@ export class TestEntity extends Entity {
       dynamic   : true,
     });
 
-    this.x = 50;
-    this.y = 0;
-    this.width = 50;
-    this.height = 50;
+    this.position.set(100, 50)
+    this.sprite.width = 50;
+    this.sprite.height = 50;
   }
 
   interact = () => {}

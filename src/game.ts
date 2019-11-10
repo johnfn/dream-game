@@ -1,4 +1,4 @@
-import { Application, SCALE_MODES, settings, filters } from "pixi.js";
+import { Application, SCALE_MODES, settings, Point } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -7,8 +7,8 @@ import { Entity, EntityType } from "./library/entity";
 import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
-import { Camera } from "./camera";
-import { GameState, DreamState } from "./state";
+import { FollowCamera } from "./camera";
+import { GameState } from "./state";
 import { MovingEntity } from "./library/moving_entity";
 import { TestEntity } from "./test_entity";
 import { Vector2 } from "./library/vector2";
@@ -20,10 +20,12 @@ export class Game {
   gameState: GameState;
 
   entities: {
+    all: Entity[];
     collidable: Entity[];
     static: Entity[];
     interactable: InteractableEntity[];
   } = {
+    all: [],
     collidable: [],
     static: [],
     interactable: []
@@ -31,7 +33,7 @@ export class Game {
   grid: CollisionGrid;
   debugMode: boolean;
   player!: Character;
-  camera!: Camera;
+  camera!: FollowCamera;
   testEntity: TestEntity;
   dreamShader!: PIXI.Graphics;
 
@@ -56,6 +58,7 @@ export class Game {
     // this.testEntity.position = new Point(10, 10);
     // console.log(oldPosition); // (10, 10)
 
+    this.testEntity.position = new Point(100, 50);
     this.app.stage.addChild(this.testEntity);
 
     settings.SCALE_MODE = SCALE_MODES.NEAREST;
@@ -110,13 +113,12 @@ export class Game {
 
     this.app.stage.addChild(this.player);
 
-    this.camera = new Camera({
+    this.camera = new FollowCamera({
       stage: this.app.stage,
+      followTarget: this.player,
       width: C.CANVAS_WIDTH,
       height: C.CANVAS_HEIGHT
     });
-
-    this.camera.follow(this.player);
 
     const testShard = new DreamShard({ game: this });
     testShard.position.set(5, 5);
@@ -144,6 +146,7 @@ export class Game {
         }
       }
     }
+    
 
     const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
 
@@ -189,15 +192,14 @@ export class Game {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
-      entity.x = updatedBounds.x;
-      entity.y = updatedBounds.y;
+      entity.position.set(updatedBounds.x,updatedBounds.y);
     }
   }
 
   gameLoop = () => {
     this.gameState.keys.update();
 
-    for (const e of this.entities.collidable) {
+    for (const e of this.entities.all) {
       e.update(this.gameState);
     }
 

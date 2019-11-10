@@ -9,7 +9,7 @@ import { MovingEntity } from "./library/moving_entity";
 
 export class Character extends MovingEntity {
   private _animFrame = 0; //0 to 60
-  private _frameRate = 8; //Animation frames changes per second
+  private _totalNumFrames = 8; 
   protected _maxSpeed = 300;
   private _textures: { [key: string]: PIXI.Texture } = {};
 
@@ -23,19 +23,24 @@ export class Character extends MovingEntity {
     this._textures = props.spritesheet.textures;
   }
 
+  // Assumes 60 FPS
+  getFrameNumber(currFrame: number, numAnimFrames: number, animSpeed: number ) {
+    return Math.floor(numAnimFrames * (animSpeed * currFrame / 60)) % numAnimFrames;
+  }
+
   updateSprite = (): void => {
-    const frameNumber = Math.floor(this._animFrame / (60 / this._frameRate));
+    const frameNumber = this.getFrameNumber(this._animFrame, this._totalNumFrames, 2);
 
     if (this.velocity.equals(Vector2.Zero)) {
-      this.texture = this._textures[`char_idle-${frameNumber}.png`];
+      this.sprite.texture = this._textures[`char_idle-${frameNumber}.png`];
     } else if (this.velocity.x > 0) {
-      this.texture = this._textures[`char_walk_right-${frameNumber}.png`];
+      this.sprite.texture = this._textures[`char_walk_right-${frameNumber}.png`];
     } else if (this.velocity.x < 0) {
-      this.texture = this._textures[`char_walk_left-${frameNumber}.png`];
+      this.sprite.texture = this._textures[`char_walk_left-${frameNumber}.png`];
     } else if (this.velocity.y < 0) {
-      this.texture = this._textures[`char_walk_up-${frameNumber}.png`];
+      this.sprite.texture = this._textures[`char_walk_up-${frameNumber}.png`];
     } else if (this.velocity.y > 0) {
-      this.texture = this._textures[`char_walk_down-${frameNumber}.png`];
+      this.sprite.texture = this._textures[`char_walk_down-${frameNumber}.png`];
     }
   };
 
