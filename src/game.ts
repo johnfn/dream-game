@@ -1,4 +1,4 @@
-import { Application, SCALE_MODES, settings, Point } from "pixi.js";
+import { Application, SCALE_MODES, settings, Point, Sprite, Texture } from "pixi.js";
 import { } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -15,7 +15,7 @@ import { TestEntity } from "./test_entity";
 import { Vector2 } from "./library/vector2";
 import { DreamShard } from "./dream_shard";
 import { InteractableEntity } from "./library/interactable_entity";
-import { TextEntity } from "./library/text";
+import { TextEntity } from "./library/text_entity";
 
 export class Game {
   app: PIXI.Application;
@@ -82,7 +82,7 @@ export class Game {
     C.Loader.onLoadComplete(this.startGame);
   }
 
-  startGame = () => {
+  startGame = async () => {
     const tilemap = new TiledTilemap({
       pathToTilemap: "maps",
       json: C.Loader.getResource("maps/map.json").data,
@@ -134,7 +134,9 @@ export class Game {
 
     this.app.stage.addChild(this.gameState.shader);
 
-    const text = new TextEntity("This is some <span style='color: red'>text</span>");
+    const text = new TextEntity(
+      /* "This is some <span style='color: red'>text</span>" */
+    );
     this.app.stage.addChild(text);
 
     this.app.ticker.add(() => this.gameLoop());

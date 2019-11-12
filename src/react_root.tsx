@@ -1,6 +1,5 @@
 import React from 'react';
 import { Game } from './game';
-import { ReactTextComponent } from './library/text';
 
 class ReactWrapper extends React.Component<{}, {}> {
   static Instance: ReactWrapper;
@@ -26,9 +25,6 @@ class ReactWrapper extends React.Component<{}, {}> {
   render() {
     return (
       <div className="App">
-        {
-          ReactTextComponent.Texts
-        }
       </div>
     );
   }
