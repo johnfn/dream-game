@@ -31,21 +31,36 @@ export abstract class Entity extends Container {
     dynamic   : boolean;
   }) {
     super();
+
     this.sprite = new Sprite(props.texture);
     props.game.entities.all.push(this);
+
     if (props.collidable) {
       props.game.entities.collidable.push(this);
     } else {
       props.game.entities.static.push(this);
     }
-    this.sprite.anchor.set(0.5);
-    this.addChild(this.sprite)
+
+    this.sprite.anchor.set(0);
+    this.addChild(this.sprite);
   }
 
   abstract update: (state: GameState) => void;
   abstract collide: (other: Entity, intersection: Rect) => void;
 
-  // TODO: rename once this isnt a name collision
+  setTexture(newTexture: Texture) {
+    this.sprite.texture = newTexture;
+  }
+
+  public get width() {
+    return this.sprite.width;
+  }
+
+  public get height() {
+    return this.sprite.height;
+  }
+
+  // TODO: rename once this isnt a name collision with superclass
   public myGetBounds(): Rect {
     return new Rect({
       x: this.x,

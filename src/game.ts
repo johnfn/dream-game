@@ -15,6 +15,7 @@ import { Vector2 } from "./library/vector2";
 import { DreamShard } from "./dream_shard";
 import { InteractableEntity } from "./library/interactable_entity";
 import { TextEntity } from "./library/text_entity";
+import { TypewriterText } from "./typewriter_text";
 
 export class Game {
   app: PIXI.Application;
@@ -133,11 +134,12 @@ export class Game {
 
     this.app.stage.addChild(this.gameState.shader);
 
-    const text = new TextEntity(
-      `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how.</div>`
+    const text = new TypewriterText(
+      `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how.</div>`,
+      this,
     );
 
-    text.html = `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how. blahblah asdf asdf asdf asdf asdf asf asdf asdf asdf </div>`
+    // text.html = `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how. blahblah asdf asdf asdf asdf asdf asf asdf asdf asdf </div>`
 
     this.app.stage.addChild(text);
 

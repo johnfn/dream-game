@@ -1,5 +1,8 @@
 import { Sprite, Texture } from 'pixi.js';
 import { FontDataUrl } from './font_data_url';
+import { Entity } from './entity';
+import { Game } from '../game';
+import { GameState } from '../state';
 
 // 1. Encode font into dataurl
 // 2. Use dataurl in SVG (otherwise you wouldnt be able to refer to the font in the SVG).
@@ -22,24 +25,37 @@ export const PIXEL_RATIO = (() => {
   return dpr / bsr;
 })();
     
-export class TextEntity extends Sprite {
+export class TextEntity extends Entity {
   canvas       : HTMLCanvasElement;
   context      : CanvasRenderingContext2D;
-  width        : number;
-  height       : number;
   private _html: string;
 
-  constructor(html: string) {
-    super();
+  constructor(html: string, game: Game, width: number, height: number) {
+    super({
+      game      : game,
+      texture   : Texture.WHITE,
+      collidable: false,
+      dynamic   : false,
+    });
 
-    this._html    = html;
-    this.width   = 500;
-    this.height  = 500;
+    this.sprite.width = width;
+    this.sprite.height = height;
+
+    this._html   = html;
     this.canvas  = this.createHiDPICanvas(this.width, this.height);
     this.context = this.canvas.getContext('2d')!;
 
     this.buildTextGraphic();
   }
+
+  update = (state: GameState) => {
+
+  };
+
+  collide = (other: Entity) => {
+
+  };
+
 
   set html(value: string) {
     this._html = value;
@@ -126,6 +142,6 @@ export class TextEntity extends Sprite {
 
     await this.renderHTMLToCanvas(this._html, this.context, 0, 0, this.width, this.height);
 
-    this.texture = Texture.from(this.canvas)
+    this.setTexture(Texture.from(this.canvas));
   }
 }
