@@ -1,6 +1,15 @@
 import { Sprite, Texture } from 'pixi.js';
 import { FontDataUrl } from './font_data_url';
 
+// 1. Encode font into dataurl
+// 2. Use dataurl in SVG (otherwise you wouldnt be able to refer to the font in the SVG).
+// 3. Load the SVG into an image
+// 4. Render the image to a canvas
+// 5. Use the canvas as a texture for a Sprite
+
+// 6. Waste 30 minutes trying to debug your code only to realize it was because
+//    there was a missing ' in font_data_url
+
 export const PIXEL_RATIO = (() => {
   const ctx = document.createElement("canvas").getContext("2d")!,
       dpr = window.devicePixelRatio || 1,
@@ -18,13 +27,15 @@ export class TextEntity extends Sprite {
   context: CanvasRenderingContext2D;
   width: number;
   height: number;
+  html: string;
 
-  constructor() {
+  constructor(html: string) {
     super();
 
-    this.width = 500;
-    this.height = 500;
-    this.canvas = this.createHiDPICanvas(this.width, this.height);
+    this.html    = html;
+    this.width   = 500;
+    this.height  = 500;
+    this.canvas  = this.createHiDPICanvas(this.width, this.height);
     this.context = this.canvas.getContext('2d')!;
 
     this.buildText();
@@ -47,7 +58,8 @@ export class TextEntity extends Sprite {
             }
           </style>
         </defs>
-      ${ this.htmlToXML(html) }
+
+        ${ this.htmlToXML(html) }
       
       </foreignObject>
     </svg>`;
@@ -100,11 +112,7 @@ export class TextEntity extends Sprite {
   async buildText() {
     this.context.clearRect(0, 0, this.width, this.height);
 
-    const html = `
-      <div style="color: red; font-family: FreePixel; font-size: 18px">this works. don't ask how.</div>
-    `;
-
-    await this.renderHTMLToCanvas(html, this.context, 0, 0, this.width, this.height);
+    await this.renderHTMLToCanvas(this.html, this.context, 0, 0, this.width, this.height);
 
     this.texture = Texture.from(this.canvas)
   }

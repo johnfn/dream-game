@@ -135,7 +135,7 @@ export class Game {
     this.app.stage.addChild(this.gameState.shader);
 
     const text = new TextEntity(
-      /* "This is some <span style='color: red'>text</span>" */
+      `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how.</div>`
     );
     this.app.stage.addChild(text);
 
