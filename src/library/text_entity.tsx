@@ -23,22 +23,28 @@ export const PIXEL_RATIO = (() => {
 })();
     
 export class TextEntity extends Sprite {
-  canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
-  width: number;
-  height: number;
-  html: string;
+  canvas       : HTMLCanvasElement;
+  context      : CanvasRenderingContext2D;
+  width        : number;
+  height       : number;
+  private _html: string;
 
   constructor(html: string) {
     super();
 
-    this.html    = html;
+    this._html    = html;
     this.width   = 500;
     this.height  = 500;
     this.canvas  = this.createHiDPICanvas(this.width, this.height);
     this.context = this.canvas.getContext('2d')!;
 
-    this.buildText();
+    this.buildTextGraphic();
+  }
+
+  set html(value: string) {
+    this._html = value;
+
+    this.buildTextGraphic()
   }
 
   // converting woff into dataurl:
@@ -48,7 +54,13 @@ export class TextEntity extends Sprite {
   // https://stackoverflow.com/questions/12652769/rendering-html-elements-to-canvas
 
   async renderHTMLToCanvas(html: string, ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
-    var data = `data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="${ width }" height="${ height }">
+    const wrappedHtml = `
+      <div style="width: ${ this.width }">
+        ${ html }
+      </div>
+    `;
+
+    const data = `data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="${ width }" height="${ height }">
       <foreignObject width="100%" height="100%">
         <defs>
           <style type="text/css">
@@ -59,7 +71,7 @@ export class TextEntity extends Sprite {
           </style>
         </defs>
 
-        ${ this.htmlToXML(html) }
+        ${ this.htmlToXML(wrappedHtml) }
       
       </foreignObject>
     </svg>`;
@@ -109,10 +121,10 @@ export class TextEntity extends Sprite {
     return can;
   }
 
-  async buildText() {
+  async buildTextGraphic() {
     this.context.clearRect(0, 0, this.width, this.height);
 
-    await this.renderHTMLToCanvas(this.html, this.context, 0, 0, this.width, this.height);
+    await this.renderHTMLToCanvas(this._html, this.context, 0, 0, this.width, this.height);
 
     this.texture = Texture.from(this.canvas)
   }

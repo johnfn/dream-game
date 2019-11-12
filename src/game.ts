@@ -1,5 +1,4 @@
 import { Application, SCALE_MODES, settings, Point, Sprite, Texture } from "pixi.js";
-import { } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -137,6 +136,9 @@ export class Game {
     const text = new TextEntity(
       `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how.</div>`
     );
+
+    text.html = `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how. blahblah asdf asdf asdf asdf asdf asf asdf asdf asdf </div>`
+
     this.app.stage.addChild(text);
 
     this.app.ticker.add(() => this.gameLoop());
