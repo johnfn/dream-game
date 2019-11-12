@@ -43,7 +43,7 @@ export class TextEntity extends Sprite {
           <style type="text/css">
             @font-face {
               font-family: FreePixel;
-              src: url('${ FontDataUrl }');
+              src: ${ FontDataUrl }
             }
           </style>
         </defs>
