@@ -1,4 +1,5 @@
 import { Application, SCALE_MODES, settings, Point } from "pixi.js";
+import { } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -14,6 +15,7 @@ import { TestEntity } from "./test_entity";
 import { Vector2 } from "./library/vector2";
 import { DreamShard } from "./dream_shard";
 import { InteractableEntity } from "./library/interactable_entity";
+import { TextEntity } from "./library/text";
 
 export class Game {
   app: PIXI.Application;
@@ -131,6 +133,9 @@ export class Game {
     this.app.stage.addChild(testShard);
 
     this.app.stage.addChild(this.gameState.shader);
+
+    const text = new TextEntity("This is some <span style='color: red'>text</span>");
+    this.app.stage.addChild(text);
 
     this.app.ticker.add(() => this.gameLoop());
   };

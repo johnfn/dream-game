@@ -7370,6 +7370,11 @@ pirates@^4.0.1:
   dependencies:
     node-modules-regexp "^1.0.0"
 
+pixi-multistyle-text@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/pixi-multistyle-text/-/pixi-multistyle-text-0.7.0.tgz#8cd9d85ba35618c63e1012d241a2e9941f68a98e"
+  integrity sha512-lHVH8iy+7wFeRVy6MhnMegXX4F2jVMfrl2yjUpk1A0gaj6Oyb1s4G4VyxL45b9nML4iePFoJCi4kxgIHbhwtAA==
+
 pixi.js@*, pixi.js@^5.1.5:
   version "5.1.5"
   resolved "https://registry.yarnpkg.com/pixi.js/-/pixi.js-5.1.5.tgz#96e8140652c8f53d5adde9d679d5a8f8a0ef626f"

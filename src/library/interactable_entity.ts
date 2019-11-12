@@ -11,7 +11,9 @@ export abstract class InteractableEntity extends Entity {
     dynamic: boolean;
   }) {
     super(props);
+
     props.game.entities.interactable.push(this);
   }
+
   abstract interact(other: Entity, gameState: GameState): void;
 }

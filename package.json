@@ -5,6 +5,7 @@
   "dependencies": {
     "@types/pixi.js": "^5.0.0",
     "@types/react": "^16.9.11",
+    "pixi-multistyle-text": "^0.7.0",
     "pixi.js": "^5.1.5",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
