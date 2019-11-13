@@ -12,7 +12,6 @@ export class TypewriterText extends TextEntity {
 
     this.finalText = text;
     this.displayedText = "";
-    // this.html = `<div style="color: red; font-family: FreePixel; font-size: 20px">i deed it<div>`;
 
     this.html = `<div style="color: red; font-family: FreePixel; font-size: 20px">i deed it<div>`;
   }
@@ -21,7 +20,6 @@ export class TypewriterText extends TextEntity {
     ++this.tick;
 
     if (this.tick % 2 === 0 && this.displayedText.length !== this.finalText.length) {
-
      this.displayedText += this.finalText[this.displayedText.length];
 
       this.html = (

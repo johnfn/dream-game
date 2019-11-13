@@ -157,10 +157,11 @@ export class Vector2 {
   }
 
   lerp(other: Vector2, t: number): Vector2 {
-    if (t > 1 || t < 0) {console.error("Lerp t must be between 0 and 1.")}
+    if (t > 1 || t < 0) { console.error("Lerp t must be between 0 and 1."); }
     if (t === 0) return this;
     if (t === 1) return other;
-    return this.scale({x:0, y:0}, {x:1-t, y:1-t}).add(other.scale({x:0, y:0}, {x:t, y:t}))
+
+    return this.scale({ x: 0, y: 0 }, { x: 1 - t, y: 1 - t }).add(other.scale({ x: 0, y: 0}, { x: t, y: t }))
   }
 
   coserp(other: Vector2, t: number): Vector2 {

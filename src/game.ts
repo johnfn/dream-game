@@ -16,6 +16,7 @@ import { DreamShard } from "./dream_shard";
 import { InteractableEntity } from "./library/interactable_entity";
 import { TextEntity } from "./library/text_entity";
 import { TypewriterText } from "./typewriter_text";
+import { BaseNPC } from "./base_npc";
 
 export class Game {
   app: PIXI.Application;
@@ -32,6 +33,7 @@ export class Game {
     static: [],
     interactable: []
   };
+
   grid: CollisionGrid;
   debugMode: boolean;
   player!: Character;
@@ -141,8 +143,8 @@ export class Game {
 
     this.app.stage.addChild(text);
 
-    // text.html = `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how. blahblah asdf asdf asdf asdf asdf asf asdf asdf asdf </div>`
-
+    const npc = new BaseNPC({ game: this });
+    this.app.stage.addChild(npc);
 
     this.app.ticker.add(() => this.gameLoop());
   };
@@ -164,7 +166,6 @@ export class Game {
         }
       }
     }
-    
 
     const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
 
@@ -217,12 +218,25 @@ export class Game {
   gameLoop = () => {
     this.gameState.keys.update();
 
-    for (const e of this.entities.all) {
-      e.update(this.gameState);
+    for (const entity of this.entities.all) {
+      entity.update(this.gameState);
     }
 
-    for (const e of this.entities.interactable) {
-      e.interact(this.player, this.gameState);
+    for (const interactor of this.entities.interactable) {
+      // This will always be completely unnecessary (I hope), but we could use
+      // the collsiion grid for this too
+
+      // @gabby: what is diagonal distance???
+
+      const distance = new Vector2(interactor.position).diagonalDistance(
+        new Vector2(this.player.position)
+      );
+
+      if (distance < C.INTERACTION_DISTANCE && this.gameState.keys.justDown.E) {
+        interactor.interact(this.player, this.gameState);
+
+        break;
+      }
     }
 
     this.resolveCollisions();

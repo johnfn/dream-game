@@ -35,6 +35,10 @@ export class FollowCamera {
     if (this._target) {
       this.centerOn(this.center.lerp(new Vector2(this._target.center), 0.09));
     }
-    this._stage.position = new PIXI.Point(-this._position.x, -this._position.y);
+
+    this._stage.position = new PIXI.Point(
+      Math.floor(-this._position.x), 
+      Math.floor(-this._position.y)
+    );
   };
 }

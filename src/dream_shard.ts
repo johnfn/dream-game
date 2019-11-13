@@ -33,13 +33,13 @@ export class DreamShard extends InteractableEntity {
 
   checkForInteractions = (other: Entity, gameState: GameState) => {
     if (
-      new Vector2(other.position).diagonalDistance(new Vector2(this.position)) <
-      100
+      new Vector2(other.position).diagonalDistance(new Vector2(this.position)) < C.INTERACTION_DISTANCE
     ) {
       if (gameState.keys.justDown.E) {
         return true;
       }
     }
+
     return false;
   };
 
