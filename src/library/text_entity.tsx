@@ -56,7 +56,6 @@ export class TextEntity extends Entity {
 
   };
 
-
   set html(value: string) {
     this._html = value;
 
@@ -92,21 +91,23 @@ export class TextEntity extends Entity {
       </foreignObject>
     </svg>`;
 
-    await new Promise((resolve, reject) => {
+    await new Promise(resolve => {
       const img = new Image();
       
-      img.onload = function() {
+      img.onload = () => {
+        ctx.clearRect(0, 0, this.width, this.height);
         ctx.drawImage(img, x, y);
 
         resolve();
-      }
+      };
 
       img.src = data;
     });
   }
 
   htmlToXML(html: string): string {
-    var doc = document.implementation.createHTMLDocument('');
+    const doc = document.implementation.createHTMLDocument('');
+
     doc.write(html);
 
     // You must manually set the xmlns if you intend to immediately serialize     
@@ -138,10 +139,9 @@ export class TextEntity extends Entity {
   }
 
   async buildTextGraphic() {
-    this.context.clearRect(0, 0, this.width, this.height);
-
     await this.renderHTMLToCanvas(this._html, this.context, 0, 0, this.width, this.height);
 
-    this.setTexture(Texture.from(this.canvas));
+    this.sprite.texture = Texture.from(this.canvas);
+    this.sprite.texture.update();
   }
 }

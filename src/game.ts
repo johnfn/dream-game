@@ -135,13 +135,14 @@ export class Game {
     this.app.stage.addChild(this.gameState.shader);
 
     const text = new TypewriterText(
-      `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how.</div>`,
+      `blah blah this is some text`,
       this,
     );
 
+    this.app.stage.addChild(text);
+
     // text.html = `<div style="color: red; font-family: FreePixel; font-size: 20px">this works. don't ask how. blahblah asdf asdf asdf asdf asdf asf asdf asdf asdf </div>`
 
-    this.app.stage.addChild(text);
 
     this.app.ticker.add(() => this.gameLoop());
   };
