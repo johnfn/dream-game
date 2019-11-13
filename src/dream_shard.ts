@@ -12,15 +12,16 @@ export class DreamShard extends InteractableEntity {
   private _animFrame: number = 0;
   private _endPos: Vector2;
   private _startPos: Vector2;
-  constructor(props: { game: Game }) {
+
+  constructor() {
     super({
-      game: props.game,
-      texture: C.Loader.getResource("art/temp.png").texture,
+      texture   : C.Loader.getResource("art/temp.png").texture,
       collidable: false,
-      dynamic: false
+      dynamic   : false
     });
 
-    props.game.entities.interactable.push(this);
+    Game.Instance.entities.interactable.push(this);
+
     this._startPos = new Vector2(this.position);
     this._endPos = this._startPos.add({x: 0, y: 10});
   }

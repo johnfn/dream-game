@@ -1,6 +1,5 @@
 import * as PIXI from "pixi.js";
 
-import { Game } from "./game";
 import { GameState } from "./state";
 import { InteractableEntity } from "./library/interactable_entity";
 import { Character } from "./character";
@@ -9,9 +8,8 @@ import { Character } from "./character";
  * Completely pointless entity purely for testing.
  */
 export class BaseNPC extends InteractableEntity {
-  constructor(props: { game: Game; }) {
+  constructor() {
     super({
-      game      : props.game,
       texture   : PIXI.Texture.WHITE,
       collidable: true,
       dynamic   : true,

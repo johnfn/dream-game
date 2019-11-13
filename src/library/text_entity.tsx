@@ -1,4 +1,4 @@
-import { Sprite, Texture } from 'pixi.js';
+import { Texture } from 'pixi.js';
 import { FontDataUrl } from './font_data_url';
 import { Entity } from './entity';
 import { Game } from '../game';
@@ -32,7 +32,6 @@ export class TextEntity extends Entity {
 
   constructor(html: string, game: Game, width: number, height: number) {
     super({
-      game      : game,
       texture   : Texture.WHITE,
       collidable: false,
       dynamic   : false,
@@ -116,7 +115,7 @@ export class TextEntity extends Entity {
     doc.documentElement.setAttribute('xmlns', doc.documentElement.namespaceURI!);
 
     // Get well-formed markup
-    html = (new XMLSerializer).serializeToString(doc.body);
+    html = (new XMLSerializer()).serializeToString(doc.body);
 
     return html;
   }

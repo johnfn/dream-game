@@ -1,16 +1,14 @@
 import * as PIXI from "pixi.js";
 
 import { Entity } from "./library/entity";
-import { Game } from "./game";
 import { GameState } from "./state";
 
 /**
  * Completely pointless entity purely for testing.
  */
 export class TestEntity extends Entity {
-  constructor(props: { game: Game; }) {
+  constructor() {
     super({
-      game      : props.game,
       texture   : PIXI.Texture.WHITE,
       collidable: true,
       dynamic   : true,

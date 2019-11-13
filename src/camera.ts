@@ -10,10 +10,11 @@ export class FollowCamera {
   private _height: number;
 
   constructor(props: { stage: PIXI.Container; followTarget: Entity, width: number; height: number }) {
-    this._stage = props.stage;
-    this._width = props.width;
+    this._stage  = props.stage;
+    this._width  = props.width;
     this._height = props.height;
     this._target = props.followTarget;
+
     this.centerOn(new Vector2(this._target.position));
   }
 

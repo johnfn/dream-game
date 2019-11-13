@@ -25,7 +25,6 @@ export abstract class Entity extends Container {
   sprite: Sprite;
 
   constructor(props: {
-    game      : Game;
     texture   : Texture;
     collidable: boolean;
     dynamic   : boolean;
@@ -33,12 +32,12 @@ export abstract class Entity extends Container {
     super();
 
     this.sprite = new Sprite(props.texture);
-    props.game.entities.all.push(this);
+    Game.Instance.entities.all.push(this);
 
     if (props.collidable) {
-      props.game.entities.collidable.push(this);
+      Game.Instance.entities.collidable.push(this);
     } else {
-      props.game.entities.static.push(this);
+      Game.Instance.entities.static.push(this);
     }
 
     this.sprite.anchor.set(0);

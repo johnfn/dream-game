@@ -1,4 +1,4 @@
-import { Application, SCALE_MODES, settings, Point, Sprite, Texture } from "pixi.js";
+import { Application, SCALE_MODES, settings, Point } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -14,11 +14,12 @@ import { TestEntity } from "./test_entity";
 import { Vector2 } from "./library/vector2";
 import { DreamShard } from "./dream_shard";
 import { InteractableEntity } from "./library/interactable_entity";
-import { TextEntity } from "./library/text_entity";
 import { TypewriterText } from "./typewriter_text";
 import { BaseNPC } from "./base_npc";
 
 export class Game {
+  static Instance: Game;
+
   app: PIXI.Application;
   gameState: GameState;
 
@@ -42,6 +43,8 @@ export class Game {
   dreamShader!: PIXI.Graphics;
 
   constructor() {
+    Game.Instance = this;
+
     this.debugMode = true;
     this.gameState = new GameState();
 
@@ -53,7 +56,7 @@ export class Game {
       resolution: 1
     });
 
-    this.testEntity = new TestEntity({ game: this });
+    this.testEntity = new TestEntity();
 
     // This is insanity:
 
@@ -130,7 +133,7 @@ export class Game {
       height: C.CANVAS_HEIGHT
     });
 
-    const testShard = new DreamShard({ game: this });
+    const testShard = new DreamShard();
     testShard.position.set(5, 5);
     this.app.stage.addChild(testShard);
 
@@ -143,7 +146,7 @@ export class Game {
 
     this.app.stage.addChild(text);
 
-    const npc = new BaseNPC({ game: this });
+    const npc = new BaseNPC();
     this.app.stage.addChild(npc);
 
     this.app.ticker.add(() => this.gameLoop());
