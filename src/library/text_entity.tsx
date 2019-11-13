@@ -1,7 +1,6 @@
 import { Texture } from 'pixi.js';
 import { FontDataUrl } from './font_data_url';
 import { Entity } from './entity';
-import { Game } from '../game';
 import { GameState } from '../state';
 
 // 1. Encode font into dataurl
@@ -30,7 +29,7 @@ export class TextEntity extends Entity {
   context      : CanvasRenderingContext2D;
   private _html: string;
 
-  constructor(html: string, game: Game, width: number, height: number) {
+  constructor(html: string, width: number, height: number) {
     super({
       texture   : Texture.WHITE,
       collidable: false,

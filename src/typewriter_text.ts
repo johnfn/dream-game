@@ -8,7 +8,7 @@ export class TypewriterText extends TextEntity {
   tick = 0;
 
   constructor(text: string, game: Game) {
-    super(text, game, 500, 500);
+    super(text, 500, 500);
 
     this.finalText = text;
     this.displayedText = "";

@@ -213,7 +213,8 @@ export class CollisionGrid {
         .moveTo(line.x1, line.y1)
         .lineTo(line.x2, line.y2);
     }
-    this._game.app.stage.addChild(renderLines);
+
+    this._game.stage.addChild(renderLines);
   };
 }
 

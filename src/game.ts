@@ -1,4 +1,4 @@
-import { Application, SCALE_MODES, settings, Point } from "pixi.js";
+import { Application, SCALE_MODES, settings, Point, Container } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -16,11 +16,12 @@ import { DreamShard } from "./dream_shard";
 import { InteractableEntity } from "./library/interactable_entity";
 import { TypewriterText } from "./typewriter_text";
 import { BaseNPC } from "./base_npc";
+import { HeadsUpDisplay } from "./heads_up_display";
 
 export class Game {
   static Instance: Game;
 
-  app: PIXI.Application;
+  app      : PIXI.Application;
   gameState: GameState;
 
   entities: {
@@ -35,12 +36,23 @@ export class Game {
     interactable: []
   };
 
-  grid: CollisionGrid;
-  debugMode: boolean;
-  player!: Character;
-  camera!: FollowCamera;
-  testEntity: TestEntity;
-  dreamShader!: PIXI.Graphics;
+  grid            : CollisionGrid;
+  debugMode       : boolean;
+  player         !: Character;
+  camera         !: FollowCamera;
+  testEntity      : TestEntity;
+  dreamShader    !: PIXI.Graphics;
+
+  /** 
+   * The stage of the game. Put everything in-game on here.
+   */
+  stage           : Container;
+
+  /** 
+   * A stage for things in the game that don't move when the camera move and are
+   * instead fixed to the screen. For example, the HUD.
+   */
+  fixedCameraStage: Container;
 
   constructor() {
     Game.Instance = this;
@@ -53,10 +65,16 @@ export class Game {
       height: C.CANVAS_HEIGHT,
       antialias: true,
       transparent: false,
-      resolution: 1
+      resolution : 1
     });
 
     this.testEntity = new TestEntity();
+
+    this.stage = new Container();
+    this.app.stage.addChild(this.stage);
+
+    this.fixedCameraStage = new Container();
+    this.app.stage.addChild(this.fixedCameraStage);
 
     // This is insanity:
 
@@ -66,13 +84,13 @@ export class Game {
     // console.log(oldPosition); // (10, 10)
 
     this.testEntity.position = new Point(100, 50);
-    this.app.stage.addChild(this.testEntity);
+    this.stage.addChild(this.testEntity);
 
     settings.SCALE_MODE = SCALE_MODES.NEAREST;
 
     C.Renderer = this.app.renderer;
     C.Loader = new TypesafeLoader(ResourcesToLoad);
-    C.Stage = this.app.stage;
+    C.Stage = this.stage;
 
     document.body.appendChild(this.app.view);
 
@@ -112,7 +130,7 @@ export class Game {
         this.gameState.realityMapLayer = sprite;
       }
 
-      this.app.stage.addChild(sprite);
+      this.stage.addChild(sprite);
     }
 
     this.player = new Character({
@@ -124,10 +142,10 @@ export class Game {
     this.player.x = 0;
     this.player.y = 200;
 
-    this.app.stage.addChild(this.player);
+    this.stage.addChild(this.player);
 
     this.camera = new FollowCamera({
-      stage: this.app.stage,
+      stage: this.stage,
       followTarget: this.player,
       width: C.CANVAS_WIDTH,
       height: C.CANVAS_HEIGHT
@@ -135,19 +153,22 @@ export class Game {
 
     const testShard = new DreamShard();
     testShard.position.set(5, 5);
-    this.app.stage.addChild(testShard);
+    this.stage.addChild(testShard);
 
-    this.app.stage.addChild(this.gameState.shader);
+    this.stage.addChild(this.gameState.shader);
 
     const text = new TypewriterText(
       `blah blah this is some text`,
       this,
     );
 
-    this.app.stage.addChild(text);
+    this.fixedCameraStage.addChild(text);
 
     const npc = new BaseNPC();
-    this.app.stage.addChild(npc);
+    this.stage.addChild(npc);
+
+    const hud = new HeadsUpDisplay();
+    this.fixedCameraStage.addChild(hud);
 
     this.app.ticker.add(() => this.gameLoop());
   };
