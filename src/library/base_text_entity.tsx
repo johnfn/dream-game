@@ -24,7 +24,7 @@ export const PIXEL_RATIO = (() => {
   return dpr / bsr;
 })();
     
-export class TextEntity extends Entity {
+export class BaseTextEntity extends Entity {
   canvas       : HTMLCanvasElement;
   context      : CanvasRenderingContext2D;
   private _html: string;
@@ -66,7 +66,7 @@ export class TextEntity extends Entity {
   // reference used for this insanity: 
   // https://stackoverflow.com/questions/12652769/rendering-html-elements-to-canvas
 
-  async renderHTMLToCanvas(html: string, ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
+  private async renderHTMLToCanvas(html: string, ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
     const wrappedHtml = `
       <div style="width: ${ this.width }">
         ${ html }
@@ -103,7 +103,7 @@ export class TextEntity extends Entity {
     });
   }
 
-  htmlToXML(html: string): string {
+  private htmlToXML(html: string): string {
     const doc = document.implementation.createHTMLDocument('');
 
     doc.write(html);
@@ -119,7 +119,7 @@ export class TextEntity extends Entity {
     return html;
   }
 
-  createHiDPICanvas(w: number, h: number, ratio: number | undefined = undefined) {
+  private createHiDPICanvas(w: number, h: number, ratio: number | undefined = undefined) {
     if (ratio === undefined) { 
       ratio = PIXEL_RATIO; 
     }
@@ -136,7 +136,7 @@ export class TextEntity extends Entity {
     return can;
   }
 
-  async buildTextGraphic() {
+  private async buildTextGraphic() {
     await this.renderHTMLToCanvas(this._html, this.context, 0, 0, this.width, this.height);
 
     this.sprite.texture = Texture.from(this.canvas);

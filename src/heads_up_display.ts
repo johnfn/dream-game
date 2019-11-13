@@ -2,11 +2,11 @@ import * as PIXI from "pixi.js";
 
 import { Entity } from "./library/entity";
 import { GameState } from "./state";
-import { TextEntity } from "./library/text_entity";
+import { BaseTextEntity } from "./library/base_text_entity";
 import { C } from "./constants";
 
 export class HeadsUpDisplay extends Entity {
-  interactText: TextEntity;
+  interactText: BaseTextEntity;
 
   constructor() {
     super({
@@ -15,8 +15,8 @@ export class HeadsUpDisplay extends Entity {
       dynamic   : false,
     });
 
-    this.interactText = new TextEntity(
-      `<div style="color: white; text-align: right; font-family: FreePixel; font-size: 20px">e: Interact</div>`,
+    this.interactText = new BaseTextEntity(
+      `<div style="color: white; text-align: right; font-family: FreePixel; font-size: 18px">e: Interact</div>`,
       C.CANVAS_WIDTH,
       100
     );

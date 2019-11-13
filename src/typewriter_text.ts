@@ -1,8 +1,8 @@
-import { TextEntity } from "./library/text_entity";
+import { BaseTextEntity } from "./library/base_text_entity";
 import { GameState } from "./state";
 import { Game } from "./game";
 
-export class TypewriterText extends TextEntity {
+export class TypewriterText extends BaseTextEntity {
   finalText: string;
   displayedText: string;
   tick = 0;

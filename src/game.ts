@@ -14,9 +14,9 @@ import { TestEntity } from "./test_entity";
 import { Vector2 } from "./library/vector2";
 import { DreamShard } from "./dream_shard";
 import { InteractableEntity } from "./library/interactable_entity";
-import { TypewriterText } from "./typewriter_text";
 import { BaseNPC } from "./base_npc";
 import { HeadsUpDisplay } from "./heads_up_display";
+import { TextEntity } from "./library/text_entity";
 
 export class Game {
   static Instance: Game;
@@ -157,18 +157,25 @@ export class Game {
 
     this.stage.addChild(this.gameState.shader);
 
-    const text = new TypewriterText(
-      `blah blah this is some text`,
-      this,
-    );
-
-    this.fixedCameraStage.addChild(text);
+    // const text = new TypewriterText(
+    //   `blah blah this is some text`,
+    //   this,
+    // );
+    // this.fixedCameraStage.addChild(text);
 
     const npc = new BaseNPC();
     this.stage.addChild(npc);
 
     const hud = new HeadsUpDisplay();
     this.fixedCameraStage.addChild(hud);
+
+    const myTest = new TextEntity(
+      "%1%This is some red text% normal text %2%green text!%", {
+      1: { color: "red", fontSize: 18 },
+      2: { color: "green", fontSize: 18 },
+    });
+
+    this.fixedCameraStage.addChild(myTest);
 
     this.app.ticker.add(() => this.gameLoop());
   };
