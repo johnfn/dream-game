@@ -36,7 +36,7 @@ export class BaseTextEntity extends Entity {
       dynamic   : false,
     });
 
-    this.sprite.width = width;
+    this.sprite.width  = width;
     this.sprite.height = height;
 
     this._html   = html;
@@ -136,7 +136,7 @@ export class BaseTextEntity extends Entity {
     return can;
   }
 
-  private async buildTextGraphic() {
+  protected async buildTextGraphic() {
     await this.renderHTMLToCanvas(this._html, this.context, 0, 0, this.width, this.height);
 
     this.sprite.texture = Texture.from(this.canvas);

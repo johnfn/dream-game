@@ -47,6 +47,7 @@ export class Game {
    * The stage of the game. Put everything in-game on here.
    */
   stage           : Container;
+  hud            !: HeadsUpDisplay;
 
   /** 
    * A stage for things in the game that don't move when the camera move and are
@@ -166,16 +167,8 @@ export class Game {
     const npc = new BaseNPC();
     this.stage.addChild(npc);
 
-    const hud = new HeadsUpDisplay();
-    this.fixedCameraStage.addChild(hud);
-
-    const myTest = new TextEntity(
-      "%1%This is some red text% normal text %2%green text!%", {
-      1: { color: "red", fontSize: 18 },
-      2: { color: "green", fontSize: 18 },
-    });
-
-    this.fixedCameraStage.addChild(myTest);
+    this.hud = new HeadsUpDisplay();
+    this.fixedCameraStage.addChild(this.hud);
 
     this.app.ticker.add(() => this.gameLoop());
   };
@@ -246,6 +239,41 @@ export class Game {
     }
   }
 
+  handleInteractions = () => {
+    // find potential interactor
+
+    const sortedInteractors = this.entities.interactable.slice().sort((a, b) => 
+      new Vector2(a.position).diagonalDistance(new Vector2(this.player.position)) -
+      new Vector2(b.position).diagonalDistance(new Vector2(this.player.position))
+    );
+    let targetInteractor: InteractableEntity | null = sortedInteractors[0];
+
+    if (targetInteractor) {
+      const distance = new Vector2(targetInteractor.position).diagonalDistance(
+        new Vector2(this.player.position)
+      );
+
+
+      if (distance > C.INTERACTION_DISTANCE) {
+        targetInteractor = null;
+      } 
+    }
+
+    // found it. interact
+
+    if (targetInteractor && this.gameState.keys.justDown.E) {
+      targetInteractor.interact(this.player, this.gameState);
+    }
+
+    // update HUD (maybe move this code into HUD)
+
+    if (targetInteractor) {
+      this.hud.interactText.setText("%1%e: Interact");
+    } else {
+      this.hud.interactText.setText("%1%e: Nothing");
+    }
+  };
+
   gameLoop = () => {
     this.gameState.keys.update();
 
@@ -253,22 +281,7 @@ export class Game {
       entity.update(this.gameState);
     }
 
-    for (const interactor of this.entities.interactable) {
-      // This will always be completely unnecessary (I hope), but we could use
-      // the collsiion grid for this too
-
-      // @gabby: what is diagonal distance???
-
-      const distance = new Vector2(interactor.position).diagonalDistance(
-        new Vector2(this.player.position)
-      );
-
-      if (distance < C.INTERACTION_DISTANCE && this.gameState.keys.justDown.E) {
-        interactor.interact(this.player, this.gameState);
-
-        break;
-      }
-    }
+    this.handleInteractions();
 
     this.resolveCollisions();
 

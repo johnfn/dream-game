@@ -5,6 +5,11 @@ import { C } from "./constants";
 
 import * as PIXI from "pixi.js";
 
+export enum GameMode {
+  Normal,
+  Dialog,
+}
+
 export class GameState {
   inDreamWorld    = false;
   keys            : KeyboardState;
@@ -12,9 +17,11 @@ export class GameState {
 
   dreamMapLayer  !: Sprite;
   realityMapLayer!: Sprite;
-  shader: PIXI.Graphics;
+  shader          : PIXI.Graphics;
+  mode            : GameMode;
 
   constructor() {
+    this.mode = GameMode.Normal
     this.keys = new KeyboardState();
 
     this.shader = new PIXI.Graphics()
