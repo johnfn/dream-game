@@ -52,6 +52,9 @@ export class DreamShard extends InteractableEntity {
     }
   };
 
+  interactRange = C.INTERACTION_DISTANCE;
+  interactText  = "Dream";
+
   toggleDream = (gameState: GameState) => {
     if (!gameState.inDreamWorld) {
       gameState.inDreamWorld = true;

@@ -8,7 +8,7 @@ import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
 import { FollowCamera } from "./camera";
-import { GameState, GameMode } from "./state";
+import { GameState } from "./state";
 import { MovingEntity } from "./library/moving_entity";
 import { TestEntity } from "./test_entity";
 import { Vector2 } from "./library/vector2";
@@ -271,9 +271,9 @@ export class Game {
     // update HUD (maybe move this code into HUD)
 
     if (targetInteractor) {
-      this.hud.interactText.setText("%1%e: Interact");
+      this.hud.interactText.setText(`%1%e: ${ targetInteractor.interactText }`);
     } else {
-      this.hud.interactText.setText("%1%e: Nothing");
+      this.hud.interactText.setText(`%1%e: Nothing`);
     }
   };
 

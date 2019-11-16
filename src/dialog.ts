@@ -2,8 +2,9 @@ import { GameState, GameMode } from "./state";
 import { Entity } from "./library/entity";
 import { C } from "./constants";
 import { TextEntity } from "./library/text_entity";
+import { InteractableEntity } from "./library/interactable_entity";
 
-export class Dialog extends Entity {
+export class Dialog extends InteractableEntity {
   activeModes = [GameMode.Dialog];
   text: TextEntity;
 
@@ -31,12 +32,16 @@ export class Dialog extends Entity {
   collide = () => {};
 
   update = (state: GameState) => {
-    if (state.keys.justDown.E) {
-      Dialog.EndDialog(state);
-    }
   };
 
   isOnScreen = () => true
+
+  interact = (other: Entity, gameState: GameState) => {
+    Dialog.EndDialog(gameState);
+  };
+
+  interactRange = Number.POSITIVE_INFINITY;
+  interactText  = "Keep Talking";
 
   static StartDialog(gameState: GameState) {
     gameState.mode = GameMode.Dialog;
