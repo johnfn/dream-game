@@ -144,4 +144,11 @@ export class BaseTextEntity extends Entity {
     this.sprite.texture = Texture.from(this.canvas);
     this.sprite.texture.update();
   }
+
+  clear() {
+    this.context.clearRect(0, 0, this.width, this.height);
+
+    this.sprite.texture = Texture.from(this.canvas);
+    this.sprite.texture.update();
+  }
 }

@@ -1,30 +1,62 @@
-import { BaseTextEntity } from "./library/base_text_entity";
-import { GameState } from "./state";
-import { Game } from "./game";
+import { GameState, GameMode } from "./state";
+import { TextEntity, TextStyles, TextSegmentState, AdvanceState as AdvanceTextState } from "./library/text_entity";
 
-export class TypewriterText extends BaseTextEntity {
+export class TypewriterText extends TextEntity {
+  activeModes = [GameMode.Dialog];
   finalText: string;
   displayedText: string;
   tick = 0;
+  textState = TextSegmentState.NormalText;
+  started = false;
 
-  constructor(text: string, game: Game) {
-    super(text, 500, 500);
+  constructor(text: string, styles: TextStyles) {
+    super("", styles);
 
     this.finalText = text;
     this.displayedText = "";
+    this.setText("");
+  }
 
-    this.html = `<div style="color: red; font-family: FreePixel; font-size: 20px">i deed it<div>`;
+  start() {
+    this.clear();
+
+    this.displayedText = "";
+    this.started = true;
   }
 
   update = (state: GameState) => {
+    if (!this.started) {
+      return;
+    }
+
     ++this.tick;
 
-    if (this.tick % 2 === 0 && this.displayedText.length !== this.finalText.length) {
-     this.displayedText += this.finalText[this.displayedText.length];
+    const nextChar = () => this.finalText[this.displayedText.length];
 
-      this.html = (
-        `<div style="color: red; font-family: FreePixel; font-size: 20px">${ this.displayedText }</div>`
-      );
+    if (this.tick % 2 === 0 && this.displayedText.length !== this.finalText.length) {
+      // advance text
+
+      let char = nextChar();
+      this.displayedText += char;
+
+      // skip over %s and id sections
+      // TODO this is too coupled to TextEntity formatting
+
+      if (char === "%") {
+        this.textState = AdvanceTextState(this.textState);
+        this.displayedText += nextChar()
+
+        if (this.textState === TextSegmentState.IdText) {
+          while (char !== "%") {
+            char = nextChar();
+            this.displayedText += char;
+          }
+
+          this.textState = AdvanceTextState(this.textState);
+        }
+      }
+
+      this.setText(this.displayedText);
     }
   }
 }

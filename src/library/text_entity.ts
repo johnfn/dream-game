@@ -15,10 +15,22 @@ export type TextSegment = {
   style: TextEntityStyle;
 }
 
-enum TextSegmentState {
+export enum TextSegmentState {
   NormalText,
   IdText,
   StyledText,
+}
+
+export const AdvanceState = (currentState: TextSegmentState): TextSegmentState => {
+  if (currentState === TextSegmentState.NormalText) {
+    return TextSegmentState.IdText;
+  } else if (currentState === TextSegmentState.IdText) {
+    return TextSegmentState.StyledText;
+  } else if (currentState === TextSegmentState.StyledText) {
+    return TextSegmentState.NormalText;
+  }
+
+  return undefined as any; // stupid typechecker
 }
 
 /**
@@ -79,18 +91,13 @@ export class TextEntity extends BaseTextEntity {
 
       if (ch === "%") {
         if (state === TextSegmentState.NormalText) {
-          state = TextSegmentState.IdText;
           id = "";
         } else if (state === TextSegmentState.IdText) {
-          state = TextSegmentState.StyledText;
-
           segments.push({
             text: "",
             style: this.styles[id],
           });
         } else if (state === TextSegmentState.StyledText) {
-          state = TextSegmentState.NormalText;
-
           segments.push({
             text: "",
             style: {
@@ -99,6 +106,8 @@ export class TextEntity extends BaseTextEntity {
             },
           });
         }
+
+        state = AdvanceState(state);
         
         continue;
       } else {

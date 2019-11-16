@@ -1,31 +1,34 @@
 import { GameState, GameMode } from "./state";
 import { Entity } from "./library/entity";
 import { C } from "./constants";
-import { TextEntity } from "./library/text_entity";
 import { InteractableEntity } from "./library/interactable_entity";
+import { TypewriterText } from "./typewriter_text";
 
 export class Dialog extends InteractableEntity {
+  static Instance: Dialog;
+
   activeModes = [GameMode.Dialog];
-  text: TextEntity;
+  text: TypewriterText;
 
   constructor() {
     super({
       texture   : C.Loader.getResource("art/dialog_box.png").texture,
-      collidable: true,
+      collidable: false,
       dynamic   : true,
     });
+
+    Dialog.Instance = this;
 
     this.position.set(200, 200)
     this.sprite.width = 400;
 
-    this.text = new TextEntity(
+    this.text = new TypewriterText(
       "%1%This is some dialog text", {
         1: { color   : "white", fontSize: 18, align: "right" }
       }
     );
 
     this.addChild(this.text);
-
     this.visible = false;
   }
 
@@ -44,6 +47,8 @@ export class Dialog extends InteractableEntity {
   interactText  = "Keep Talking";
 
   static StartDialog(gameState: GameState) {
+    Dialog.Instance.text.start();
+
     gameState.mode = GameMode.Dialog;
     gameState.dialog.visible = true;
   }

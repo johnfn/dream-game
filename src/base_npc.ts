@@ -24,11 +24,13 @@ export class BaseNPC extends InteractableEntity {
   interact = (player: Character, state: GameState) => {
     Dialog.StartDialog(state);
   };
+
   interactRange = C.INTERACTION_DISTANCE;
   interactText  = "Talk";
 
   collide = () => {}
-  update = (state: GameState) => {}
+  update = (state: GameState) => {
+  };
 
   isOnScreen = () => true
 }
