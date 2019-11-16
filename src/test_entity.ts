@@ -1,12 +1,14 @@
 import * as PIXI from "pixi.js";
 
 import { Entity } from "./library/entity";
-import { GameState } from "./state";
+import { GameState, GameMode } from "./state";
 
 /**
  * Completely pointless entity purely for testing.
  */
 export class TestEntity extends Entity {
+  activeModes = [GameMode.Normal];
+
   constructor() {
     super({
       texture   : PIXI.Texture.WHITE,

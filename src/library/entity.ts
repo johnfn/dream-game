@@ -3,7 +3,7 @@ import { Vector2 } from "./vector2";
 import { Rect } from "./rect";
 import { Sprite, Texture, Container }from "pixi.js";
 import { C } from "../constants";
-import { GameState } from "../state";
+import { GameState, GameMode } from "../state";
 
 export enum EntityType {
   NormalEntity,
@@ -44,6 +44,7 @@ export abstract class Entity extends Container {
     this.addChild(this.sprite);
   }
 
+  abstract activeModes: GameMode[];
   abstract update: (state: GameState) => void;
   abstract collide: (other: Entity, intersection: Rect) => void;
 

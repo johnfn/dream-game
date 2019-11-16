@@ -2,11 +2,12 @@ import { Entity, EntityType } from "./entity";
 import { Vector2 } from "./vector2";
 import { Game } from "../game";
 import { Texture } from "pixi.js";
-import { GameState } from "../state";
+import { GameState, GameMode } from "../state";
 import { Rect } from "./rect";
 
 // Not currently used anywhere, just for experimenting.
 export class MovingEntity extends Entity {
+  activeModes = [GameMode.Normal];
   entityType = EntityType.MovingEntity;
 
   private _velocity = Vector2.Zero;

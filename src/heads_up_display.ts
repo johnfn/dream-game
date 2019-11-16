@@ -1,10 +1,11 @@
 import * as PIXI from "pixi.js";
 
 import { Entity } from "./library/entity";
-import { GameState } from "./state";
+import { GameState, GameMode } from "./state";
 import { TextEntity } from "./library/text_entity";
 
 export class HeadsUpDisplay extends Entity {
+  activeModes = [GameMode.Normal];
   interactText: TextEntity;
 
   constructor() {

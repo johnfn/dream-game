@@ -1,7 +1,7 @@
 import { Texture } from 'pixi.js';
 import { FontDataUrl } from './font_data_url';
 import { Entity } from './entity';
-import { GameState } from '../state';
+import { GameState, GameMode } from '../state';
 
 // 1. Encode font into dataurl
 // 2. Use dataurl in SVG (otherwise you wouldnt be able to refer to the font in the SVG).
@@ -25,6 +25,8 @@ export const PIXEL_RATIO = (() => {
 })();
     
 export class BaseTextEntity extends Entity {
+  activeModes = [GameMode.Normal];
+
   canvas       : HTMLCanvasElement;
   context      : CanvasRenderingContext2D;
   private _html: string;

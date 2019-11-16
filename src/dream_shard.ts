@@ -4,11 +4,13 @@ import { Point } from "pixi.js";
 import { Rect } from "./library/rect";
 import { C } from "./constants";
 import { Vector2 } from "./library/vector2";
-import { GameState } from "./state";
+import { GameState, GameMode } from "./state";
 import { InteractableEntity } from "./library/interactable_entity";
 
 // TODO: Allow shard color customization in constructor
 export class DreamShard extends InteractableEntity {
+  activeModes = [GameMode.Normal];
+
   private _animFrame: number = 0;
   private _endPos: Vector2;
   private _startPos: Vector2;

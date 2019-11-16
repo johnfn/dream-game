@@ -4,6 +4,7 @@ import { Sprite } from "pixi.js";
 import { C } from "./constants";
 
 import * as PIXI from "pixi.js";
+import { Dialog } from "./dialog";
 
 export enum GameMode {
   Normal,
@@ -11,15 +12,18 @@ export enum GameMode {
 }
 
 export class GameState {
-  inDreamWorld    = false;
-  keys            : KeyboardState;
-  map            !: TiledTilemap;
+  inDreamWorld     = false;
+  keys             : KeyboardState;
+  map             !: TiledTilemap;
 
-  dreamMapLayer  !: Sprite;
-  realityMapLayer!: Sprite;
-  shader          : PIXI.Graphics;
-  mode            : GameMode;
+  dreamMapLayer   !: Sprite;
+  realityMapLayer !: Sprite;
+  shader           : PIXI.Graphics;
+  dialog          !: Dialog;
 
+  // TODO: Maybe mode should be a stack?
+  mode             : GameMode;
+  
   constructor() {
     this.mode = GameMode.Normal
     this.keys = new KeyboardState();

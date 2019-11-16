@@ -1,13 +1,13 @@
 import * as PIXI from "pixi.js";
 
-import { GameState } from "./state";
+import { GameState, GameMode } from "./state";
 import { InteractableEntity } from "./library/interactable_entity";
 import { Character } from "./character";
+import { Dialog } from "./dialog";
 
-/**
- * Completely pointless entity purely for testing.
- */
 export class BaseNPC extends InteractableEntity {
+  activeModes = [GameMode.Normal];
+
   constructor() {
     super({
       texture   : PIXI.Texture.WHITE,
@@ -21,7 +21,7 @@ export class BaseNPC extends InteractableEntity {
   }
 
   interact = (player: Character, state: GameState) => {
-    console.log("My GOD!");
+    Dialog.StartDialog(state);
   };
 
   collide = () => {}

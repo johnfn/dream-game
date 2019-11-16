@@ -8,7 +8,7 @@ import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
 import { FollowCamera } from "./camera";
-import { GameState } from "./state";
+import { GameState, GameMode } from "./state";
 import { MovingEntity } from "./library/moving_entity";
 import { TestEntity } from "./test_entity";
 import { Vector2 } from "./library/vector2";
@@ -16,7 +16,7 @@ import { DreamShard } from "./dream_shard";
 import { InteractableEntity } from "./library/interactable_entity";
 import { BaseNPC } from "./base_npc";
 import { HeadsUpDisplay } from "./heads_up_display";
-import { TextEntity } from "./library/text_entity";
+import { Dialog } from "./dialog";
 
 export class Game {
   static Instance: Game;
@@ -170,6 +170,9 @@ export class Game {
     this.hud = new HeadsUpDisplay();
     this.fixedCameraStage.addChild(this.hud);
 
+    this.gameState.dialog = new Dialog();
+    this.fixedCameraStage.addChild(this.gameState.dialog);
+
     this.app.ticker.add(() => this.gameLoop());
   };
 
@@ -239,10 +242,10 @@ export class Game {
     }
   }
 
-  handleInteractions = () => {
+  handleInteractions = (activeEntities: InteractableEntity[]) => {
     // find potential interactor
 
-    const sortedInteractors = this.entities.interactable.slice().sort((a, b) => 
+    const sortedInteractors = activeEntities.slice().sort((a, b) => 
       new Vector2(a.position).diagonalDistance(new Vector2(this.player.position)) -
       new Vector2(b.position).diagonalDistance(new Vector2(this.player.position))
     );
@@ -277,11 +280,17 @@ export class Game {
   gameLoop = () => {
     this.gameState.keys.update();
 
-    for (const entity of this.entities.all) {
+    const activeEntities = this.entities.all
+      .filter(entity => entity.activeModes.includes(this.gameState.mode));
+
+    const activeInteractableEntities = this.entities.interactable
+      .filter(entity => entity.activeModes.includes(this.gameState.mode));
+
+    for (const entity of activeEntities) {
       entity.update(this.gameState);
     }
 
-    this.handleInteractions();
+    this.handleInteractions(activeInteractableEntities);
 
     this.resolveCollisions();
 

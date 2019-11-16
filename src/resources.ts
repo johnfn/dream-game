@@ -14,6 +14,7 @@ export const ResourcesToLoad = {
   "art/char.png"             : ResourceType.Image,
   "art/char_spritesheet.json": ResourceType.Spritesheet,
   "maps/map.json"            : ResourceType.Tileset,
+  "art/dialog_box.png"       : ResourceType.Image,
 };
 
 export type ResourceName = keyof typeof ResourcesToLoad;

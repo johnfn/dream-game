@@ -3,11 +3,13 @@ import { Entity } from "./library/entity";
 import { Game } from "./game";
 import { Vector2 } from "./library/vector2";
 import { Rect } from "./library/rect";
-import { GameState } from "./state";
+import { GameState, GameMode } from "./state";
 import { KeyboardState } from "./library/keyboard";
 import { MovingEntity } from "./library/moving_entity";
 
 export class Character extends MovingEntity {
+  activeModes = [GameMode.Normal];
+
   private _animFrame = 0; //0 to 60
   private _totalNumFrames = 8; 
   protected _maxSpeed = 300;
