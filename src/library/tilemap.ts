@@ -184,22 +184,19 @@ export class TiledTilemap {
     return result;
   }
 
-  private loadObjectLayers(): Entity {
-    let result: Entity | null = null;
+  private loadObjectLayers(): { entity: Entity, layerName: string }[] {
+    let objectLayers: { entity: Entity, layerName: string }[] = [];
 
     for (const layer of this.data.layers) {
       if (layer.type === "objectgroup") {
-        result = this.loadObjectLayer(layer);
+        objectLayers.push({
+          entity   : this.loadObjectLayer(layer),
+          layerName: layer.name,
+        });
       } 
     }
 
-    if (result === null) {
-      throw new Error("Handle this case!");
-    }
-
-    // TODO Handle case of multiple object layers
-
-    return result;
+    return objectLayers;
   }
 
   private loadObjectLayer(layer: TiledObjectLayerJSON): Entity {
@@ -271,7 +268,7 @@ export class TiledTilemap {
     layerName: string;
     entity   : Entity;
   }[] {
-    const layers: {
+    let layers: {
       layerName: string;
       entity   : Entity;
     }[] = [];
@@ -313,16 +310,11 @@ export class TiledTilemap {
     }
 
     // Load object layers
+    // TODO: only load objects in this region - not the entire layer!!!
 
-    // TODO: Load multiple object layers
-    // TODO: only load objects in this region
+    const objectLayers = this.loadObjectLayers();
 
-    const objectLayer = this.loadObjectLayers();
-
-    layers.push({
-      entity: objectLayer,
-      layerName: "Object Layer TODO",
-    });
+    layers = [...layers, ...objectLayers];
 
     return layers;
   }
