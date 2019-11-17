@@ -85,7 +85,9 @@ export class DreamMap extends Entity {
           return entity;
       }
 
-      default: console.log(`unhandled gid ${ obj.gid } and type ${ tile.tileProperties.type }`); 
+      default: {
+        alert(`unhandled gid ${ obj.gid } and type ${ tile.tileProperties.type }`); 
+      }
     }
     
     return null;

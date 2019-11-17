@@ -208,7 +208,9 @@ export class TiledTilemap {
 
         const newObj = this.buildCustomObject(obj, {
           x             : obj.x,
-          y             : obj.y,
+
+          // tiled pivot point is (0, 1) so we need to subtract by tile height.
+          y             : obj.y - spritesheet.tileheight,
           tile          : spritesheet,
           isCollider    : this.gidHasCollision[obj.gid] || false,
           gid           : obj.gid,
@@ -218,6 +220,7 @@ export class TiledTilemap {
         if (newObj) {
           objectLayer.addChild(newObj);
         }
+
       } else {
         console.error("object in object layer without gid! very bad?!?");
       }
