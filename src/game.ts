@@ -2,7 +2,6 @@ import { Application, SCALE_MODES, settings, Point, Container } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
-import { TiledTilemap } from "./library/tilemap";
 import { Entity, EntityType } from "./library/entity";
 import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
@@ -17,6 +16,7 @@ import { InteractableEntity } from "./library/interactable_entity";
 import { BaseNPC } from "./base_npc";
 import { HeadsUpDisplay } from "./heads_up_display";
 import { Dialog } from "./dialog";
+import { DreamMap } from "./dream_map";
 
 export class Game {
   static Instance: Game;
@@ -107,32 +107,8 @@ export class Game {
   }
 
   startGame = async () => {
-    const tilemap = new TiledTilemap({
-      pathToTilemap: "maps",
-      json: C.Loader.getResource("maps/map.json").data,
-      renderer: C.Renderer
-    });
-
-    this.gameState.map = tilemap;
-
-    const layers = tilemap.loadRegionLayers(
-      new Rect({
-        x: 0,
-        y: 0,
-        w: 2048,
-        h: 2048
-      })
-    );
-
-    for (const { layerName, sprite } of layers) {
-      if (layerName === "Dream Layer") {
-        this.gameState.dreamMapLayer   = sprite;
-      } else if (layerName === "Reality Ground Layer") {
-        this.gameState.realityMapLayer = sprite;
-      }
-
-      this.stage.addChild(sprite);
-    }
+    this.gameState.map = new DreamMap(this.gameState);
+    this.stage.addChild(this.gameState.map);
 
     this.player = new Character({
       game: this,
@@ -140,8 +116,8 @@ export class Game {
         .spritesheet!
     });
 
-    this.player.x = 0;
-    this.player.y = 200;
+    this.player.x = 500;
+    this.player.y = 1000;
 
     this.stage.addChild(this.player);
 
@@ -179,19 +155,10 @@ export class Game {
   // Note: For now, we treat map as a special case.
   // TODO: Load map into collision grid and use collision grid ONLY.
   private doesRectHitAnything = (rect: Rect, associatedEntity: Entity): boolean => {
-    const tiles = [
-      ...this.gameState.map.getTilesAt(rect.x         , rect.y),
-      ...this.gameState.map.getTilesAt(rect.x + rect.w, rect.y),
-      ...this.gameState.map.getTilesAt(rect.x         , rect.y + rect.h),
-      ...this.gameState.map.getTilesAt(rect.x + rect.w, rect.y + rect.h),
-    ];
+    const hitMap = this.gameState.map.doesRectCollideMap(rect);
 
-    for (const tile of tiles) {
-      if (tile !== null) {
-        if (tile.isCollider) {
-          return true;
-        }
-      }
+    if (hitMap) {
+      return true;
     }
 
     const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);

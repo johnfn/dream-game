@@ -162,7 +162,7 @@ export class TiledTilemap {
     return result;
   }
 
-  private loadObjects(_layer: TiledObjectLayerJSON): void {
+  private loadObjects(layer: TiledObjectLayerJSON): void {
     console.error("grant has not handled object group layers yet!!!");
 
     /*

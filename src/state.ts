@@ -1,10 +1,10 @@
 import { KeyboardState } from "./library/keyboard";
-import { TiledTilemap } from "./library/tilemap";
 import { Sprite } from "pixi.js";
 import { C } from "./constants";
 
 import * as PIXI from "pixi.js";
 import { Dialog } from "./dialog";
+import { DreamMap } from "./dream_map";
 
 export enum GameMode {
   Normal,
@@ -14,7 +14,7 @@ export enum GameMode {
 export class GameState {
   inDreamWorld     = false;
   keys             : KeyboardState;
-  map             !: TiledTilemap;
+  map             !: DreamMap;
 
   dreamMapLayer   !: Sprite;
   realityMapLayer !: Sprite;
