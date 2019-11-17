@@ -69,9 +69,9 @@ export class DreamMap extends Entity {
         const spriteTex = TextureCache.GetTextureForTile(tile); 
         const entity = new TestEntity(spriteTex);
   
-        entity.x = 0;
-        entity.y = 0;
-  
+        entity.x = tile.x;
+        entity.y = tile.y;
+
         return entity;
       }
       case "doorLeft": 
