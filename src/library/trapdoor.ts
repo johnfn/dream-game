@@ -8,17 +8,14 @@ import { C } from "../constants";
 
 type StairType = "up" | "down";
 export class Trapdoor extends InteractableEntity {
-    private stairType: StairType;   constructor(props: {
-    texture: Texture;
-    stairType: StairType;
-  }) {
+  private stairType: StairType;
+  constructor(props: { texture: Texture; stairType: StairType }) {
     super({
       texture: props.texture,
       collidable: true,
-      dynamic: false,
+      dynamic: false
     });
     this.stairType = props.stairType;
-    
   }
 
   activeModes = [GameMode.Normal];
@@ -30,16 +27,15 @@ export class Trapdoor extends InteractableEntity {
     //Do nothing
   };
 
-  interact= (other: Entity, gameState: GameState) => {
+  interact = (other: Entity, gameState: GameState) => {
     // Change level
     if (this.stairType === "down") {
-        gameState.level -= 1;
+      gameState.map.updateLevel(gameState.level - 1, gameState);
     } else if (this.stairType === "up") {
-        gameState.level += 1;
+      gameState.map.updateLevel(gameState.level + 1, gameState);
     }
-  }
+  };
 
   interactRange = C.INTERACTION_DISTANCE;
   interactText = "";
-
 }

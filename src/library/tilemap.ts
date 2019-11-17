@@ -5,6 +5,11 @@ import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
 import { TestEntity } from '../test_entity';
 
+export type MapLayer = {
+  layerName: string;
+  entity   : Entity;
+}
+
 // 2D array that allows for negative indices
 class Grid<T> {
   private _data: { [key: number]: { [key: number]: T} } = {};
@@ -40,6 +45,18 @@ class Grid<T> {
   }
 }
 
+type TilemapCustomObjects = 
+  | {
+      type: "single";
+      name: string;
+      getInstanceType: (tex: Texture) => Entity;
+    }
+  | {
+      type: "group";
+      names: string[];
+      getInstanceType: (tex: Texture) => Entity;
+    }
+
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
 
 export class TiledTilemap {
@@ -48,16 +65,17 @@ export class TiledTilemap {
   private tileLayers: { [tilesetName: string]: Grid<Tile> };
   private renderer: Renderer;
   private gidHasCollision: { [id: number]: boolean } = {};
-  private buildCustomObject: (obj: TiledObjectJSON, tile: Tile) => Entity | null;
+  // private buildCustomObject: (obj: TiledObjectJSON, tile: Tile) => Entity | null;
+  private customObjects: TilemapCustomObjects[];
 
-  constructor({ json: data, renderer, pathToTilemap, buildCustomObject }: { 
+  constructor({ json: data, renderer, pathToTilemap, customObjects }: { 
     // this is required to calculate the relative paths of the tileset images.
-    json             : TiledJSON; 
-    renderer         : Renderer; 
-    pathToTilemap    : string;
-    buildCustomObject: (obj: TiledObjectJSON, tile: Tile) => Entity | null;
+    json         : TiledJSON; 
+    renderer     : Renderer; 
+    pathToTilemap: string;
+    customObjects: TilemapCustomObjects[];
   }) {
-    this.buildCustomObject = buildCustomObject;
+    this.customObjects = customObjects;
     this.data = data;
     this.renderer = renderer;
 
@@ -205,8 +223,8 @@ export class TiledTilemap {
     for (const obj of layer.objects) {
       if (obj.gid) {
         const { spritesheet, tileProperties } = this.gidInfo(obj.gid);
-
-        const newObj = this.buildCustomObject(obj, {
+        let newObj: Entity | null = null;
+        const tile = {
           x             : obj.x,
 
           // tiled pivot point is (0, 1) so we need to subtract by tile height.
@@ -215,9 +233,36 @@ export class TiledTilemap {
           isCollider    : this.gidHasCollision[obj.gid] || false,
           gid           : obj.gid,
           tileProperties: tileProperties,
-        });
+        };
+
+        for (const customObject of this.customObjects) {
+          const tileType = tileProperties.type;
+
+          if (typeof tileType !== "string") {
+            continue;
+          }
+
+          if (customObject.type === "single") {
+            if (customObject.name === tileType) {
+              const spriteTex = TextureCache.GetTextureForTile(tile); 
+
+              newObj = customObject.getInstanceType(spriteTex);
+            }
+          } else if (customObject.type === "group") {
+            // TODO: grouping logic
+
+            if (customObject.names.includes(tileType)) {
+              const spriteTex = TextureCache.GetTextureForTile(tile); 
+
+              newObj = customObject.getInstanceType(spriteTex);
+            }
+          }
+        }
 
         if (newObj) {
+          newObj.x = tile.x;
+          newObj.y = tile.y;
+
           objectLayer.addChild(newObj);
         }
 
@@ -267,14 +312,8 @@ export class TiledTilemap {
     return result;
   }
 
-  public loadRegionLayers(region: Rect): {
-    layerName: string;
-    entity   : Entity;
-  }[] {
-    let layers: {
-      layerName: string;
-      entity   : Entity;
-    }[] = [];
+  public loadRegionLayers(region: Rect): MapLayer[] {
+    let layers: MapLayer[] = [];
 
     // Load tile layers
 
