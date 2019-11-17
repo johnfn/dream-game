@@ -39,19 +39,20 @@ export class DreamMap extends Entity {
     );
 
     for (const { layerName, entity } of layers) {
-      gameState.level = Number(layerName[-1]);
-      if (layerName === "Dream Layer 1") {
-        gameState.dreamMapLayer = entity;
-      } else if (
-        layerName === "Reality Ground Layer 0" ||
-        layerName === "Reality Ground Layer 1" ||
-        layerName === "Reality Ground Layer 2"
-      ) {
-        gameState.realityMapLayer = entity;
-      } else if (layerName === "Object Layer TODO") {
-        gameState.objectLayer = entity;
+      const layerType = layerName.split(" ")[0]; //'Reality' or 'Dream'
+      //const layerLevel = Number(layerName.split(" ")[]); //'Reality' or 'Dream'
+      console.log(layerType);
+      console.log(layerName.split(" ")[-1]);
+      if (Number(layerName[-1]) == gameState.level) {
+        if (layerType === "Dream") {
+          gameState.dreamMapLayer = entity;
+        } else if (layerType === "Reality") {
+          gameState.realityMapLayer = entity;
+        } else if (layerName === "Reality Object Layer 1") { //Fix this later
+          gameState.objectLayer = entity;
+        }
       }
-
+      
       this.addChild(entity);
     }
   }
@@ -73,8 +74,16 @@ export class DreamMap extends Entity {
         return entity;
       }
       case "upStair2":
-        break; //Aesthetic only
-      case "characterStart":
+        break;
+      case "characterStart": {
+        const spriteTex = TextureCache.GetTextureForTile(tile);
+        const entity = new TestEntity(spriteTex);
+
+        entity.x = tile.x;
+        entity.y = tile.y;
+
+        return entity;
+      }
       case "doorLeft":
       case "doorRight": {
         const spriteTex = TextureCache.GetTextureForTile(tile);
@@ -83,15 +92,19 @@ export class DreamMap extends Entity {
         entity.x = tile.x;
         entity.y = tile.y;
 
-        console.log(entity.x, entity.y);
-
         return entity;
       }
-
-      default:
-        console.log(
-          `unhandled gid ${obj.gid} and type ${tile.tileProperties.type}`
-        );
+      case "upStair2":
+        break; //Aesthetic only
+      case "characterStart":
+      case "doorLeft":
+      case "doorRight": {
+        const spriteTex = TextureCache.GetTextureForTile(tile);
+        const entity = new TestEntity(spriteTex);
+      }
+      default: {
+        alert(`unhandled gid ${obj.gid} and type ${tile.tileProperties.type}`);
+      }
     }
 
     return null;

@@ -184,22 +184,19 @@ export class TiledTilemap {
     return result;
   }
 
-  private loadObjectLayers(): Entity {
-    let result: Entity | null = null;
+  private loadObjectLayers(): { entity: Entity, layerName: string }[] {
+    let objectLayers: { entity: Entity, layerName: string }[] = [];
 
     for (const layer of this.data.layers) {
       if (layer.type === "objectgroup") {
-        result = this.loadObjectLayer(layer);
+        objectLayers.push({
+          entity   : this.loadObjectLayer(layer),
+          layerName: layer.name,
+        });
       } 
     }
 
-    if (result === null) {
-      throw new Error("Handle this case!");
-    }
-
-    // TODO Handle case of multiple object layers
-
-    return result;
+    return objectLayers;
   }
 
   private loadObjectLayer(layer: TiledObjectLayerJSON): Entity {
@@ -211,7 +208,9 @@ export class TiledTilemap {
 
         const newObj = this.buildCustomObject(obj, {
           x             : obj.x,
-          y             : obj.y,
+
+          // tiled pivot point is (0, 1) so we need to subtract by tile height.
+          y             : obj.y - spritesheet.tileheight,
           tile          : spritesheet,
           isCollider    : this.gidHasCollision[obj.gid] || false,
           gid           : obj.gid,
@@ -221,6 +220,7 @@ export class TiledTilemap {
         if (newObj) {
           objectLayer.addChild(newObj);
         }
+
       } else {
         console.error("object in object layer without gid! very bad?!?");
       }
@@ -271,7 +271,7 @@ export class TiledTilemap {
     layerName: string;
     entity   : Entity;
   }[] {
-    const layers: {
+    let layers: {
       layerName: string;
       entity   : Entity;
     }[] = [];
@@ -313,16 +313,11 @@ export class TiledTilemap {
     }
 
     // Load object layers
+    // TODO: only load objects in this region - not the entire layer!!!
 
-    // TODO: Load multiple object layers
-    // TODO: only load objects in this region
+    const objectLayers = this.loadObjectLayers();
 
-    const objectLayer = this.loadObjectLayers();
-
-    layers.push({
-      entity: objectLayer,
-      layerName: "Object Layer TODO",
-    });
+    layers = [...layers, ...objectLayers];
 
     return layers;
   }
