@@ -5,9 +5,6 @@ import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
 import { TestEntity } from '../test_entity';
 
-// TODO
-import * as test from '../../public/maps/map.json'
-
 // 2D array that allows for negative indices
 class Grid<T> {
   private _data: { [key: number]: { [key: number]: T} } = {};
@@ -47,8 +44,6 @@ class Grid<T> {
 
 export class TiledTilemap {
   private data: TiledJSON;
-  private tileWidth: number;
-  private tileHeight: number;
   private tilesets: Tileset[];
   private tileLayers: { [tilesetName: string]: Grid<Tile> };
   private renderer: Renderer;
@@ -64,14 +59,10 @@ export class TiledTilemap {
   }) {
     this.buildCustomObject = buildCustomObject;
     this.data = data;
-    this.tileHeight = data.tileheight;
-    this.tileWidth = data.tilewidth;
     this.renderer = renderer;
 
     this.tilesets = TiledTilemap.LoadTilesets(pathToTilemap, this.data);
-
     this.gidHasCollision = this.buildCollisionInfoForTiles()
-
     this.tileLayers = this.loadTileLayers();
   }
 
@@ -87,6 +78,10 @@ export class TiledTilemap {
     for (const tileset of this.data.tilesets) {
       if (tileset.tiles) {
         for (const tileAndCollisionObjects of tileset.tiles) {
+          if (!tileAndCollisionObjects.objectgroup) {
+            continue;
+          }
+
           if (tileAndCollisionObjects.objectgroup.objects.length > 0) {
             gidHasCollision[
               tileAndCollisionObjects.id + tileset.firstgid

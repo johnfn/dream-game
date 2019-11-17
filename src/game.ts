@@ -110,8 +110,8 @@ export class Game {
         .spritesheet!
     });
 
-    this.player.x = 500;
-    this.player.y = 1000;
+    this.player.x = -32;
+    this.player.y = -32;
 
     this.stage.addChild(this.player);
 
