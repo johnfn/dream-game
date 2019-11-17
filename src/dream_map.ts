@@ -65,6 +65,7 @@ export class DreamMap extends Entity {
       }
       case "upStair1": break;
       case "upStair2": break;
+      case "characterStart": 
       case "doorLeft": 
       case "doorRight": {
           const spriteTex = TextureCache.GetTextureForTile(tile); 
@@ -72,6 +73,8 @@ export class DreamMap extends Entity {
     
           entity.x = tile.x;
           entity.y = tile.y;
+
+          console.log(entity.x, entity.y)
     
           return entity;
       }
