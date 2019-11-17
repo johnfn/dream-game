@@ -24,7 +24,35 @@ export class DreamMap extends Entity {
       pathToTilemap: "maps",
       json: C.Loader.getResource("maps/map.json").data,
       renderer: C.Renderer,
-      buildCustomObject: this.buildCustomObject,
+      customObjects: [
+        {
+          type: "single" as const,
+
+          name: "downStair",
+          getInstanceType: (tex: Texture) => new Trapdoor({ texture: tex }),
+        },
+
+        {
+          type: "group" as const,
+
+          names: ["upStair1", "upStair2"],
+          getInstanceType: (tex: Texture) => new TestEntity(tex),
+        },
+
+        {
+          type: "group" as const,
+
+          names: ["doorLeft", "doorRight"],
+          getInstanceType: (tex: Texture) => new TestEntity(tex),
+        },
+
+        {
+          type: "single" as const,
+
+          name: "characterStart",
+          getInstanceType: (tex: Texture) => new TestEntity(tex),
+        } as const,
+      ]
     });
 
     this.map = tilemap;
@@ -49,48 +77,6 @@ export class DreamMap extends Entity {
 
       this.addChild(entity);
     }
-  }
-
-  buildCustomObject = (obj: TiledObjectJSON, tile: Tile): Entity | null => {
-    console.log(tile.tileProperties);
-
-    if (!tile.tileProperties.type) console.error("uh oh");
-
-    switch (tile.tileProperties.type) {
-      case "downStair": {
-        const spriteTex = TextureCache.GetTextureForTile(tile);
-        const entity = new Trapdoor({texture: spriteTex});
-
-        return entity;
-      }
-      case "upStair1": break;
-      case "upStair2": break;
-      case "characterStart": {
-        const spriteTex = TextureCache.GetTextureForTile(tile); 
-        const entity = new TestEntity(spriteTex);
-  
-        entity.x = tile.x;
-        entity.y = tile.y;
-
-        return entity;
-      }
-      case "doorLeft": 
-      case "doorRight": {
-          const spriteTex = TextureCache.GetTextureForTile(tile); 
-          const entity = new TestEntity(spriteTex);
-    
-          entity.x = tile.x;
-          entity.y = tile.y;
-    
-          return entity;
-      }
-
-      default: {
-        alert(`unhandled gid ${ obj.gid } and type ${ tile.tileProperties.type }`); 
-      }
-    }
-    
-    return null;
   }
 
   collide = (other: Entity, intersection: Rect) => {
