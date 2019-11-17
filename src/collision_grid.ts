@@ -173,7 +173,7 @@ export class CollisionGrid {
 
     for (let hash of hashes) {
       if (!(hash in this._cells)) {
-        console.error("Collision grid hash out of bounds :(");
+        //console.error("Collision grid hash out of bounds :(");
 
         continue;
       }
