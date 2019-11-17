@@ -16,6 +16,7 @@ import { BaseNPC } from "./base_npc";
 import { HeadsUpDisplay } from "./heads_up_display";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
+import { MyName } from "./my_name";
 
 export class Game {
   static Instance: Game;
@@ -110,8 +111,13 @@ export class Game {
         .spritesheet!
     });
 
-    this.player.x = -32;
-    this.player.y = -32;
+    if (MyName === "grant") {
+      this.player.x = -32;
+      this.player.y = -32;
+    } else {
+      this.player.x = 200;
+      this.player.y = 900;
+    }
 
     this.stage.addChild(this.player);
 
