@@ -51,6 +51,16 @@ export interface TiledObjectLayerJSON {
   type: "objectgroup";
 }
 
+export interface TilesetTilesJSON {
+  id          : number;
+  objectgroup?: TiledObjectLayerJSON;
+  properties ?: {
+    name : string;
+    type : "string"; // TODO: There are probably others. And yes, the literal string "string".
+    value: string;
+  }[];
+}
+
 export interface TilesetJSON {
   columns    : number;
   firstgid   : number;
@@ -64,15 +74,7 @@ export interface TilesetJSON {
   tileheight : number;
   tilewidth  : number;
 
-  tiles     ?: { 
-    id          : number;
-    objectgroup?: TiledObjectLayerJSON;
-    properties ?: {
-      name : string;
-      type : "string"; // TODO: There are probably others. And yes, the literal string "string".
-      value: string;
-    };
-  }[]
+  tiles     ?: TilesetTilesJSON[];
 }
 
 export interface TiledJSON {
@@ -90,11 +92,12 @@ export interface TiledJSON {
 }
 
 export interface Tile {
-  x         : number;
-  y         : number;
-  gid       : number;
-  tile      : SpritesheetTile;
-  isCollider: boolean;
+  x             : number;
+  y             : number;
+  gid           : number;
+  tile          : SpritesheetTile;
+  isCollider    : boolean;
+  tileProperties: { [key: string]: unknown; };
 }
 
 export interface Tileset {
@@ -105,10 +108,11 @@ export interface Tileset {
   imageUrlRelativeToTilemap: string;
   imageUrlRelativeToGame: string;
 
-  imagewidth: number;
+  imagewidth : number;
   imageheight: number;
-  tilewidth: number;
-  tileheight: number;
+  tilewidth  : number;
+  tileheight : number;
+  tiles      : TilesetTilesJSON[] | undefined;
 }
 
 export interface TiledObject {
@@ -129,4 +133,5 @@ export interface SpritesheetTile {
   spritesheety: number;
   tilewidth: number;
   tileheight: number
+  tileProperties: TilesetTilesJSON[] | undefined;
 }
