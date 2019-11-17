@@ -39,9 +39,9 @@ export class DreamMap extends Entity {
     );
 
     for (const { layerName, entity } of layers) {
-      if (layerName === "Dream Layer") {
+      if (layerName === "Dream Layer 1") {
         gameState.dreamMapLayer = entity;
-      } else if (layerName === "Reality Ground Layer") {
+      } else if (layerName === "Reality Ground Layer 1") {
         gameState.realityMapLayer = entity;
       } else if (layerName === "Object Layer TODO") {
         gameState.objectLayer = entity;
