@@ -43,7 +43,7 @@ export class DreamMap extends Entity {
         gameState.dreamMapLayer = entity;
       } else if (layerName === "Reality Ground Layer") {
         gameState.realityMapLayer = entity;
-      } else if (layerName === "Object Layer TODO") {
+      } else if (layerName === "Reality Object Layer 1") {
         gameState.objectLayer = entity;
       }
 
@@ -65,7 +65,15 @@ export class DreamMap extends Entity {
       }
       case "upStair1": break;
       case "upStair2": break;
-      case "characterStart": 
+      case "characterStart": {
+        const spriteTex = TextureCache.GetTextureForTile(tile); 
+        const entity = new TestEntity(spriteTex);
+  
+        entity.x = 0;
+        entity.y = 0;
+  
+        return entity;
+      }
       case "doorLeft": 
       case "doorRight": {
           const spriteTex = TextureCache.GetTextureForTile(tile); 
@@ -73,17 +81,13 @@ export class DreamMap extends Entity {
     
           entity.x = tile.x;
           entity.y = tile.y;
-
-          console.log(entity.x, entity.y)
     
           return entity;
       }
 
       default: console.log(`unhandled gid ${ obj.gid } and type ${ tile.tileProperties.type }`); 
     }
-
     
-
     return null;
   }
 
