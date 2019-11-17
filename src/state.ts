@@ -16,6 +16,7 @@ export class GameState {
   keys             : KeyboardState;
   map             !: DreamMap;
 
+  level! : number;
   dreamMapLayer   !: Entity;
   realityMapLayer !: Entity;
   objectLayer     !: Entity;

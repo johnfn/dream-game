@@ -17,14 +17,14 @@ export class DreamMap extends Entity {
     super({
       texture: Texture.EMPTY,
       collidable: false,
-      dynamic: false,
+      dynamic: false
     });
 
     const tilemap = new TiledTilemap({
       pathToTilemap: "maps",
       json: C.Loader.getResource("maps/map.json").data,
       renderer: C.Renderer,
-      buildCustomObject: this.buildCustomObject,
+      buildCustomObject: this.buildCustomObject
     });
 
     this.map = tilemap;
@@ -39,9 +39,14 @@ export class DreamMap extends Entity {
     );
 
     for (const { layerName, entity } of layers) {
+      gameState.level = Number(layerName[-1]);
       if (layerName === "Dream Layer 1") {
         gameState.dreamMapLayer = entity;
-      } else if (layerName === "Reality Ground Layer 1") {
+      } else if (
+        layerName === "Reality Ground Layer 0" ||
+        layerName === "Reality Ground Layer 1" ||
+        layerName === "Reality Ground Layer 2"
+      ) {
         gameState.realityMapLayer = entity;
       } else if (layerName === "Object Layer TODO") {
         gameState.objectLayer = entity;
@@ -59,48 +64,49 @@ export class DreamMap extends Entity {
     switch (tile.tileProperties.type) {
       case "downStair": {
         const spriteTex = TextureCache.GetTextureForTile(tile);
-        const entity = new Trapdoor({texture: spriteTex});
+        const entity = new Trapdoor({ texture: spriteTex, stairType: "down" }); //TODO: get levels from map
+        return entity;
+      }
+      case "upStair1": {
+        const spriteTex = TextureCache.GetTextureForTile(tile);
+        const entity = new Trapdoor({ texture: spriteTex, stairType: "up" }); //TODO: get levels from map
+        return entity;
+      }
+      case "upStair2":
+        break; //Aesthetic only
+      case "characterStart":
+      case "doorLeft":
+      case "doorRight": {
+        const spriteTex = TextureCache.GetTextureForTile(tile);
+        const entity = new TestEntity(spriteTex);
+
+        entity.x = tile.x;
+        entity.y = tile.y;
+
+        console.log(entity.x, entity.y);
 
         return entity;
       }
-      case "upStair1": break;
-      case "upStair2": break;
-      case "characterStart": 
-      case "doorLeft": 
-      case "doorRight": {
-          const spriteTex = TextureCache.GetTextureForTile(tile); 
-          const entity = new TestEntity(spriteTex);
-    
-          entity.x = tile.x;
-          entity.y = tile.y;
 
-          console.log(entity.x, entity.y)
-    
-          return entity;
-      }
-
-      default: console.log(`unhandled gid ${ obj.gid } and type ${ tile.tileProperties.type }`); 
+      default:
+        console.log(
+          `unhandled gid ${obj.gid} and type ${tile.tileProperties.type}`
+        );
     }
 
-    
-
     return null;
-  }
+  };
 
-  collide = (other: Entity, intersection: Rect) => {
+  collide = (other: Entity, intersection: Rect) => {};
 
-  }
-
-  update = (gameState: GameState) => {
-
-  }
+  update = (gameState: GameState) => {};
 
   doesRectCollideMap(rect: Rect): boolean {
     const tiles = [
-      ...this.map.getTilesAt(rect.x         , rect.y),
+      ...this.map.getTilesAt(rect.x, rect.y),
       ...this.map.getTilesAt(rect.x + rect.w, rect.y),
-      ...this.map.getTilesAt(rect.x         , rect.y + rect.h),
-      ...this.map.getTilesAt(rect.x + rect.w, rect.y + rect.h),
+      ...this.map.getTilesAt(rect.x, rect.y + rect.h),
+      ...this.map.getTilesAt(rect.x + rect.w, rect.y + rect.h)
     ];
 
     for (const tile of tiles) {
