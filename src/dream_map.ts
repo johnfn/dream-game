@@ -51,7 +51,7 @@ export class DreamMap extends Entity {
   }
 
   buildCustomObject = (obj: TiledObjectJSON, tile: Tile): Entity | null => {
-    console.log(obj.properties);
+    console.log(tile.tileProperties);
 
     if (obj.gid === 36 || obj.gid === 37) {
       // Left or right half of door

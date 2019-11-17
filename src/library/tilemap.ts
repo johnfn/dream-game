@@ -1,6 +1,6 @@
 import { Sprite, Renderer, RenderTexture, Texture } from 'pixi.js'
 import { Rect } from './rect'
-import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON, TiledObjectJSON } from './tilemap_types';
+import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON, TiledObjectJSON, TilesetTilesJSON } from './tilemap_types';
 import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
 import { TestEntity } from '../test_entity';
@@ -104,8 +104,8 @@ export class TiledTilemap {
   private static LoadTilesets(pathToTilemap: string, json: TiledJSON): Tileset[] {
     const tilesets: Tileset[] = [];
 
-    for (const { image: imageUrlRelativeToTilemap, name, firstgid, imageheight, imagewidth, tileheight, tilewidth } of json.tilesets) {
-      const tiles = (imageheight * imagewidth) / (tileheight * tilewidth);
+    for (const { image: imageUrlRelativeToTilemap, name, firstgid, imageheight, imagewidth, tileheight, tilewidth, tiles } of json.tilesets) {
+      const tileCountInTileset = (imageheight * imagewidth) / (tileheight * tilewidth);
       const imageUrlRelativeToGame = 
         new URL(pathToTilemap + "/" + imageUrlRelativeToTilemap, "http://a").href.slice("http://a".length + 1); // slice off the initial / too
 
@@ -117,17 +117,21 @@ export class TiledTilemap {
         imageheight,
         tilewidth,
         tileheight,
+        tiles,
 
         gidStart: firstgid,
-        gidEnd  : firstgid + tiles,
+        gidEnd  : firstgid + tileCountInTileset,
       });
     }
 
     return tilesets;
   }
 
-  private gidToTileset(gid: number): SpritesheetTile {
-    for (const { gidStart, gidEnd, imageUrlRelativeToGame, imagewidth, tilewidth, tileheight } of this.tilesets) {
+  private gidInfo(gid: number): {
+    spritesheet   : SpritesheetTile;
+    tileProperties: { [key: string]: unknown };
+  } {
+    for (const { gidStart, gidEnd, imageUrlRelativeToGame, imagewidth, tilewidth, tileheight, tiles } of this.tilesets) {
       if (gid >= gidStart && gid < gidEnd) {
         const normalizedGid = gid - gidStart;
         const tilesWide = imagewidth / tilewidth;
@@ -135,12 +139,30 @@ export class TiledTilemap {
         const x = (normalizedGid % tilesWide);
         const y = Math.floor(normalizedGid / tilesWide);
 
-        return {
+        const spritesheet = {
           imageUrlRelativeToGame,
           spritesheetx: x,
           spritesheety: y,
           tilewidth,
           tileheight,
+          tileProperties: tiles,
+        };
+
+        let tileProperties: { [key: string]: unknown } = {};
+
+        if (tiles) {
+          const matchedTileInfo = tiles.find(tile => gid === gidStart + tile.id);
+
+          if (matchedTileInfo && matchedTileInfo.properties) {
+            for (const { name, type, value } of matchedTileInfo.properties) {
+              tileProperties[name] = value;
+            }
+          }
+        }
+
+        return {
+          spritesheet,
+          tileProperties,
         };
       }
     }
@@ -185,14 +207,15 @@ export class TiledTilemap {
 
     for (const obj of layer.objects) {
       if (obj.gid) {
-        const spritesheetTile = this.gidToTileset(obj.gid);
+        const { spritesheet, tileProperties } = this.gidInfo(obj.gid);
 
         const newObj = this.buildCustomObject(obj, {
-          x         : obj.x,
-          y         : obj.y,
-          tile      : spritesheetTile,
-          isCollider: this.gidHasCollision[obj.gid] || false,
-          gid       : obj.gid,
+          x             : obj.x,
+          y             : obj.y,
+          tile          : spritesheet,
+          isCollider    : this.gidHasCollision[obj.gid] || false,
+          gid           : obj.gid,
+          tileProperties: tileProperties,
         });
 
         if (newObj) {
@@ -226,12 +249,17 @@ export class TiledTilemap {
         const absTileX = relTileX + chunk.x;
         const absTileY = relTileY + chunk.y;
 
+        const { spritesheet, tileProperties } = this.gidInfo(gid);
+
+        // TODO: Merge instance properties and tileset properties...
+
         result.set(absTileX, absTileY, {
-          x         : absTileX * this.data.tilewidth,
-          y         : absTileY * this.data.tileheight,
-          tile      : this.gidToTileset(gid),
-          isCollider: this.gidHasCollision[gid] || false,
-          gid       : gid,
+          x             : absTileX * this.data.tilewidth,
+          y             : absTileY * this.data.tileheight,
+          tile          : spritesheet,
+          isCollider    : this.gidHasCollision[gid] || false,
+          tileProperties: tileProperties,
+          gid           : gid,
         });
       }
     }
