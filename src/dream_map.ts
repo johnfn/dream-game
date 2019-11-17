@@ -4,10 +4,9 @@ import { Rect } from "./library/rect";
 import { Texture } from "pixi.js";
 import { TiledTilemap } from "./library/tilemap";
 import { C } from "./constants";
-import { TiledObjectJSON, Tile } from "./library/tilemap_types";
-import { TextureCache } from "./library/texture_cache";
 import { TestEntity } from "./test_entity";
 import { Trapdoor } from "./library/trapdoor";
+import { Door } from "./door";
 
 export class DreamMap extends Entity {
   activeModes = [GameMode.Normal];
@@ -15,7 +14,6 @@ export class DreamMap extends Entity {
 
   constructor(gameState: GameState) {
     super({
-      texture: Texture.EMPTY,
       collidable: false,
       dynamic: false,
     });
@@ -37,6 +35,7 @@ export class DreamMap extends Entity {
 
           names: ["upStair1", "upStair2"],
           getInstanceType: (tex: Texture) => new TestEntity(tex),
+          getGroupInstanceType: () => new Door(),
         },
 
         {
@@ -44,6 +43,7 @@ export class DreamMap extends Entity {
 
           names: ["doorLeft", "doorRight"],
           getInstanceType: (tex: Texture) => new TestEntity(tex),
+          getGroupInstanceType: () => new Door(),
         },
 
         {

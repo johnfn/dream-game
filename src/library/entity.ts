@@ -25,9 +25,9 @@ export abstract class Entity extends Container {
   sprite: Sprite;
 
   constructor(props: {
-    texture   : Texture;
-    collidable: boolean;
-    dynamic   : boolean;
+    texture   ?: Texture;
+    collidable : boolean;
+    dynamic    : boolean;
   }) {
     super();
 

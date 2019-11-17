@@ -1,7 +1,6 @@
 import { Entity } from "./entity";
 import { GameMode } from "../state";
 import { Texture } from "pixi.js";
-import { TiledTilemap } from "./tilemap";
 
 export class Trapdoor extends Entity {
   constructor(props: {

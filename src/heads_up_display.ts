@@ -10,7 +10,6 @@ export class HeadsUpDisplay extends Entity {
 
   constructor() {
     super({
-      texture   : PIXI.Texture.EMPTY,
       collidable: false,
       dynamic   : false,
     });
