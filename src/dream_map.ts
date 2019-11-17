@@ -57,24 +57,30 @@ export class DreamMap extends Entity {
     if (obj.gid === 36 || obj.gid === 37) {
       // Left or right half of door
 
-      const spriteTex = TextureCache.GetTextureForTile(tile);
-      const entity = new TestEntity(spriteTex);
-
-      entity.x = tile.x;
-      entity.y = tile.y;
-
-      return entity;
+      
     }
 
     if (!tile.tileProperties.type) console.error("uh oh");
 
     switch (tile.tileProperties.type) {
-      case "downStair": 
+      case "downStair": {
         const spriteTex = TextureCache.GetTextureForTile(tile);
-        const entity = new Trapdoor({texture: spriteTex})
-        break;
+        const entity = new Trapdoor({texture: spriteTex});
+        return entity;
+      }
       case "upStair1": break;
       case "upStair2": break;
+      case "doorLeft": 
+      case "doorRight": {
+          const spriteTex = TextureCache.GetTextureForTile(tile); 
+          const entity = new TestEntity(spriteTex);
+    
+          entity.x = tile.x;
+          entity.y = tile.y;
+    
+          return entity;
+      }
+
       default: console.log(`unhandled gid ${ obj.gid }`); 
     }
 
