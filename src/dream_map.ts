@@ -54,18 +54,13 @@ export class DreamMap extends Entity {
   buildCustomObject = (obj: TiledObjectJSON, tile: Tile): Entity | null => {
     console.log(tile.tileProperties);
 
-    if (obj.gid === 36 || obj.gid === 37) {
-      // Left or right half of door
-
-      
-    }
-
     if (!tile.tileProperties.type) console.error("uh oh");
 
     switch (tile.tileProperties.type) {
       case "downStair": {
         const spriteTex = TextureCache.GetTextureForTile(tile);
         const entity = new Trapdoor({texture: spriteTex});
+
         return entity;
       }
       case "upStair1": break;
@@ -81,7 +76,7 @@ export class DreamMap extends Entity {
           return entity;
       }
 
-      default: console.log(`unhandled gid ${ obj.gid }`); 
+      default: console.log(`unhandled gid ${ obj.gid } and type ${ tile.tileProperties.type }`); 
     }
 
     
