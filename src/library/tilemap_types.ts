@@ -65,8 +65,13 @@ export interface TilesetJSON {
   tilewidth  : number;
 
   tiles     ?: { 
-    id: number;
-    objectgroup: TiledObjectLayerJSON;
+    id          : number;
+    objectgroup?: TiledObjectLayerJSON;
+    properties ?: {
+      name : string;
+      type : "string"; // TODO: There are probably others. And yes, the literal string "string".
+      value: string;
+    };
   }[]
 }
 
