@@ -1,10 +1,10 @@
 import { KeyboardState } from "./library/keyboard";
-import { Sprite } from "pixi.js";
 import { C } from "./constants";
 
 import * as PIXI from "pixi.js";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
+import { Entity } from "./library/entity";
 
 export enum GameMode {
   Normal,
@@ -16,8 +16,9 @@ export class GameState {
   keys             : KeyboardState;
   map             !: DreamMap;
 
-  dreamMapLayer   !: Sprite;
-  realityMapLayer !: Sprite;
+  dreamMapLayer   !: Entity;
+  realityMapLayer !: Entity;
+  objectLayer     !: Entity;
   shader           : PIXI.Graphics;
   dialog          !: Dialog;
 

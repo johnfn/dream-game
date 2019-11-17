@@ -1,8 +1,12 @@
-import { Sprite, Renderer, RenderTexture } from 'pixi.js'
+import { Sprite, Renderer, RenderTexture, Texture } from 'pixi.js'
 import { Rect } from './rect'
-import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON } from './tilemap_types';
+import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON, TiledObjectJSON } from './tilemap_types';
 import { TextureCache } from './texture_cache';
-import { ResourceName } from '../resources';
+import { Entity } from './entity';
+import { TestEntity } from '../test_entity';
+
+// TODO
+import * as test from '../../public/maps/map.json'
 
 // 2D array that allows for negative indices
 class Grid<T> {
@@ -46,16 +50,19 @@ export class TiledTilemap {
   private tileWidth: number;
   private tileHeight: number;
   private tilesets: Tileset[];
-  private layers: { [tilesetName: string]: Grid<Tile> };
+  private tileLayers: { [tilesetName: string]: Grid<Tile> };
   private renderer: Renderer;
   private gidHasCollision: { [id: number]: boolean } = {};
+  private buildCustomObject: (obj: TiledObjectJSON, tile: Tile) => Entity | null;
 
-  constructor({ json: data, renderer, pathToTilemap }: { 
+  constructor({ json: data, renderer, pathToTilemap, buildCustomObject }: { 
     // this is required to calculate the relative paths of the tileset images.
-    json         : TiledJSON; 
-    renderer     : Renderer; 
-    pathToTilemap: string;
+    json             : TiledJSON; 
+    renderer         : Renderer; 
+    pathToTilemap    : string;
+    buildCustomObject: (obj: TiledObjectJSON, tile: Tile) => Entity | null;
   }) {
+    this.buildCustomObject = buildCustomObject;
     this.data = data;
     this.tileHeight = data.tileheight;
     this.tileWidth = data.tilewidth;
@@ -65,7 +72,7 @@ export class TiledTilemap {
 
     this.gidHasCollision = this.buildCollisionInfoForTiles()
 
-    this.layers = this.loadLayers();
+    this.tileLayers = this.loadTileLayers();
   }
 
   private buildCollisionInfoForTiles(): { [key: number]: boolean } {
@@ -146,13 +153,11 @@ export class TiledTilemap {
     throw new Error("gid out of range. ask gabby what to do?!?");
   }
 
-  private loadLayers(): { [layerName: string]: Grid<Tile> } {
+  private loadTileLayers(): { [layerName: string]: Grid<Tile> } {
     const result: { [layerName: string]: Grid<Tile> } = {};
 
     for (const layer of this.data.layers) {
-      if (layer.type === "objectgroup") {
-        this.loadObjects(layer);
-      } else if (layer.type === "tilelayer") {
+      if (layer.type === "tilelayer") {
         const grid = this.loadTiles(layer);
 
         result[layer.name] = grid;
@@ -162,30 +167,53 @@ export class TiledTilemap {
     return result;
   }
 
-  private loadObjects(layer: TiledObjectLayerJSON): void {
-    console.error("grant has not handled object group layers yet!!!");
+  private loadObjectLayers(): Entity {
+    let result: Entity | null = null;
 
-    /*
-    const objects: Entity<any, any>[] = [];
-    for (const object of layer.objects) {
-      const newObject = this.buildObject(object, this.game);
-      if (!newObject) { continue; }
-      newObject.set("x", object.x);
-      newObject.set("y", object.y - 32);
-      objects.push(newObject);
+    for (const layer of this.data.layers) {
+      if (layer.type === "objectgroup") {
+        result = this.loadObjectLayer(layer);
+      } 
     }
-    const result: ExternalLayerTypes["objects"] = {
-      type   : "objects",
-      objects,
-    };
-    (this.layers as any)[layer.name] = result;
-    */
+
+    if (result === null) {
+      throw new Error("Handle this case!");
+    }
+
+    // TODO Handle case of multiple object layers
+
+    return result;
   }
 
+  private loadObjectLayer(layer: TiledObjectLayerJSON): Entity {
+    const objectLayer = new TestEntity(Texture.EMPTY);
+
+    for (const obj of layer.objects) {
+      if (obj.gid) {
+        const spritesheetTile = this.gidToTileset(obj.gid);
+
+        const newObj = this.buildCustomObject(obj, {
+          x         : obj.x,
+          y         : obj.y,
+          tile      : spritesheetTile,
+          isCollider: this.gidHasCollision[obj.gid] || false,
+          gid       : obj.gid,
+        });
+
+        if (newObj) {
+          objectLayer.addChild(newObj);
+        }
+      } else {
+        console.error("object in object layer without gid! very bad?!?");
+      }
+    }
+
+    return objectLayer;
+  }
 
   private loadTiles(layer: TiledTileLayerJSON): Grid<Tile> {
     const result = new Grid<Tile>();
-    const { chunks, name: layername } = layer;
+    const { chunks } = layer;
 
     // TODO: If the world gets very large, loading in all chunks like this might
     // not be the best idea - lazy loading could be better.
@@ -201,13 +229,12 @@ export class TiledTilemap {
         const relTileY = Math.floor(i / chunk.width);
 
         const absTileX = relTileX + chunk.x;
-        const absTileY = relTileY + chunk.x;
+        const absTileY = relTileY + chunk.y;
 
         result.set(absTileX, absTileY, {
           x         : absTileX * this.data.tilewidth,
           y         : absTileY * this.data.tileheight,
           tile      : this.gidToTileset(gid),
-          layername : layername,
           isCollider: this.gidHasCollision[gid] || false,
           gid       : gid,
         });
@@ -219,15 +246,17 @@ export class TiledTilemap {
 
   public loadRegionLayers(region: Rect): {
     layerName: string;
-    sprite: Sprite;
+    entity   : Entity;
   }[] {
     const layers: {
       layerName: string;
-      sprite: Sprite;
+      entity   : Entity;
     }[] = [];
 
-    for (const layerName of Object.keys(this.layers)) {
-      const layer = this.layers[layerName];
+    // Load tile layers
+
+    for (const layerName of Object.keys(this.tileLayers)) {
+      const layer = this.tileLayers[layerName];
       const renderTexture = RenderTexture.create({
         width : region.w,
         height: region.h,
@@ -241,39 +270,36 @@ export class TiledTilemap {
 
           if (!tile) { continue; }
 
-          const {
-            x,
-            y,
-            tile: {
-              imageUrlRelativeToGame,
-              spritesheetx,
-              spritesheety,
-            },
-          } = tile;
-
-          const spriteTex = TextureCache.GetTextureFromSpritesheet({ 
-            textureName: imageUrlRelativeToGame as ResourceName, // TODO: Is there any way to improve this cast?
-            x          : spritesheetx, 
-            y          : spritesheety, 
-            tilewidth  : this.tileWidth, 
-            tileheight : this.tileHeight 
-          });
+          const tex = TextureCache.GetTextureForTile(tile);
+          const sprite = new Sprite(tex);
 
           // We have to offset here because we'd be drawing outside of the
           // bounds of the RenderTexture otherwise.
 
-          spriteTex.x = x - region.x;
-          spriteTex.y = y - region.y;
+          sprite.x = tile.x - region.x;
+          sprite.y = tile.y - region.y;
 
-          this.renderer.render(spriteTex, renderTexture, false);
+          this.renderer.render(sprite, renderTexture, false);
         }
       }
 
       layers.push({
-        sprite   : new Sprite(renderTexture),
+        entity   : new TestEntity(renderTexture),
         layerName,
       })
     }
+
+    // Load object layers
+
+    // TODO: Load multiple object layers
+    // TODO: only load objects in this region
+
+    const objectLayer = this.loadObjectLayers();
+
+    layers.push({
+      entity: objectLayer,
+      layerName: "Object Layer TODO",
+    });
 
     return layers;
   }
@@ -284,8 +310,8 @@ export class TiledTilemap {
 
     const tiles: Tile[] = [];
 
-    for (const layerName of Object.keys(this.layers)) {
-      const tile = this.layers[layerName].get(
+    for (const layerName of Object.keys(this.tileLayers)) {
+      const tile = this.tileLayers[layerName].get(
         Math.floor(x / tileWidth),
         Math.floor(y / tileHeight)
       );

@@ -4,6 +4,9 @@ import { Rect } from "./library/rect";
 import { Texture } from "pixi.js";
 import { TiledTilemap } from "./library/tilemap";
 import { C } from "./constants";
+import { TiledObjectJSON, Tile } from "./library/tilemap_types";
+import { TextureCache } from "./library/texture_cache";
+import { TestEntity } from "./test_entity";
 
 export class DreamMap extends Entity {
   activeModes = [GameMode.Normal];
@@ -19,7 +22,8 @@ export class DreamMap extends Entity {
     const tilemap = new TiledTilemap({
       pathToTilemap: "maps",
       json: C.Loader.getResource("maps/map.json").data,
-      renderer: C.Renderer
+      renderer: C.Renderer,
+      buildCustomObject: this.buildCustomObject,
     });
 
     this.map = tilemap;
@@ -33,16 +37,34 @@ export class DreamMap extends Entity {
       })
     );
 
-    for (const { layerName, sprite } of layers) {
+    for (const { layerName, entity } of layers) {
       if (layerName === "Dream Layer") {
-        gameState.dreamMapLayer   = sprite;
+        gameState.dreamMapLayer = entity;
       } else if (layerName === "Reality Ground Layer") {
-        gameState.realityMapLayer = sprite;
+        gameState.realityMapLayer = entity;
+      } else if (layerName === "Object Layer TODO") {
+        gameState.objectLayer = entity;
       }
 
-      this.addChild(sprite);
+      this.addChild(entity);
+    }
+  }
+
+  buildCustomObject = (obj: TiledObjectJSON, tile: Tile): Entity | null => {
+    if (obj.gid === 36 || obj.gid === 37) {
+      // Left or right half of door
+
+      const spriteTex = TextureCache.GetTextureForTile(tile);
+      const entity = new TestEntity(spriteTex);
+
+      entity.x = tile.x;
+      entity.y = tile.y;
+
+      return entity;
     }
 
+    console.log(obj.gid);
+    return null;
   }
 
   collide = (other: Entity, intersection: Rect) => {

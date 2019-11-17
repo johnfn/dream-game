@@ -1,4 +1,4 @@
-import { Application, SCALE_MODES, settings, Point, Container } from "pixi.js";
+import { Application, SCALE_MODES, settings, Container } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -9,7 +9,6 @@ import { Character } from "./character";
 import { FollowCamera } from "./camera";
 import { GameState } from "./state";
 import { MovingEntity } from "./library/moving_entity";
-import { TestEntity } from "./test_entity";
 import { Vector2 } from "./library/vector2";
 import { DreamShard } from "./dream_shard";
 import { InteractableEntity } from "./library/interactable_entity";
@@ -40,7 +39,6 @@ export class Game {
   debugMode       : boolean;
   player         !: Character;
   camera         !: FollowCamera;
-  testEntity      : TestEntity;
   dreamShader    !: PIXI.Graphics;
 
   /** 
@@ -62,14 +60,13 @@ export class Game {
     this.gameState = new GameState();
 
     this.app = new Application({
-      width: C.CANVAS_WIDTH,
-      height: C.CANVAS_HEIGHT,
-      antialias: true,
+      width      : C.CANVAS_WIDTH,
+      height     : C.CANVAS_HEIGHT,
+      antialias  : true,
       transparent: false,
-      resolution : 1
+      resolution : 1,
+      backgroundColor: 0x666666,
     });
-
-    this.testEntity = new TestEntity();
 
     this.stage = new Container();
     this.app.stage.addChild(this.stage);
@@ -83,9 +80,6 @@ export class Game {
     // const oldPosition = this.testEntity.position;
     // this.testEntity.position = new Point(10, 10);
     // console.log(oldPosition); // (10, 10)
-
-    this.testEntity.position = new Point(100, 50);
-    this.stage.addChild(this.testEntity);
 
     settings.SCALE_MODE = SCALE_MODES.NEAREST;
 
@@ -122,10 +116,10 @@ export class Game {
     this.stage.addChild(this.player);
 
     this.camera = new FollowCamera({
-      stage: this.stage,
+      stage       : this.stage,
       followTarget: this.player,
-      width: C.CANVAS_WIDTH,
-      height: C.CANVAS_HEIGHT
+      width       : C.CANVAS_WIDTH,
+      height      : C.CANVAS_HEIGHT
     });
 
     const testShard = new DreamShard();

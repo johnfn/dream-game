@@ -9,16 +9,12 @@ import { GameState, GameMode } from "./state";
 export class TestEntity extends Entity {
   activeModes = [GameMode.Normal];
 
-  constructor() {
+  constructor(texture: PIXI.Texture) {
     super({
-      texture   : PIXI.Texture.WHITE,
+      texture   : texture,
       collidable: true,
       dynamic   : true,
     });
-
-    this.position.set(100, 50)
-    this.sprite.width = 50;
-    this.sprite.height = 50;
   }
 
   interact = () => {}

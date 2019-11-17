@@ -89,7 +89,6 @@ export interface Tile {
   y         : number;
   gid       : number;
   tile      : SpritesheetTile;
-  layername : string;
   isCollider: boolean;
 }
 
