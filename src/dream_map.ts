@@ -7,6 +7,7 @@ import { C } from "./constants";
 import { TiledObjectJSON, Tile } from "./library/tilemap_types";
 import { TextureCache } from "./library/texture_cache";
 import { TestEntity } from "./test_entity";
+import { Trapdoor } from "./library/trapdoor";
 
 export class DreamMap extends Entity {
   activeModes = [GameMode.Normal];
@@ -51,7 +52,7 @@ export class DreamMap extends Entity {
   }
 
   buildCustomObject = (obj: TiledObjectJSON, tile: Tile): Entity | null => {
-    console.log(obj.properties);
+    console.log(obj);
 
     if (obj.gid === 36 || obj.gid === 37) {
       // Left or right half of door
@@ -64,8 +65,17 @@ export class DreamMap extends Entity {
 
       return entity;
     }
+    switch (obj.properties[0]) {
+      case "downStair": 
+        const spriteTex = TextureCache.GetTextureForTile(tile);
+        const entity = new Trapdoor({texture: spriteTex})
+        break;
+      case "upStair1": break;
+      case "upStair2": break;
+      default: console.log(`unhandled gid ${ obj.gid }`); 
+    }
 
-    console.log(`unhandled gid ${ obj.gid }`);
+    
 
     return null;
   }

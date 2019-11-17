@@ -80,6 +80,60 @@
                  "width":64,
                  "x":128,
                  "y":64
+                }, 
+                {
+                 "gid":10,
+                 "height":64,
+                 "id":5,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"downStair"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":192,
+                 "y":768
+                }, 
+                {
+                 "gid":11,
+                 "height":64,
+                 "id":6,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"upStair1"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":192,
+                 "y":640
+                }, 
+                {
+                 "gid":3,
+                 "height":64,
+                 "id":7,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"upStair2"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":192,
+                 "y":576
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -108,11 +162,11 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":4,
- "nextobjectid":5,
+ "nextlayerid":5,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.2.3",
+ "tiledversion":"1.2.4",
  "tileheight":64,
  "tilesets":[
         {
