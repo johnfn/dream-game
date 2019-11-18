@@ -371,7 +371,20 @@ export class TiledTilemap {
         grid.get(obj.gridX, obj.gridY)!.grouped = true;
       }
 
+      // Find (x, y) of group
+
+      let minTileX = Number.POSITIVE_INFINITY;
+      let minTileY = Number.POSITIVE_INFINITY;
+
+      for (const obj of group) {
+        minTileX = Math.min(minTileX, obj.tile.x);
+        minTileY = Math.min(minTileY, obj.tile.y);
+      }
+
       const groupEntity = customObject.getGroupInstanceType();
+
+      groupEntity.x = minTileX;
+      groupEntity.y = minTileY;
 
       for (const obj of group) {
         const spriteTex = TextureCache.GetTextureForTile(obj.tile);
@@ -379,8 +392,8 @@ export class TiledTilemap {
 
         groupEntity.addChild(objEntity);
 
-        objEntity.x = obj.tile.x;
-        objEntity.y = obj.tile.y;
+        objEntity.x = obj.tile.x - groupEntity.x;
+        objEntity.y = obj.tile.y - groupEntity.y;
       }
 
       objectLayer.addChild(groupEntity);

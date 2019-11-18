@@ -1,7 +1,8 @@
-import { Entity } from "./library/entity";
 import { GameState, GameMode } from "./state";
+import { InteractableEntity } from "./library/interactable_entity";
+import { C } from "./constants";
 
-export class Door extends Entity {
+export class Door extends InteractableEntity {
   activeModes = [GameMode.Normal];
 
   constructor() {
@@ -11,10 +12,16 @@ export class Door extends Entity {
     });
   }
 
-  interact = () => {}
-  collide = () => {}
-  update = (state: GameState) => {
-  }
+  interactRange = C.INTERACTION_DISTANCE;
+  interactText = "Open door";
+
+  interact = () => {
+    this.visible = false;
+  };
+
+  collide = () => {};
+
+  update = (state: GameState) => {};
 
   isOnScreen = () => true
 }
