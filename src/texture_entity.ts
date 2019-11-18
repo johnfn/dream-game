@@ -15,7 +15,7 @@ export class TextureEntity extends Entity {
   }) {
     super({
       texture   : props.texture,
-      collidable: true,
+      collidable: false,
       dynamic   : true,
     });
 
