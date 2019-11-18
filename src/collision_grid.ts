@@ -165,6 +165,8 @@ export class CollisionGrid {
     }
   };
 
+  erroredOnce = false;
+
   // Add a rect to the hash grid.
   // Checks each corner, to handle entities that span multiply grid cells.
   add = (rect: Rect, associatedEntity?: Entity) => {
@@ -173,7 +175,11 @@ export class CollisionGrid {
 
     for (let hash of hashes) {
       if (!(hash in this._cells)) {
-        console.error("Collision grid hash out of bounds :(");
+        if (!this.erroredOnce) {
+          console.error("Collision grid hash out of bounds :(");
+
+          this.erroredOnce = true;
+        }
 
         continue;
       }
