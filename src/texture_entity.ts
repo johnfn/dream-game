@@ -3,10 +3,7 @@ import * as PIXI from "pixi.js";
 import { Entity } from "./library/entity";
 import { GameState, GameMode } from "./state";
 
-/**
- * Completely pointless entity purely for testing.
- */
-export class TestEntity extends Entity {
+export class TextureEntity extends Entity {
   activeModes = [GameMode.Normal];
 
   constructor(texture?: PIXI.Texture) {

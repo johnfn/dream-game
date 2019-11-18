@@ -3,7 +3,7 @@ import { Rect } from './rect'
 import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON } from './tilemap_types';
 import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
-import { TestEntity } from '../test_entity';
+import { TextureEntity } from '../test_entity';
 
 export type MapLayer = {
   layerName: string;
@@ -223,7 +223,7 @@ export class TiledTilemap {
   }
 
   private loadObjectLayer(layer: TiledObjectLayerJSON): Entity {
-    const objectLayer = new TestEntity();
+    const objectLayer = new TextureEntity();
 
     type ObjectInGroup = {
       name : string;
@@ -479,7 +479,7 @@ export class TiledTilemap {
       }
 
       layers.push({
-        entity   : new TestEntity(renderTexture),
+        entity   : new TextureEntity(renderTexture),
         layerName,
       })
     }

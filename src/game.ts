@@ -158,12 +158,16 @@ export class Game {
     const hitMap = this.gameState.map.doesRectCollideMap(rect);
 
     if (hitMap) {
+      console.log("hit map");
+
       return true;
     }
 
     const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
 
     if (gridCollisions.length > 0) {
+      console.log(gridCollisions);
+
       return true;
     }
 

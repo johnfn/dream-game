@@ -7,11 +7,13 @@ import { C } from "../constants";
 type StairType = "up" | "down";
 export class Trapdoor extends InteractableEntity {
   private stairType: StairType;
+
   constructor(props: { stairType: StairType }) {
     super({
       collidable: true,
-      dynamic: false
+      dynamic   : false
     });
+
     this.stairType = props.stairType;
   }
 

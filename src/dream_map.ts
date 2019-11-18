@@ -4,7 +4,7 @@ import { Rect } from "./library/rect";
 import { Texture } from "pixi.js";
 import { TiledTilemap } from "./library/tilemap";
 import { C } from "./constants";
-import { TestEntity } from "./test_entity";
+import { TextureEntity } from "./texture_entity";
 import { Trapdoor } from "./library/trapdoor";
 import { Door } from "./door";
 
@@ -14,6 +14,7 @@ type MapLevel = {
   dreamObjectLayer: Entity | undefined;
   realityObjectLayer: Entity | undefined;
 };
+
 export class DreamMap extends Entity {
   activeModes = [GameMode.Normal];
   map: TiledTilemap;
@@ -34,7 +35,7 @@ export class DreamMap extends Entity {
           type: "group" as const,
 
           names: ["downStair"],
-          getInstanceType: (tex: Texture) => new TestEntity(tex),
+          getInstanceType: (tex: Texture) => new TextureEntity(tex),
           getGroupInstanceType: () => new Trapdoor({stairType: "down"})
         },
 
@@ -42,7 +43,7 @@ export class DreamMap extends Entity {
           type: "group" as const,
 
           names: ["upStair1", "upStair2"],
-          getInstanceType: (tex: Texture) => new TestEntity(tex),
+          getInstanceType: (tex: Texture) => new TextureEntity(tex),
           getGroupInstanceType: () => new Trapdoor({stairType: "up"})
         },
 
@@ -50,7 +51,7 @@ export class DreamMap extends Entity {
           type: "group" as const,
 
           names: ["doorLeft", "doorRight"],
-          getInstanceType: (tex: Texture) => new TestEntity(tex),
+          getInstanceType: (tex: Texture) => new TextureEntity(tex),
           getGroupInstanceType: () => new Door()
         },
 
@@ -58,7 +59,7 @@ export class DreamMap extends Entity {
           type: "single" as const,
 
           name: "characterStart",
-          getInstanceType: (tex: Texture) => new TestEntity(tex)
+          getInstanceType: (tex: Texture) => new TextureEntity(tex)
         } as const
       ]
     });
