@@ -14,10 +14,11 @@ export class Door extends InteractableEntity {
   }
 
   interactRange = C.INTERACTION_DISTANCE;
-  interactText = "Open door";
+  interactText  = "Open door";
 
   interact = () => {
     this.visible = false;
+    this.setCollideable(false);
   };
 
   collide = () => {};

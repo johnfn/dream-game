@@ -51,6 +51,16 @@ export abstract class Entity extends Container {
   abstract update: (state: GameState) => void;
   abstract collide: (other: Entity, intersection: Rect) => void;
 
+  setCollideable(newValue: boolean) {
+    if (newValue) {
+      Game.Instance.entities.static.splice(Game.Instance.entities.static.indexOf(this), 1);
+      Game.Instance.entities.collidable.push(this);
+    } else {
+      Game.Instance.entities.collidable.splice(Game.Instance.entities.collidable.indexOf(this), 1);
+      Game.Instance.entities.static.push(this);
+    }
+  }
+
   setTexture(newTexture: Texture) {
     this.sprite.texture = newTexture;
   }
