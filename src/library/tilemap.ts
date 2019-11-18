@@ -5,6 +5,11 @@ import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
 import { TestEntity } from '../test_entity';
 
+export type MapLayer = {
+  layerName: string;
+  entity   : Entity;
+}
+
 // 2D array that allows for negative indices
 class Grid<T> {
   private _data: { [key: number]: { [key: number]: T} } = {};
@@ -440,14 +445,8 @@ export class TiledTilemap {
     return result;
   }
 
-  public loadRegionLayers(region: Rect): {
-    layerName: string;
-    entity   : Entity;
-  }[] {
-    let layers: {
-      layerName: string;
-      entity   : Entity;
-    }[] = [];
+  public loadRegionLayers(region: Rect): MapLayer[] {
+    let layers: MapLayer[] = [];
 
     // Load tile layers
 

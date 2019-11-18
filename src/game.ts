@@ -116,7 +116,7 @@ export class Game {
       this.player.y = 900;
     } else {
       this.player.x = 200;
-      this.player.y = 900;
+      this.player.y = 1200;
     }
 
     this.stage.addChild(this.player);
@@ -149,7 +149,7 @@ export class Game {
     this.gameState.dialog = new Dialog();
     this.fixedCameraStage.addChild(this.gameState.dialog);
 
-    this.app.ticker.add(() => this.gameLoop());
+    this.app.ticker.add(() => this.gameLoop()); 
   };
 
   // Note: For now, we treat map as a special case.

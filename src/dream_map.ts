@@ -2,20 +2,28 @@ import { Entity } from "./library/entity";
 import { GameMode, GameState } from "./state";
 import { Rect } from "./library/rect";
 import { Texture } from "pixi.js";
-import { TiledTilemap } from "./library/tilemap";
+import { TiledTilemap, MapLayer } from "./library/tilemap";
 import { C } from "./constants";
 import { TestEntity } from "./test_entity";
 import { Trapdoor } from "./library/trapdoor";
+import { Game } from "./game";
 import { Door } from "./door";
 
+type MapLevel = {
+  dreamGroundLayer: Entity | undefined;
+  realityGroundLayer: Entity | undefined;
+  dreamObjectLayer: Entity | undefined;
+  realityObjectLayer: Entity | undefined;
+};
 export class DreamMap extends Entity {
   activeModes = [GameMode.Normal];
   map: TiledTilemap;
+  levels: { [key: number]: MapLevel } = [];
 
   constructor(gameState: GameState) {
     super({
       collidable: false,
-      dynamic: false,
+      dynamic: false
     });
 
     const tilemap = new TiledTilemap({
@@ -24,10 +32,11 @@ export class DreamMap extends Entity {
       renderer: C.Renderer,
       customObjects: [
         {
-          type: "single" as const,
+          type: "group" as const,
 
-          name: "downStair",
-          getInstanceType: (tex: Texture) => new Trapdoor({ texture: tex }),
+          names: ["downStair"],
+          getInstanceType: (tex: Texture) => new TestEntity(tex),
+          getGroupInstanceType: () => new Trapdoor({stairType: "down"})
         },
 
         {
@@ -35,7 +44,7 @@ export class DreamMap extends Entity {
 
           names: ["upStair1", "upStair2"],
           getInstanceType: (tex: Texture) => new TestEntity(tex),
-          getGroupInstanceType: () => new Door(),
+          getGroupInstanceType: () => new Trapdoor({stairType: "up"})
         },
 
         {
@@ -43,15 +52,15 @@ export class DreamMap extends Entity {
 
           names: ["doorLeft", "doorRight"],
           getInstanceType: (tex: Texture) => new TestEntity(tex),
-          getGroupInstanceType: () => new Door(),
+          getGroupInstanceType: () => new Door()
         },
 
         {
           type: "single" as const,
 
           name: "characterStart",
-          getInstanceType: (tex: Texture) => new TestEntity(tex),
-        } as const,
+          getInstanceType: (tex: Texture) => new TestEntity(tex)
+        } as const
       ]
     });
 
@@ -65,34 +74,77 @@ export class DreamMap extends Entity {
         h: 2048
       })
     );
+    this.loadAllLayers(layers);
+    this.updateLevel(gameState.level, gameState);
+  }
 
-    for (const { layerName, entity } of layers) {
-      if (layerName === "Dream Layer") {
-        gameState.dreamMapLayer = entity;
-      } else if (layerName === "Reality Ground Layer") {
-        gameState.realityMapLayer = entity;
-      } else if (layerName === "Reality Object Layer 1") {
-        gameState.objectLayer = entity;
+  updateLevel = (level: number, gameState: GameState) => {
+    
+    if (level < 0 || level > 2) return;
+
+    this.removeChild(
+      this.levels[gameState.level].dreamGroundLayer!,
+      this.levels[gameState.level].realityGroundLayer!,
+      this.levels[gameState.level].dreamObjectLayer!,
+      this.levels[gameState.level].realityObjectLayer!
+    );
+
+    gameState.level = level;
+    console.log(gameState.level);
+
+    gameState.dreamMapLayer = this.levels[gameState.level].dreamGroundLayer!;
+    gameState.realityMapLayer = this.levels[
+      gameState.level
+    ].realityGroundLayer!;
+
+    this.addChild(
+      this.levels[gameState.level].dreamGroundLayer!,
+      this.levels[gameState.level].realityGroundLayer!,
+      this.levels[gameState.level].dreamObjectLayer!,
+      this.levels[gameState.level].realityObjectLayer!
+    );
+  };
+
+  loadAllLayers = (layers: { layerName: string; entity: Entity }[]) => {
+    for (let { layerName, entity } of layers) {
+      const s = layerName.split(" ");
+
+      const layerType = s[0] + " " + s[1]; // ie. 'Reality Object'
+      const layerLevel = Number(s[s.length - 1]);
+
+      if (!(layerLevel in this.levels)) {
+        this.levels[layerLevel] = {
+          dreamGroundLayer: undefined,
+          realityGroundLayer: undefined,
+          dreamObjectLayer: undefined,
+          realityObjectLayer: undefined
+        };
       }
 
-      this.addChild(entity);
+      if (layerType === "Dream Ground") {
+        this.levels[layerLevel].dreamGroundLayer = entity;
+      } else if (layerType === "Reality Ground") {
+        this.levels[layerLevel].realityGroundLayer = entity;
+      } else if (layerType === "Dream Object") {
+        this.levels[layerLevel].dreamObjectLayer = entity;
+      } else if (layerType === "Reality Object") {
+        this.levels[layerLevel].realityObjectLayer = entity;
+      }
     }
-  }
+  };
 
   collide = (other: Entity, intersection: Rect) => {
+    return null;
+  };
 
-  }
-
-  update = (gameState: GameState) => {
-
-  }
+  update = (gameState: GameState) => {}; 
 
   doesRectCollideMap(rect: Rect): boolean {
     const tiles = [
-      ...this.map.getTilesAt(rect.x         , rect.y),
+      ...this.map.getTilesAt(rect.x, rect.y),
       ...this.map.getTilesAt(rect.x + rect.w, rect.y),
-      ...this.map.getTilesAt(rect.x         , rect.y + rect.h),
-      ...this.map.getTilesAt(rect.x + rect.w, rect.y + rect.h),
+      ...this.map.getTilesAt(rect.x, rect.y + rect.h),
+      ...this.map.getTilesAt(rect.x + rect.w, rect.y + rect.h)
     ];
 
     for (const tile of tiles) {

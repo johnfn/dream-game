@@ -16,6 +16,7 @@ export class GameState {
   keys             : KeyboardState;
   map             !: DreamMap;
 
+  level! : number;
   dreamMapLayer   !: Entity;
   realityMapLayer !: Entity;
   objectLayer     !: Entity;
@@ -27,6 +28,7 @@ export class GameState {
   
   constructor() {
     this.mode = GameMode.Normal
+    this.level = 1;
     this.keys = new KeyboardState();
 
     this.shader = new PIXI.Graphics()
