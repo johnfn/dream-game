@@ -35,7 +35,7 @@ export class DreamMap extends Entity {
           type: "group" as const,
 
           names: ["downStair"],
-          getInstanceType: (tex: Texture) => new TextureEntity(tex),
+          getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "downStair" }),
           getGroupInstanceType: () => new Trapdoor({stairType: "down"})
         },
 
@@ -43,7 +43,7 @@ export class DreamMap extends Entity {
           type: "group" as const,
 
           names: ["upStair1", "upStair2"],
-          getInstanceType: (tex: Texture) => new TextureEntity(tex),
+          getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "upStair" }),
           getGroupInstanceType: () => new Trapdoor({stairType: "up"})
         },
 
@@ -51,7 +51,7 @@ export class DreamMap extends Entity {
           type: "group" as const,
 
           names: ["doorLeft", "doorRight"],
-          getInstanceType: (tex: Texture) => new TextureEntity(tex),
+          getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "door" }),
           getGroupInstanceType: () => new Door()
         },
 
@@ -59,7 +59,7 @@ export class DreamMap extends Entity {
           type: "single" as const,
 
           name: "characterStart",
-          getInstanceType: (tex: Texture) => new TextureEntity(tex)
+          getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "characterStart" })
         } as const
       ]
     });

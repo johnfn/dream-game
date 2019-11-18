@@ -223,7 +223,7 @@ export class TiledTilemap {
   }
 
   private loadObjectLayer(layer: TiledObjectLayerJSON): Entity {
-    const objectLayer = new TextureEntity();
+    const objectLayer = new TextureEntity({ name: "objectLayer" });
 
     type ObjectInGroup = {
       name : string;
@@ -479,7 +479,7 @@ export class TiledTilemap {
       }
 
       layers.push({
-        entity   : new TextureEntity(renderTexture),
+        entity   : new TextureEntity({ texture: renderTexture, name: "map layer" }),
         layerName,
       })
     }

@@ -61,11 +61,12 @@ export class Game {
     this.gameState = new GameState();
 
     this.app = new Application({
-      width      : C.CANVAS_WIDTH,
-      height     : C.CANVAS_HEIGHT,
-      antialias  : true,
-      transparent: false,
-      resolution : 1,
+      width          : C.CANVAS_WIDTH,
+      height         : C.CANVAS_HEIGHT,
+      antialias      : true,
+      transparent    : false,
+      resolution     : window.devicePixelRatio,
+      autoDensity    : true,
       backgroundColor: 0x666666,
     });
 
