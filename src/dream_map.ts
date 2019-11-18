@@ -32,11 +32,11 @@ export class DreamMap extends Entity {
       renderer: C.Renderer,
       customObjects: [
         {
-          type: "single" as const,
+          type: "group" as const,
 
-          name: "downStair",
-          getInstanceType: (tex: Texture) =>
-            new Trapdoor({ texture: tex, stairType: "down" })
+          names: ["downStair"],
+          getInstanceType: (tex: Texture) => new TestEntity(tex),
+          getGroupInstanceType: () => new Trapdoor({stairType: "down"})
         },
 
         {
@@ -44,7 +44,7 @@ export class DreamMap extends Entity {
 
           names: ["upStair1", "upStair2"],
           getInstanceType: (tex: Texture) => new TestEntity(tex),
-          getGroupInstanceType: () => new Door()
+          getGroupInstanceType: () => new Trapdoor({stairType: "up"})
         },
 
         {

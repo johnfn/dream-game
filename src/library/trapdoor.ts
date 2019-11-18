@@ -9,9 +9,8 @@ import { C } from "../constants";
 type StairType = "up" | "down";
 export class Trapdoor extends InteractableEntity {
   private stairType: StairType;
-  constructor(props: { texture: Texture; stairType: StairType }) {
+  constructor(props: { stairType: StairType }) {
     super({
-      texture: props.texture,
       collidable: true,
       dynamic: false
     });

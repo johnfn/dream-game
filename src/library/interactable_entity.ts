@@ -5,7 +5,7 @@ import { Texture } from "pixi.js";
 
 export abstract class InteractableEntity extends Entity {
   constructor(props: {
-    texture: Texture;
+    texture?: Texture;
     collidable: boolean;
     dynamic: boolean;
   }) {
