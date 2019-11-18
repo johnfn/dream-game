@@ -4,14 +4,13 @@ import { C } from "./constants";
 
 export class Door extends InteractableEntity {
   activeModes = [GameMode.Normal];
+  name = "Door";
 
   constructor() {
     super({
       collidable: true,
       dynamic   : true,
     });
-
-    console.log("maybe");
   }
 
   interactRange = C.INTERACTION_DISTANCE;
@@ -23,7 +22,8 @@ export class Door extends InteractableEntity {
 
   collide = () => {};
 
-  update = (state: GameState) => {};
+  update = (state: GameState) => {
+  };
 
   isOnScreen = () => true
 }

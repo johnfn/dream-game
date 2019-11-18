@@ -60,7 +60,7 @@ export class DreamMap extends Entity {
 
           name: "characterStart",
           getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "characterStart" })
-        } as const
+        }
       ]
     });
 
@@ -90,7 +90,6 @@ export class DreamMap extends Entity {
     );
 
     gameState.level = level;
-    console.log(gameState.level);
 
     gameState.dreamMapLayer = this.levels[gameState.level].dreamGroundLayer!;
     gameState.realityMapLayer = this.levels[

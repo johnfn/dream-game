@@ -21,6 +21,9 @@ export enum EntityType {
 
 // TODO: probably make less of these methods abstract?
 export abstract class Entity extends Container {
+  // just for debugging
+  name = "i should really give this entity a name!";
+
   entityType = EntityType.NormalEntity;
   sprite: Sprite;
 
@@ -52,21 +55,13 @@ export abstract class Entity extends Container {
     this.sprite.texture = newTexture;
   }
 
-  public get width() {
-    return this.sprite.width;
-  }
-
-  public get height() {
-    return this.sprite.height;
-  }
-
   // TODO: rename once this isnt a name collision with superclass
   public myGetBounds(): Rect {
     return new Rect({
       x: this.x,
       y: this.y,
-      w: this.sprite.width,
-      h: this.sprite.height
+      w: this.width,
+      h: this.height
     });
   }
 
@@ -74,15 +69,15 @@ export abstract class Entity extends Container {
     return new Rect({
       x: this.x,
       y: this.y,
-      w: this.sprite.width,
-      h: this.sprite.height
+      w: this.width,
+      h: this.height
     });
   }
 
   public get center(): Vector2 {
     return new Vector2(this.position).add({
-      x: this.sprite.width / 2,
-      y: this.sprite.height / 2
+      x: this.width / 2,
+      y: this.height / 2
     });
   }
 

@@ -6,9 +6,6 @@ import { GameState, GameMode } from "./state";
 export class TextureEntity extends Entity {
   activeModes = [GameMode.Normal];
 
-  // just for debugging
-  name: string;
-
   constructor(props: {
     texture?: PIXI.Texture;
     name   ?: string;
@@ -24,7 +21,8 @@ export class TextureEntity extends Entity {
 
   interact = () => {}
   collide = () => {}
-  update = (state: GameState) => {}
+  update = (state: GameState) => {
+  }
 
   isOnScreen = () => true
 }
