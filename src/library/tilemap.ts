@@ -376,7 +376,7 @@ export class TiledTilemap {
         grid.get(obj.gridX, obj.gridY)!.grouped = true;
       }
 
-      const groupEntity = new TestEntity();
+      const groupEntity = customObject.getGroupInstanceType();
 
       for (const obj of group) {
         const spriteTex = TextureCache.GetTextureForTile(obj.tile);
