@@ -61,11 +61,12 @@ export class Game {
     this.gameState = new GameState();
 
     this.app = new Application({
-      width      : C.CANVAS_WIDTH,
-      height     : C.CANVAS_HEIGHT,
-      antialias  : true,
-      transparent: false,
-      resolution : 1,
+      width          : C.CANVAS_WIDTH,
+      height         : C.CANVAS_HEIGHT,
+      antialias      : true,
+      transparent    : false,
+      resolution     : window.devicePixelRatio,
+      autoDensity    : true,
       backgroundColor: 0x666666,
     });
 
@@ -158,12 +159,16 @@ export class Game {
     const hitMap = this.gameState.map.doesRectCollideMap(rect);
 
     if (hitMap) {
+      console.log("hit map");
+
       return true;
     }
 
     const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
 
     if (gridCollisions.length > 0) {
+      console.log(gridCollisions);
+
       return true;
     }
 

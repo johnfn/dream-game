@@ -1,7 +1,5 @@
 import { Entity } from "./entity";
 import { GameMode, GameState } from "../state";
-import { Texture } from "pixi.js";
-import { TiledTilemap } from "./tilemap";
 import { Rect } from "./rect";
 import { InteractableEntity } from "./interactable_entity";
 import { C } from "../constants";
@@ -9,11 +7,13 @@ import { C } from "../constants";
 type StairType = "up" | "down";
 export class Trapdoor extends InteractableEntity {
   private stairType: StairType;
+
   constructor(props: { stairType: StairType }) {
     super({
       collidable: true,
-      dynamic: false
+      dynamic   : false
     });
+
     this.stairType = props.stairType;
   }
 

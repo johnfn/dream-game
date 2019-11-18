@@ -3,7 +3,7 @@ import { Rect } from './rect'
 import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON } from './tilemap_types';
 import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
-import { TestEntity } from '../test_entity';
+import { TextureEntity } from '../texture_entity';
 
 export type MapLayer = {
   layerName: string;
@@ -177,7 +177,7 @@ export class TiledTilemap {
           const matchedTileInfo = tiles.find(tile => gid === gidStart + tile.id);
 
           if (matchedTileInfo && matchedTileInfo.properties) {
-            for (const { name, type, value } of matchedTileInfo.properties) {
+            for (const { name, value } of matchedTileInfo.properties) {
               tileProperties[name] = value;
             }
           }
@@ -223,7 +223,7 @@ export class TiledTilemap {
   }
 
   private loadObjectLayer(layer: TiledObjectLayerJSON): Entity {
-    const objectLayer = new TestEntity();
+    const objectLayer = new TextureEntity({ name: "objectLayer" });
 
     type ObjectInGroup = {
       name : string;
@@ -479,7 +479,7 @@ export class TiledTilemap {
       }
 
       layers.push({
-        entity   : new TestEntity(renderTexture),
+        entity   : new TextureEntity({ texture: renderTexture, name: "map layer" }),
         layerName,
       })
     }

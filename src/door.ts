@@ -10,6 +10,8 @@ export class Door extends InteractableEntity {
       collidable: true,
       dynamic   : true,
     });
+
+    console.log("maybe");
   }
 
   interactRange = C.INTERACTION_DISTANCE;
