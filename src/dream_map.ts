@@ -4,21 +4,24 @@ import { Rect } from "./library/rect";
 import { Texture } from "pixi.js";
 import { TiledTilemap, MapLayer } from "./library/tilemap";
 import { C } from "./constants";
-import { TiledObjectJSON, Tile } from "./library/tilemap_types";
-import { TextureCache } from "./library/texture_cache";
 import { TestEntity } from "./test_entity";
 import { Trapdoor } from "./library/trapdoor";
 import { Game } from "./game";
+import { Door } from "./door";
 
-type MapLevel = { dreamLayer: Entity | undefined; realityLayer: Entity | undefined };
+type MapLevel = {
+  dreamGroundLayer: Entity | undefined;
+  realityGroundLayer: Entity | undefined;
+  dreamObjectLayer: Entity | undefined;
+  realityObjectLayer: Entity | undefined;
+};
 export class DreamMap extends Entity {
   activeModes = [GameMode.Normal];
   map: TiledTilemap;
-  levels: { [key: number]:  MapLevel} = [];
+  levels: { [key: number]: MapLevel } = [];
 
   constructor(gameState: GameState) {
     super({
-      texture: Texture.EMPTY,
       collidable: false,
       dynamic: false
     });
@@ -40,15 +43,16 @@ export class DreamMap extends Entity {
           type: "group" as const,
 
           names: ["upStair1", "upStair2"],
-          getInstanceType: (tex: Texture) =>
-            new Trapdoor({ texture: tex, stairType: "up" })
+          getInstanceType: (tex: Texture) => new TestEntity(tex),
+          getGroupInstanceType: () => new Door()
         },
 
         {
           type: "group" as const,
 
           names: ["doorLeft", "doorRight"],
-          getInstanceType: (tex: Texture) => new TestEntity(tex)
+          getInstanceType: (tex: Texture) => new TestEntity(tex),
+          getGroupInstanceType: () => new Door()
         },
 
         {
@@ -71,48 +75,69 @@ export class DreamMap extends Entity {
       })
     );
     this.loadAllLayers(layers);
-    this.updateLevel(gameState.level, gameState)
+    this.updateLevel(gameState.level, gameState);
   }
 
   updateLevel = (level: number, gameState: GameState) => {
-    this.removeChild(this.levels[gameState.level].dreamLayer!);
-    this.removeChild(this.levels[gameState.level].realityLayer!);
+    
+    if (level < 0 || level > 2) return;
+
+    this.removeChild(
+      this.levels[gameState.level].dreamGroundLayer!,
+      this.levels[gameState.level].realityGroundLayer!,
+      this.levels[gameState.level].dreamObjectLayer!,
+      this.levels[gameState.level].realityObjectLayer!
+    );
 
     gameState.level = level;
+    console.log(gameState.level);
 
-    gameState.dreamMapLayer = this.levels[gameState.level].dreamLayer!;
-    gameState.realityMapLayer = this.levels[gameState.level].realityLayer!;
+    gameState.dreamMapLayer = this.levels[gameState.level].dreamGroundLayer!;
+    gameState.realityMapLayer = this.levels[
+      gameState.level
+    ].realityGroundLayer!;
 
-    console.log(this.levels[gameState.level].realityLayer!);
-    this.addChild(this.levels[gameState.level].dreamLayer!)
-    this.addChild(this.levels[gameState.level].realityLayer!)
+    this.addChild(
+      this.levels[gameState.level].dreamGroundLayer!,
+      this.levels[gameState.level].realityGroundLayer!,
+      this.levels[gameState.level].dreamObjectLayer!,
+      this.levels[gameState.level].realityObjectLayer!
+    );
   };
 
-  loadAllLayers = (layers: {layerName: string, entity: Entity}[]) => {
-    for (let {layerName, entity} of layers) {
+  loadAllLayers = (layers: { layerName: string; entity: Entity }[]) => {
+    for (let { layerName, entity } of layers) {
       const s = layerName.split(" ");
 
-      const layerType = s[0]; //'Reality' or 'Dream'
+      const layerType = s[0] + " " + s[1]; // ie. 'Reality Object'
       const layerLevel = Number(s[s.length - 1]);
 
       if (!(layerLevel in this.levels)) {
-        this.levels[layerLevel] = {dreamLayer: undefined, realityLayer: undefined}
+        this.levels[layerLevel] = {
+          dreamGroundLayer: undefined,
+          realityGroundLayer: undefined,
+          dreamObjectLayer: undefined,
+          realityObjectLayer: undefined
+        };
       }
 
-      if (layerType === "Dream" && s[1] === "Ground") {
-        this.levels[layerLevel].dreamLayer = entity;
-      } else if  (layerType === "Reality" && s[1] === "Ground") {
-        this.levels[layerLevel].realityLayer = entity;
+      if (layerType === "Dream Ground") {
+        this.levels[layerLevel].dreamGroundLayer = entity;
+      } else if (layerType === "Reality Ground") {
+        this.levels[layerLevel].realityGroundLayer = entity;
+      } else if (layerType === "Dream Object") {
+        this.levels[layerLevel].dreamObjectLayer = entity;
+      } else if (layerType === "Reality Object") {
+        this.levels[layerLevel].realityObjectLayer = entity;
       }
     }
-  }
+  };
 
   collide = (other: Entity, intersection: Rect) => {
     return null;
   };
 
-  update = (gameState: GameState) => {
-  };
+  update = (gameState: GameState) => {}; 
 
   doesRectCollideMap(rect: Rect): boolean {
     const tiles = [

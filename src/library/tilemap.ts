@@ -55,6 +55,7 @@ type TilemapCustomObjects =
       type: "group";
       names: string[];
       getInstanceType: (tex: Texture) => Entity;
+      getGroupInstanceType: () => Entity;
     }
 
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
@@ -218,56 +219,57 @@ export class TiledTilemap {
   }
 
   private loadObjectLayer(layer: TiledObjectLayerJSON): Entity {
-    const objectLayer = new TestEntity(Texture.EMPTY);
+    const objectLayer = new TestEntity();
 
     for (const obj of layer.objects) {
-      if (obj.gid) {
-        const { spritesheet, tileProperties } = this.gidInfo(obj.gid);
-        let newObj: Entity | null = null;
-        const tile = {
-          x             : obj.x,
-
-          // tiled pivot point is (0, 1) so we need to subtract by tile height.
-          y             : obj.y - spritesheet.tileheight,
-          tile          : spritesheet,
-          isCollider    : this.gidHasCollision[obj.gid] || false,
-          gid           : obj.gid,
-          tileProperties: tileProperties,
-        };
-
-        for (const customObject of this.customObjects) {
-          const tileType = tileProperties.type;
-
-          if (typeof tileType !== "string") {
-            continue;
-          }
-
-          if (customObject.type === "single") {
-            if (customObject.name === tileType) {
-              const spriteTex = TextureCache.GetTextureForTile(tile); 
-
-              newObj = customObject.getInstanceType(spriteTex);
-            }
-          } else if (customObject.type === "group") {
-            // TODO: grouping logic
-
-            if (customObject.names.includes(tileType)) {
-              const spriteTex = TextureCache.GetTextureForTile(tile); 
-
-              newObj = customObject.getInstanceType(spriteTex);
-            }
-          }
-        }
-
-        if (newObj) {
-          newObj.x = tile.x;
-          newObj.y = tile.y;
-
-          objectLayer.addChild(newObj);
-        }
-
-      } else {
+      if (!obj.gid) {
         console.error("object in object layer without gid! very bad?!?");
+
+        continue;
+      }
+
+      const { spritesheet, tileProperties } = this.gidInfo(obj.gid);
+      let newObj: Entity | null = null;
+      const tile = {
+        x             : obj.x,
+
+        // tiled pivot point is (0, 1) so we need to subtract by tile height.
+        y             : obj.y - spritesheet.tileheight,
+        tile          : spritesheet,
+        isCollider    : this.gidHasCollision[obj.gid] || false,
+        gid           : obj.gid,
+        tileProperties: tileProperties,
+      };
+
+      for (const customObject of this.customObjects) {
+        const tileType = tileProperties.type;
+
+        if (typeof tileType !== "string") {
+          continue;
+        }
+
+        if (customObject.type === "single") {
+          if (customObject.name === tileType) {
+            const spriteTex = TextureCache.GetTextureForTile(tile); 
+
+            newObj = customObject.getInstanceType(spriteTex);
+          }
+        } else if (customObject.type === "group") {
+          // TODO: grouping logic
+
+          if (customObject.names.includes(tileType)) {
+            const spriteTex = TextureCache.GetTextureForTile(tile); 
+
+            newObj = customObject.getInstanceType(spriteTex);
+          }
+        }
+      }
+
+      if (newObj) {
+        newObj.x = tile.x;
+        newObj.y = tile.y;
+
+        objectLayer.addChild(newObj);
       }
     }
 

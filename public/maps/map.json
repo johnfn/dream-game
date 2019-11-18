@@ -10,7 +10,7 @@
          "startx":0,
          "starty":0,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":0,
          "x":0,
          "y":0
@@ -37,40 +37,59 @@
          "y":0
         }, 
         {
+         "chunks":[],
+         "height":0,
+         "id":8,
+         "name":"Reality Ground Layer 2",
+         "opacity":1,
+         "startx":0,
+         "starty":0,
+         "type":"tilelayer",
+         "visible":false,
+         "width":0,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":12,
+         "name":"Reality Object Layer 0",
+         "objects":[
+                {
+                 "gid":11,
+                 "height":64,
+                 "id":9,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":192,
+                 "y":768
+                }, 
+                {
+                 "gid":3,
+                 "height":64,
+                 "id":10,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":192,
+                 "y":704
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":false,
+         "x":0,
+         "y":0
+        }, 
+        {
          "draworder":"topdown",
          "id":3,
          "name":"Reality Object Layer 1",
          "objects":[
-                {
-                 "gid":36,
-                 "height":64,
-                 "id":1,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"type",
-                         "type":"string",
-                         "value":"Door1"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":320,
-                 "y":896
-                }, 
-                {
-                 "gid":37,
-                 "height":64,
-                 "id":2,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":384,
-                 "y":896
-                }, 
                 {
                  "gid":37,
                  "height":64,
@@ -151,7 +170,44 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
+         "visible":false,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":13,
+         "name":"Reality Object Layer 2",
+         "objects":[
+                {
+                 "gid":10,
+                 "height":64,
+                 "id":11,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":192,
+                 "y":640
+                }],
+         "opacity":1,
+         "type":"objectgroup",
          "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "chunks":[],
+         "height":0,
+         "id":11,
+         "name":"Dream Ground Layer 0",
+         "opacity":1,
+         "startx":0,
+         "starty":0,
+         "type":"tilelayer",
+         "visible":true,
+         "width":0,
          "x":0,
          "y":0
         }, 
@@ -171,8 +227,33 @@
          "startx":0,
          "starty":0,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":16,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "chunks":[],
+         "height":0,
+         "id":10,
+         "name":"Dream Ground Layer 2",
+         "opacity":1,
+         "startx":0,
+         "starty":0,
+         "type":"tilelayer",
+         "visible":true,
+         "width":0,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":14,
+         "name":"Dream Object Layer 0",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -183,29 +264,26 @@
          "objects":[],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
         {
-         "chunks":[],
-         "height":0,
-         "id":8,
-         "name":"Reality Ground Layer 2",
+         "draworder":"topdown",
+         "id":15,
+         "name":"Dream Object Layer 2",
+         "objects":[],
          "opacity":1,
-         "startx":0,
-         "starty":0,
-         "type":"tilelayer",
+         "type":"objectgroup",
          "visible":true,
-         "width":0,
          "x":0,
          "y":0
         }],
- "nextlayerid":10,
- "nextobjectid":8,
+ "nextlayerid":16,
+ "nextobjectid":12,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.2.3",
+ "tiledversion":"1.2.4",
  "tileheight":64,
  "tilesets":[
         {
