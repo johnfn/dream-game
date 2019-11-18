@@ -1,4 +1,4 @@
-import { Application, SCALE_MODES, settings, Container } from "pixi.js";
+import { Application, SCALE_MODES, settings, Container, Shader, Mesh, Geometry, BLEND_MODES } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -19,6 +19,7 @@ import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
 
 export class Game {
+  uniforms!: {u_time: number, u_resolution: {x: number, y: number}};
   static Instance: Game;
 
   app      : PIXI.Application;
@@ -103,6 +104,7 @@ export class Game {
   }
 
   startGame = async () => {
+
     this.gameState.map = new DreamMap(this.gameState);
     this.stage.addChild(this.gameState.map);
 
@@ -116,8 +118,8 @@ export class Game {
       this.player.x = 200;
       this.player.y = 900;
     } else {
-      this.player.x = 200;
-      this.player.y = 1200;
+      this.player.x = 0;
+      this.player.y = 0;
     }
 
     this.stage.addChild(this.player);
@@ -150,6 +152,9 @@ export class Game {
     this.gameState.dialog = new Dialog();
     this.fixedCameraStage.addChild(this.gameState.dialog);
 
+    this.shaderStuff();
+
+
     this.app.ticker.add(() => this.gameLoop()); 
   };
 
@@ -167,7 +172,6 @@ export class Game {
     const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
 
     if (gridCollisions.length > 0) {
-      console.log(gridCollisions);
 
       return true;
     }
@@ -250,6 +254,10 @@ export class Game {
   };
 
   gameLoop = () => {
+
+    this.uniforms.u_time += 0.01;
+    console.log(this.uniforms.u_time);
+
     this.gameState.keys.update();
 
     const activeEntities = this.entities.all
@@ -268,4 +276,78 @@ export class Game {
 
     this.camera.update();
   };
+
+  shaderStuff = () => {
+
+    this.uniforms = {u_time: 1, u_resolution: {x:C.CANVAS_WIDTH, y:C.CANVAS_HEIGHT}}
+
+    const geometry = new Geometry()
+      .addAttribute(
+        "aVertexPosition", // the attribute name
+        [
+          0, 0, 
+          1, 0, 
+          0, 1,
+          1, 1
+        ], 
+          2) 
+      .addAttribute(
+        "aColor", // the attribute name
+        [
+          1,0,0, // r, g, b
+          0,1,0, // r, g, b
+          0,0,1, // r, g, b
+          0,0,1
+        ], 3).addIndex([0, 1, 2, 1, 2, 3]); 
+
+      const vertexSrc =  `
+
+      precision mediump float;
+      attribute vec2 aVertexPosition;
+      attribute vec3 aColor;
+  
+      uniform mat3 translationMatrix;
+      uniform mat3 projectionMatrix;
+      
+  
+      varying vec3 vColor;
+  
+      void main() {
+  
+          vColor = aColor;
+          gl_Position = vec4((projectionMatrix * translationMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+  
+      }`
+
+      const fragSrc = `precision mediump float;
+
+      varying vec3 vColor;
+      uniform float u_time;
+      uniform vec2 u_resolution;
+  
+      void main() {
+        
+        vec2 st = gl_FragCoord.xy/u_resolution;
+        float pct = 0.0;
+
+        vec2 pos = vec2(0.5)-st;
+        
+        float a = atan(pos.y,pos.x);                                          //angle
+
+        float r = distance(st,vec2(0.5));
+
+        vec3 color = vec3(sin(u_time), sin(u_time+0.5), sin(u_time+1.0));
+        float alpha = 1. - step(0.5*(sin(u_time)+1.), r);
+        gl_FragColor = vec4(color*alpha, 1.0);                                //a value not used in pixi apparently
+      }
+  
+  `
+    const shader = Shader.from(vertexSrc, fragSrc, this.uniforms); 
+   
+    const square = new Mesh(geometry, shader);
+    square.scale.set(C.CANVAS_WIDTH);
+    square.blendMode = BLEND_MODES.ADD;
+
+    this.fixedCameraStage.addChild(square);
+  }
 }
