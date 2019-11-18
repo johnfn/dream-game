@@ -82,7 +82,7 @@ export class Game {
     // this.testEntity.position = new Point(10, 10);
     // console.log(oldPosition); // (10, 10)
 
-    settings.SCALE_MODE = SCALE_MODES.NEAREST;
+    //settings.SCALE_MODE = SCALE_MODES.NEAREST;
 
     C.Renderer = this.app.renderer;
     C.Loader = new TypesafeLoader(ResourcesToLoad);

@@ -36,5 +36,5 @@ export class Trapdoor extends InteractableEntity {
   };
 
   interactRange = C.INTERACTION_DISTANCE;
-  interactText = "";
+  interactText = "take some stairs";
 }
