@@ -4,26 +4,31 @@ import { C } from "./constants";
 
 export class Door extends InteractableEntity {
   activeModes = [GameMode.Normal];
+  name = "Door";
+  open = false;
 
   constructor() {
     super({
       collidable: true,
       dynamic   : true,
     });
-
-    console.log("maybe");
   }
 
   interactRange = C.INTERACTION_DISTANCE;
-  interactText = "Open door";
+  interactText  = "Open door";
+  canInteract   = () => !this.open;
 
   interact = () => {
+    this.open    = true;
     this.visible = false;
+
+    this.setCollideable(false);
   };
 
   collide = () => {};
 
-  update = (state: GameState) => {};
+  update = (state: GameState) => {
+  };
 
   isOnScreen = () => true
 }

@@ -45,6 +45,7 @@ export class Dialog extends InteractableEntity {
 
   interactRange = Number.POSITIVE_INFINITY;
   interactText  = "Keep Talking";
+  canInteract   = () => true;
 
   static StartDialog(gameState: GameState) {
     Dialog.Instance.text.start();

@@ -21,6 +21,9 @@ export enum EntityType {
 
 // TODO: probably make less of these methods abstract?
 export abstract class Entity extends Container {
+  // just for debugging
+  name = "i should really give this entity a name!";
+
   entityType = EntityType.NormalEntity;
   sprite: Sprite;
 
@@ -48,16 +51,18 @@ export abstract class Entity extends Container {
   abstract update: (state: GameState) => void;
   abstract collide: (other: Entity, intersection: Rect) => void;
 
+  setCollideable(newValue: boolean) {
+    if (newValue) {
+      Game.Instance.entities.static.splice(Game.Instance.entities.static.indexOf(this), 1);
+      Game.Instance.entities.collidable.push(this);
+    } else {
+      Game.Instance.entities.collidable.splice(Game.Instance.entities.collidable.indexOf(this), 1);
+      Game.Instance.entities.static.push(this);
+    }
+  }
+
   setTexture(newTexture: Texture) {
     this.sprite.texture = newTexture;
-  }
-
-  public get width() {
-    return this.sprite.width;
-  }
-
-  public get height() {
-    return this.sprite.height;
   }
 
   // TODO: rename once this isnt a name collision with superclass
@@ -65,8 +70,8 @@ export abstract class Entity extends Container {
     return new Rect({
       x: this.x,
       y: this.y,
-      w: this.sprite.width,
-      h: this.sprite.height
+      w: this.width,
+      h: this.height
     });
   }
 
@@ -74,15 +79,15 @@ export abstract class Entity extends Container {
     return new Rect({
       x: this.x,
       y: this.y,
-      w: this.sprite.width,
-      h: this.sprite.height
+      w: this.width,
+      h: this.height
     });
   }
 
   public get center(): Vector2 {
     return new Vector2(this.position).add({
-      x: this.sprite.width / 2,
-      y: this.sprite.height / 2
+      x: this.width / 2,
+      y: this.height / 2
     });
   }
 

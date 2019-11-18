@@ -27,6 +27,7 @@ export class BaseNPC extends InteractableEntity {
 
   interactRange = C.INTERACTION_DISTANCE;
   interactText  = "Talk";
+  canInteract   = () => true;
 
   collide = () => {}
   update = (state: GameState) => {

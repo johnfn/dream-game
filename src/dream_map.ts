@@ -60,7 +60,7 @@ export class DreamMap extends Entity {
 
           name: "characterStart",
           getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "characterStart" })
-        } as const
+        }
       ]
     });
 
@@ -90,7 +90,6 @@ export class DreamMap extends Entity {
     );
 
     gameState.level = level;
-    console.log(gameState.level);
 
     gameState.dreamMapLayer = this.levels[gameState.level].dreamGroundLayer!;
     gameState.realityMapLayer = this.levels[
@@ -138,6 +137,20 @@ export class DreamMap extends Entity {
   };
 
   update = (gameState: GameState) => {}; 
+
+  // TODO: Have to ignore invisible layers. Somehow?!?
+
+  doesMapHaveCollisionAtTile(x: number, y: number): boolean {
+    const tiles = this.map.getTilesAt(x, y);
+
+    for (const tile of tiles) {
+      if (tile.isCollider) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   doesRectCollideMap(rect: Rect): boolean {
     const tiles = [

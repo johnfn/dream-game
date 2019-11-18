@@ -17,6 +17,7 @@ import { HeadsUpDisplay } from "./heads_up_display";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
+import { Lighting } from "./lighting";
 
 export class Game {
   uniforms!: {u_time: number, u_resolution: {x: number, y: number}};
@@ -96,7 +97,7 @@ export class Game {
       game: this,
       width: 2 * C.CANVAS_WIDTH,
       height: 2 * C.CANVAS_HEIGHT,
-      cellSize: 8 * C.TILE_WIDTH,
+      cellSize: 16 * C.TILE_WIDTH,
       debug: this.debugMode
     });
 
@@ -114,9 +115,11 @@ export class Game {
         .spritesheet!
     });
 
+    this.gameState.character = this.player;
+
     if (MyName === "grant") {
-      this.player.x = 200;
-      this.player.y = 900;
+      this.player.x = 150;
+      this.player.y = 200;
     } else {
       this.player.x = 0;
       this.player.y = 0;
@@ -156,6 +159,9 @@ export class Game {
 
 
     this.app.ticker.add(() => this.gameLoop()); 
+
+    this.gameState.lighting = new Lighting(this.gameState);
+    this.stage.addChild(this.gameState.lighting);
   };
 
   // Note: For now, we treat map as a special case.
@@ -164,8 +170,6 @@ export class Game {
     const hitMap = this.gameState.map.doesRectCollideMap(rect);
 
     if (hitMap) {
-      console.log("hit map");
-
       return true;
     }
 
@@ -221,7 +225,9 @@ export class Game {
   handleInteractions = (activeEntities: InteractableEntity[]) => {
     // find potential interactor
 
-    const sortedInteractors = activeEntities.slice().sort((a, b) => 
+    const sortedInteractors = activeEntities
+      .filter(ent => ent.canInteract())
+      .slice().sort((a, b) => 
       new Vector2(a.position).diagonalDistance(new Vector2(this.player.position)) -
       new Vector2(b.position).diagonalDistance(new Vector2(this.player.position))
     );
@@ -231,7 +237,6 @@ export class Game {
       const distance = new Vector2(targetInteractor.position).diagonalDistance(
         new Vector2(this.player.position)
       );
-
 
       if (distance > C.INTERACTION_DISTANCE) {
         targetInteractor = null;

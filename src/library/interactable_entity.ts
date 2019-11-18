@@ -17,4 +17,5 @@ export abstract class InteractableEntity extends Entity {
   abstract interact(other: Entity, gameState: GameState): void;
   abstract interactRange: number;
   abstract interactText : string;
+  abstract canInteract: () => boolean;
 }
