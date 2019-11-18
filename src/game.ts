@@ -112,8 +112,8 @@ export class Game {
     });
 
     if (MyName === "grant") {
-      this.player.x = -32;
-      this.player.y = -32;
+      this.player.x = 200;
+      this.player.y = 900;
     } else {
       this.player.x = 200;
       this.player.y = 1200;

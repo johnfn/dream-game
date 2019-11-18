@@ -1,6 +1,6 @@
 import { Sprite, Renderer, RenderTexture, Texture } from 'pixi.js'
 import { Rect } from './rect'
-import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON, TiledObjectJSON, TilesetTilesJSON } from './tilemap_types';
+import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON } from './tilemap_types';
 import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
 import { TestEntity } from '../test_entity';
@@ -45,18 +45,22 @@ class Grid<T> {
   }
 }
 
+type TilemapCustomObjectSingle = {
+  type: "single";
+  name: string;
+  getInstanceType: (tex: Texture) => Entity;
+};
+
+type TilemapCustomObjectGroup = {
+  type: "group";
+  names: string[];
+  getInstanceType: (tex: Texture) => Entity;
+  getGroupInstanceType: () => Entity;
+};
+
 type TilemapCustomObjects = 
-  | {
-      type: "single";
-      name: string;
-      getInstanceType: (tex: Texture) => Entity;
-    }
-  | {
-      type: "group";
-      names: string[];
-      getInstanceType: (tex: Texture) => Entity;
-      getGroupInstanceType: () => Entity;
-    }
+  | TilemapCustomObjectGroup
+  | TilemapCustomObjectSingle
 
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
 
@@ -221,6 +225,18 @@ export class TiledTilemap {
   private loadObjectLayer(layer: TiledObjectLayerJSON): Entity {
     const objectLayer = new TestEntity();
 
+    type ObjectInGroup = {
+      name : string;
+      tile : Tile;
+      gridX: number;
+      gridY: number;
+    };
+
+    const objectsToGroup: ObjectInGroup[] = [];
+
+    // Step 0: 
+    // Add all single objects
+
     for (const obj of layer.objects) {
       if (!obj.gid) {
         console.error("object in object layer without gid! very bad?!?");
@@ -255,12 +271,17 @@ export class TiledTilemap {
             newObj = customObject.getInstanceType(spriteTex);
           }
         } else if (customObject.type === "group") {
-          // TODO: grouping logic
+          // add to the list of grouped objects, which we will process later.
 
           if (customObject.names.includes(tileType)) {
-            const spriteTex = TextureCache.GetTextureForTile(tile); 
-
-            newObj = customObject.getInstanceType(spriteTex);
+            objectsToGroup.push({
+              name: tileType,
+              tile: tile,
+              // TODO: We're making an assumption that the size of the objects
+              // are all the same. I think this is safe tho?
+              gridX: tile.x / obj.width,
+              gridY: tile.y / obj.height,
+            });
           }
         }
       }
@@ -271,6 +292,103 @@ export class TiledTilemap {
 
         objectLayer.addChild(newObj);
       }
+    }
+
+    // Find all groups and add them
+    // Step 1: Load all objects into grid
+
+    const grid = new Grid<{ obj: ObjectInGroup, grouped: boolean }>();
+
+    for (const objectToGroup of objectsToGroup) {
+      grid.set(objectToGroup.gridX, objectToGroup.gridY, {
+        obj    : objectToGroup,
+        grouped: false,
+      });
+    }
+
+    // Step 2: BFS from each object to find all neighbors which are part of the
+    // group.
+
+    for (const obj of objectsToGroup) {
+      const result = grid.get(obj.gridX, obj.gridY);
+
+      if (!result) { throw new Error("Wat"); }
+
+      const { grouped } = result;
+
+      if (grouped) {
+        continue;
+      }
+
+      // Step 2a: Find all names of objects in that group
+
+      let customObject: TilemapCustomObjectGroup | null = null;
+
+      for (const candidate of this.customObjects) {
+        if (candidate.type === "group") {
+          if (candidate.names.includes(obj.name)) {
+            customObject = candidate;
+
+            break;
+          }
+        }
+      }
+
+      if (customObject === null) {
+        throw new Error("HUH!?!?");
+      }
+
+      // Step 2: Actually run BFS
+
+      const group: ObjectInGroup[] = [obj];
+      const groupEdge: ObjectInGroup[] = [obj];
+
+      while (groupEdge.length > 0) {
+        const current = groupEdge.pop()!;
+        const dxdy = [
+          [ 1,  0],
+          [-1,  0],
+          [ 0 , 1],
+          [ 0 ,-1],
+        ];
+
+        for (const [dx, dy] of dxdy) {
+          const result = grid.get(current.gridX + dx, current.gridY + dy);
+
+          if (!result) { continue; }
+
+          const { obj: neighbor, grouped } = result;
+
+          if (grouped) { continue; }
+          if (group.includes(neighbor)) { continue; }
+          if (customObject.names.includes(neighbor.name)) {
+            group.push(neighbor);
+            groupEdge.push(neighbor);
+          }
+        }
+      }
+
+      // BFS complete; `group` contains entire group.
+
+      // TODO move everything to (0, 0) in the group
+
+      for (const obj of group) {
+        grid.get(obj.gridX, obj.gridY)!.grouped = true;
+      }
+
+      const groupEntity = new TestEntity();
+
+      for (const obj of group) {
+        const spriteTex = TextureCache.GetTextureForTile(obj.tile);
+        const objEntity = customObject.getInstanceType(spriteTex);
+
+        groupEntity.addChild(objEntity);
+
+        objEntity.x = obj.tile.x;
+        objEntity.y = obj.tile.y;
+      }
+
+      objectLayer.addChild(groupEntity);
     }
 
     return objectLayer;
