@@ -5,6 +5,8 @@ import * as PIXI from "pixi.js";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { Entity } from "./library/entity";
+import { Lighting } from "./lighting";
+import { Character } from "./character";
 
 export enum GameMode {
   Normal,
@@ -16,7 +18,9 @@ export class GameState {
   keys             : KeyboardState;
   map             !: DreamMap;
 
-  level! : number;
+  character       !: Character;
+  level           !: number;
+  lighting        !: Lighting;
   dreamMapLayer   !: Entity;
   realityMapLayer !: Entity;
   objectLayer     !: Entity;

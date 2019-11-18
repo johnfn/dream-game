@@ -17,6 +17,7 @@ import { HeadsUpDisplay } from "./heads_up_display";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
+import { Lighting } from "./lighting";
 
 export class Game {
   static Instance: Game;
@@ -95,7 +96,7 @@ export class Game {
       game: this,
       width: 2 * C.CANVAS_WIDTH,
       height: 2 * C.CANVAS_HEIGHT,
-      cellSize: 8 * C.TILE_WIDTH,
+      cellSize: 16 * C.TILE_WIDTH,
       debug: this.debugMode
     });
 
@@ -112,9 +113,11 @@ export class Game {
         .spritesheet!
     });
 
+    this.gameState.character = this.player;
+
     if (MyName === "grant") {
-      this.player.x = 300;
-      this.player.y = 600;
+      this.player.x = 150;
+      this.player.y = 200;
     } else {
       this.player.x = 200;
       this.player.y = 1200;
@@ -151,6 +154,9 @@ export class Game {
     this.fixedCameraStage.addChild(this.gameState.dialog);
 
     this.app.ticker.add(() => this.gameLoop()); 
+
+    this.gameState.lighting = new Lighting(this.gameState);
+    this.stage.addChild(this.gameState.lighting);
   };
 
   // Note: For now, we treat map as a special case.

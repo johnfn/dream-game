@@ -17,8 +17,8 @@ export class C {
   public static CANVAS_WIDTH = 640;
   public static CANVAS_HEIGHT = 640;
 
-  public static TILE_WIDTH = 64;
-  public static TILE_HEIGHT = 64;
+  public static TILE_WIDTH = 32;
+  public static TILE_HEIGHT = 32;
 
   public static INTERACTION_DISTANCE = 100;
 

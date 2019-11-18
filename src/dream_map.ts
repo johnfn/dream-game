@@ -138,6 +138,20 @@ export class DreamMap extends Entity {
 
   update = (gameState: GameState) => {}; 
 
+  // TODO: Have to ignore invisible layers. Somehow?!?
+
+  doesMapHaveCollisionAtTile(x: number, y: number): boolean {
+    const tiles = this.map.getTilesAt(x, y);
+
+    for (const tile of tiles) {
+      if (tile.isCollider) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   doesRectCollideMap(rect: Rect): boolean {
     const tiles = [
       ...this.map.getTilesAt(rect.x, rect.y),
