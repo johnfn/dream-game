@@ -1,4 +1,5 @@
 import { Vector2 } from "./vector2"
+import { Graphics } from "pixi.js";
 
 export class Line {
   private _x1: number;
@@ -113,6 +114,14 @@ export class Line {
     const [ x1, x2, y1, y2 ] = s.split("|").map(x => Number(x));
 
     return new Line({ x1, x2, y1, y2 });
+  }
+
+  isXAligned(): boolean {
+    return this.x1 === this.x2;
+  }
+
+  isYAligned(): boolean {
+    return this.y1 === this.y2;
   }
 
   // Must be horizontally/vertically oriented lines
@@ -242,6 +251,38 @@ export class Line {
     return `Line: [(${ this.x1 },${ this.y1 }) -> (${ this.x2 },${ this.y2 })]`;
   }
 
+  equals(other: Line) {
+    return (
+      this.x1 === other.x1 &&
+      this.x2 === other.x2 &&
+      this.y1 === other.y1 &&
+      this.y2 === other.y2
+    ) || (
+      this.x1 === other.x2 &&
+      this.x2 === other.x1 &&
+      this.y1 === other.y2 &&
+      this.y2 === other.y1
+    );
+  }
+
+  withNewEnd(newEnd: Vector2): Line {
+    return new Line({
+      x1: this.x1,
+      y1: this.y1,
+      x2: newEnd.x,
+      y2: newEnd.y,
+    });
+  }
+
+  withNewStart(newStart: Vector2): Line {
+    return new Line({
+      x1: newStart.x,
+      y1: newStart.y,
+      x2: this.x2,
+      y2: this.y2,
+    });
+  }
+
   static Deserialize(obj: any): Line {
     if (
       !obj.hasOwnProperty("x1") ||
@@ -267,5 +308,12 @@ export class Line {
       x2: obj.x2,
       y2: obj.y2,
     });
+  }
+
+  drawOnto(graphics: Graphics, color: number) {
+    graphics.lineStyle(5, color, 1);
+
+    graphics.moveTo(this.x1, this.y1);
+    graphics.lineTo(this.x2, this.y2);
   }
 }
