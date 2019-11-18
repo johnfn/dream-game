@@ -2,11 +2,10 @@ import { Entity } from "./library/entity";
 import { GameMode, GameState } from "./state";
 import { Rect } from "./library/rect";
 import { Texture } from "pixi.js";
-import { TiledTilemap, MapLayer } from "./library/tilemap";
+import { TiledTilemap } from "./library/tilemap";
 import { C } from "./constants";
 import { TestEntity } from "./test_entity";
 import { Trapdoor } from "./library/trapdoor";
-import { Game } from "./game";
 import { Door } from "./door";
 
 type MapLevel = {

@@ -177,7 +177,7 @@ export class TiledTilemap {
           const matchedTileInfo = tiles.find(tile => gid === gidStart + tile.id);
 
           if (matchedTileInfo && matchedTileInfo.properties) {
-            for (const { name, type, value } of matchedTileInfo.properties) {
+            for (const { name, value } of matchedTileInfo.properties) {
               tileProperties[name] = value;
             }
           }

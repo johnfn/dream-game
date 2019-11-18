@@ -1,7 +1,5 @@
 import { Entity } from "./entity";
 import { GameMode, GameState } from "../state";
-import { Texture } from "pixi.js";
-import { TiledTilemap } from "./tilemap";
 import { Rect } from "./rect";
 import { InteractableEntity } from "./interactable_entity";
 import { C } from "../constants";
