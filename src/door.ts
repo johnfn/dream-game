@@ -5,6 +5,7 @@ import { C } from "./constants";
 export class Door extends InteractableEntity {
   activeModes = [GameMode.Normal];
   name = "Door";
+  open = false;
 
   constructor() {
     super({
@@ -15,9 +16,12 @@ export class Door extends InteractableEntity {
 
   interactRange = C.INTERACTION_DISTANCE;
   interactText  = "Open door";
+  canInteract   = () => !this.open;
 
   interact = () => {
+    this.open    = true;
     this.visible = false;
+
     this.setCollideable(false);
   };
 

@@ -213,7 +213,9 @@ export class Game {
   handleInteractions = (activeEntities: InteractableEntity[]) => {
     // find potential interactor
 
-    const sortedInteractors = activeEntities.slice().sort((a, b) => 
+    const sortedInteractors = activeEntities
+      .filter(ent => ent.canInteract())
+      .slice().sort((a, b) => 
       new Vector2(a.position).diagonalDistance(new Vector2(this.player.position)) -
       new Vector2(b.position).diagonalDistance(new Vector2(this.player.position))
     );
@@ -223,7 +225,6 @@ export class Game {
       const distance = new Vector2(targetInteractor.position).diagonalDistance(
         new Vector2(this.player.position)
       );
-
 
       if (distance > C.INTERACTION_DISTANCE) {
         targetInteractor = null;
