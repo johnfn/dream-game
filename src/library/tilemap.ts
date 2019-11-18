@@ -3,7 +3,7 @@ import { Rect } from './rect'
 import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON } from './tilemap_types';
 import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
-import { TextureEntity } from '../test_entity';
+import { TextureEntity } from '../texture_entity';
 
 export type MapLayer = {
   layerName: string;
