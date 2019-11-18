@@ -13,7 +13,8 @@ export class Door extends Entity {
 
   interact = () => {}
   collide = () => {}
-  update = (state: GameState) => {}
+  update = (state: GameState) => {
+  }
 
   isOnScreen = () => true
 }
