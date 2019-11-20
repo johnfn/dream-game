@@ -40,6 +40,7 @@ export class Game {
     u_time: number;
     u_resolution: { x: number; y: number };
     u_texture: Texture;
+    u_ratio: {x: number, y: number};
   };
   static Instance: Game;
 
@@ -342,7 +343,8 @@ export class Game {
     this.uniforms = {
       u_time: 1,
       u_resolution: { x: C.CANVAS_WIDTH, y: C.CANVAS_HEIGHT },
-      u_texture: texture
+      u_texture: texture,
+      u_ratio: {x: texture.width/C.CANVAS_WIDTH, y: texture.height/C.CANVAS_HEIGHT}
     };
 
     const stageShader = new Geometry()
@@ -381,10 +383,12 @@ export class Game {
       uniform float u_time;
       uniform vec2 u_resolution;
       uniform sampler2D u_texture;
+      uniform float u_ratio;
 
   
       void main() {
-        gl_FragColor = texture2D(u_texture, vUVs);
+        vec2 scaledUV = vUVs * u_ratio;
+        gl_FragColor = texture2D(u_texture, vUVs) * vec4(sin(u_time));
       }
   
   `;
