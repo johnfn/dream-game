@@ -1,4 +1,20 @@
-import { Application, SCALE_MODES, settings, Container, Shader, Mesh, Geometry, BLEND_MODES } from "pixi.js";
+import {
+  Application,
+  SCALE_MODES,
+  settings,
+  Container,
+  Shader,
+  Mesh,
+  Geometry,
+  BLEND_MODES,
+  Filter,
+  Graphics,
+  Texture,
+  Sprite,
+  Rectangle,
+  BaseTexture,
+  TextureMatrix
+} from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
@@ -20,10 +36,14 @@ import { MyName } from "./my_name";
 import { Lighting } from "./lighting";
 
 export class Game {
-  uniforms!: {u_time: number, u_resolution: {x: number, y: number}};
+  uniforms!: {
+    u_time: number;
+    u_resolution: { x: number; y: number };
+    u_texture: Texture;
+  };
   static Instance: Game;
 
-  app      : PIXI.Application;
+  app: PIXI.Application;
   gameState: GameState;
 
   entities: {
@@ -38,19 +58,19 @@ export class Game {
     interactable: []
   };
 
-  grid            : CollisionGrid;
-  debugMode       : boolean;
-  player         !: Character;
-  camera         !: FollowCamera;
-  dreamShader    !: PIXI.Graphics;
+  grid: CollisionGrid;
+  debugMode: boolean;
+  player!: Character;
+  camera!: FollowCamera;
+  dreamShader!: PIXI.Graphics;
 
-  /** 
+  /**
    * The stage of the game. Put everything in-game on here.
    */
-  stage           : Container;
-  hud            !: HeadsUpDisplay;
+  stage: Container;
+  hud!: HeadsUpDisplay;
 
-  /** 
+  /**
    * A stage for things in the game that don't move when the camera move and are
    * instead fixed to the screen. For example, the HUD.
    */
@@ -63,13 +83,13 @@ export class Game {
     this.gameState = new GameState();
 
     this.app = new Application({
-      width          : C.CANVAS_WIDTH,
-      height         : C.CANVAS_HEIGHT,
-      antialias      : true,
-      transparent    : false,
-      resolution     : window.devicePixelRatio,
-      autoDensity    : true,
-      backgroundColor: 0x666666,
+      width: C.CANVAS_WIDTH,
+      height: C.CANVAS_HEIGHT,
+      antialias: true,
+      transparent: false,
+      resolution: window.devicePixelRatio,
+      autoDensity: true,
+      backgroundColor: 0x666666
     });
 
     this.stage = new Container();
@@ -105,7 +125,6 @@ export class Game {
   }
 
   startGame = async () => {
-
     this.gameState.map = new DreamMap(this.gameState);
     this.stage.addChild(this.gameState.map);
 
@@ -128,10 +147,10 @@ export class Game {
     this.stage.addChild(this.player);
 
     this.camera = new FollowCamera({
-      stage       : this.stage,
+      stage: this.stage,
       followTarget: this.player,
-      width       : C.CANVAS_WIDTH,
-      height      : C.CANVAS_HEIGHT
+      width: C.CANVAS_WIDTH,
+      height: C.CANVAS_HEIGHT
     });
 
     const testShard = new DreamShard();
@@ -157,8 +176,7 @@ export class Game {
 
     this.shaderStuff();
 
-
-    this.app.ticker.add(() => this.gameLoop()); 
+    this.app.ticker.add(() => this.gameLoop());
 
     this.gameState.lighting = new Lighting(this.gameState);
     this.stage.addChild(this.gameState.lighting);
@@ -166,7 +184,10 @@ export class Game {
 
   // Note: For now, we treat map as a special case.
   // TODO: Load map into collision grid and use collision grid ONLY.
-  private doesRectHitAnything = (rect: Rect, associatedEntity: Entity): boolean => {
+  private doesRectHitAnything = (
+    rect: Rect,
+    associatedEntity: Entity
+  ): boolean => {
     const hitMap = this.gameState.map.doesRectCollideMap(rect);
 
     if (hitMap) {
@@ -176,7 +197,6 @@ export class Game {
     const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
 
     if (gridCollisions.length > 0) {
-
       return true;
     }
 
@@ -218,19 +238,25 @@ export class Game {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
-      entity.position.set(updatedBounds.x,updatedBounds.y);
+      entity.position.set(updatedBounds.x, updatedBounds.y);
     }
-  }
+  };
 
   handleInteractions = (activeEntities: InteractableEntity[]) => {
     // find potential interactor
 
     const sortedInteractors = activeEntities
       .filter(ent => ent.canInteract())
-      .slice().sort((a, b) => 
-      new Vector2(a.position).diagonalDistance(new Vector2(this.player.position)) -
-      new Vector2(b.position).diagonalDistance(new Vector2(this.player.position))
-    );
+      .slice()
+      .sort(
+        (a, b) =>
+          new Vector2(a.position).diagonalDistance(
+            new Vector2(this.player.position)
+          ) -
+          new Vector2(b.position).diagonalDistance(
+            new Vector2(this.player.position)
+          )
+      );
     let targetInteractor: InteractableEntity | null = sortedInteractors[0];
 
     if (targetInteractor) {
@@ -240,7 +266,7 @@ export class Game {
 
       if (distance > C.INTERACTION_DISTANCE) {
         targetInteractor = null;
-      } 
+      }
     }
 
     // found it. interact
@@ -252,24 +278,24 @@ export class Game {
     // update HUD (maybe move this code into HUD)
 
     if (targetInteractor) {
-      this.hud.interactText.setText(`%1%e: ${ targetInteractor.interactText }`);
+      this.hud.interactText.setText(`%1%e: ${targetInteractor.interactText}`);
     } else {
       this.hud.interactText.setText(`%1%e: Nothing`);
     }
   };
 
   gameLoop = () => {
-
     this.uniforms.u_time += 0.01;
-    console.log(this.uniforms.u_time);
 
     this.gameState.keys.update();
 
-    const activeEntities = this.entities.all
-      .filter(entity => entity.activeModes.includes(this.gameState.mode));
+    const activeEntities = this.entities.all.filter(entity =>
+      entity.activeModes.includes(this.gameState.mode)
+    );
 
-    const activeInteractableEntities = this.entities.interactable
-      .filter(entity => entity.activeModes.includes(this.gameState.mode));
+    const activeInteractableEntities = this.entities.interactable.filter(
+      entity => entity.activeModes.includes(this.gameState.mode)
+    );
 
     for (const entity of activeEntities) {
       entity.update(this.gameState);
@@ -283,31 +309,52 @@ export class Game {
   };
 
   shaderStuff = () => {
+    //Dummy lighting thingy
+    const lighting = new Graphics()
+      .beginFill(0xd1be69)
+      .moveTo(300, 300)
+      .lineTo(0, 0)
+      .lineTo(200, 0)
+      .lineTo(300, 300)
+      .endFill()
+      .beginFill(0xd1be69)
+      .moveTo(300, 300)
+      .lineTo(C.CANVAS_WIDTH, 0)
+      .lineTo(C.CANVAS_WIDTH, 200)
+      .lineTo(300, 300)
+      .endFill();
 
-    this.uniforms = {u_time: 1, u_resolution: {x:C.CANVAS_WIDTH, y:C.CANVAS_HEIGHT}}
+    let texture = C.Renderer.generateTexture(
+      lighting,
+      SCALE_MODES.NEAREST,
+      window.devicePixelRatio
+    );
+    texture.uvMatrix = new TextureMatrix(texture);
 
-    const geometry = new Geometry()
-      .addAttribute(
-        "aVertexPosition", // the attribute name
-        [
-          0, 0, 
-          1, 0, 
-          0, 1,
-          1, 1
-        ], 
-          2) 
-      .addAttribute(
-        "aColor", // the attribute name
-        [
-          1,0,0, // r, g, b
-          0,1,0, // r, g, b
-          0,0,1, // r, g, b
-          0,0,1
-        ], 3).addIndex([0, 1, 2, 1, 2, 3]); 
+    //Texture """""scaling""""
+    texture.uvMatrix.multiplyUvs(
+      Float32Array.from([
+        texture.width / C.CANVAS_WIDTH,
+        texture.height / C.CANVAS_HEIGHT
+      ])
+    );
 
-      const vertexSrc =  `
+    this.uniforms = {
+      u_time: 1,
+      u_resolution: { x: C.CANVAS_WIDTH, y: C.CANVAS_HEIGHT },
+      u_texture: texture
+    };
+
+    const stageShader = new Geometry()
+      .addAttribute("aVertexPosition", [0, 0, 1, 0, 0, 1, 1, 1], 2)
+      .addAttribute("aUVs", [0, 0, 1, 0, 0, 1, 1, 1], 2)
+      .addAttribute("aColor", [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1], 3)
+      .addIndex([0, 1, 2, 1, 2, 3]);
+
+    const vertexSrc = `
 
       precision mediump float;
+      attribute vec2 aUVs;
       attribute vec2 aVertexPosition;
       attribute vec3 aColor;
   
@@ -316,43 +363,40 @@ export class Game {
       
   
       varying vec3 vColor;
+      varying vec2 vUVs;
+
   
       void main() {
-  
+          vUVs = aUVs;
           vColor = aColor;
           gl_Position = vec4((projectionMatrix * translationMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
   
-      }`
+      }`;
 
-      const fragSrc = `precision mediump float;
+    const fragSrc = `precision mediump float;
 
+      varying vec2 vUVs;
       varying vec3 vColor;
+
       uniform float u_time;
       uniform vec2 u_resolution;
+      uniform sampler2D u_texture;
+
   
       void main() {
-        
-        vec2 st = gl_FragCoord.xy/u_resolution;
-        float pct = 0.0;
-
-        vec2 pos = vec2(0.5)-st;
-        
-        float a = atan(pos.y,pos.x);                                          //angle
-
-        float r = distance(st,vec2(0.5));
-
-        vec3 color = vec3(sin(u_time), sin(u_time+0.5), sin(u_time+1.0));
-        float alpha = 1. - step(0.5*(sin(u_time)+1.), r);
-        gl_FragColor = vec4(color*alpha, 1.0);                                //a value not used in pixi apparently
+        gl_FragColor = texture2D(u_texture, vUVs);
       }
   
-  `
-    const shader = Shader.from(vertexSrc, fragSrc, this.uniforms); 
-   
-    const square = new Mesh(geometry, shader);
+  `;
+    const shader = Shader.from(vertexSrc, fragSrc, this.uniforms);
+
+    const square = new Mesh(stageShader, shader);
     square.scale.set(C.CANVAS_WIDTH);
     square.blendMode = BLEND_MODES.ADD;
 
-    this.fixedCameraStage.addChild(square);
-  }
+    lighting.shader = shader;
+    lighting.blendMode = BLEND_MODES.ADD;
+
+    //this.fixedCameraStage.addChild(square); 
+  };
 }
