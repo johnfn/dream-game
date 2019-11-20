@@ -13,7 +13,8 @@ import {
   Sprite,
   Rectangle,
   BaseTexture,
-  TextureMatrix
+  TextureMatrix,
+  RenderTexture
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -41,8 +42,11 @@ export class Game {
     u_time: number;
     u_resolution: { x: number; y: number };
     u_texture: Texture;
-    u_ratio: {x: number, y: number};
+    u_ratio: { x: number; y: number };
+    u_offset: { x: number; y: number };
   };
+
+  lighting: Graphics;
   static Instance: Game;
 
   app: PIXI.Application;
@@ -122,6 +126,20 @@ export class Game {
       cellSize: 16 * C.TILE_WIDTH,
       debug: this.debugMode
     });
+
+    this.lighting = new Graphics()
+      .beginFill(0xd1be69)
+      .moveTo(300, 300)
+      .lineTo(0, 0)
+      .lineTo(200, 0)
+      .lineTo(300, 300)
+      .endFill()
+      .beginFill(0xd1be69)
+      .moveTo(300, 300)
+      .lineTo(C.CANVAS_WIDTH, 0)
+      .lineTo(C.CANVAS_WIDTH, 200)
+      .lineTo(300, 300)
+      .endFill();
 
     C.Loader.onLoadComplete(this.startGame);
   }
@@ -287,7 +305,7 @@ export class Game {
   };
 
   gameLoop = () => {
-    if (MyName !== "grant") { 
+    if (MyName !== "grant") {
       this.uniforms.u_time += 0.01;
     }
 
@@ -309,47 +327,61 @@ export class Game {
 
     this.resolveCollisions();
 
+    const rndSX = Math.random() * C.CANVAS_WIDTH;
+    const rndSY = Math.random() * C.CANVAS_HEIGHT;
+
+    if (MyName === "gabby") {
+      this.lighting = new Graphics()
+        .beginFill(0xd1be69)
+        .moveTo(rndSX, rndSY)
+        .lineTo(Math.random() * C.CANVAS_WIDTH, Math.random() * C.CANVAS_HEIGHT)
+        .lineTo(Math.random() * C.CANVAS_WIDTH, Math.random() * C.CANVAS_HEIGHT)
+        .lineTo(rndSX, rndSY)
+        .endFill();
+
+      const tex = C.Renderer.generateTexture(
+        this.lighting,
+        SCALE_MODES.NEAREST,
+        window.devicePixelRatio
+      );
+      this.uniforms.u_texture = tex;
+
+      this.uniforms.u_ratio = {
+        x: tex.width / C.CANVAS_WIDTH,
+        y: tex.height / C.CANVAS_HEIGHT
+      };
+      this.uniforms.u_offset = {
+        x: this.lighting.x / C.CANVAS_WIDTH,
+        y: this.lighting.y / C.CANVAS_HEIGHT
+      };
+    }
+
     this.camera.update();
   };
 
   shaderStuff = () => {
-    if (MyName === "grant") { return; }
-
-    //Dummy lighting thingy
-    const lighting = new Graphics()
-      .beginFill(0xd1be69)
-      .moveTo(300, 300)
-      .lineTo(0, 0)
-      .lineTo(200, 0)
-      .lineTo(300, 300)
-      .endFill()
-      .beginFill(0xd1be69)
-      .moveTo(300, 300)
-      .lineTo(C.CANVAS_WIDTH, 0)
-      .lineTo(C.CANVAS_WIDTH, 200)
-      .lineTo(300, 300)
-      .endFill();
+    if (MyName === "grant") {
+      return;
+    }
 
     let texture = C.Renderer.generateTexture(
-      lighting,
+      this.lighting,
       SCALE_MODES.NEAREST,
       window.devicePixelRatio
     );
-    texture.uvMatrix = new TextureMatrix(texture);
-
-    //Texture """""scaling""""
-    texture.uvMatrix.multiplyUvs(
-      Float32Array.from([
-        texture.width / C.CANVAS_WIDTH,
-        texture.height / C.CANVAS_HEIGHT
-      ])
-    );
 
     this.uniforms = {
+      u_ratio: {
+        x: texture.width / C.CANVAS_WIDTH,
+        y: texture.height / C.CANVAS_HEIGHT
+      },
       u_time: 1,
       u_resolution: { x: C.CANVAS_WIDTH, y: C.CANVAS_HEIGHT },
       u_texture: texture,
-      u_ratio: {x: texture.width/C.CANVAS_WIDTH, y: texture.height/C.CANVAS_HEIGHT}
+      u_offset: {
+        x: this.lighting.x / C.CANVAS_WIDTH,
+        y: this.lighting.y / C.CANVAS_HEIGHT
+      }
     };
 
     const stageShader = new Geometry()
@@ -367,7 +399,6 @@ export class Game {
   
       uniform mat3 translationMatrix;
       uniform mat3 projectionMatrix;
-      
   
       varying vec3 vColor;
       varying vec2 vUVs;
@@ -388,12 +419,17 @@ export class Game {
       uniform float u_time;
       uniform vec2 u_resolution;
       uniform sampler2D u_texture;
-      uniform float u_ratio;
-
+      uniform vec2 u_ratio;
+      uniform vec2 u_offset;
   
       void main() {
-        vec2 scaledUV = vUVs * u_ratio;
-        gl_FragColor = texture2D(u_texture, vUVs) * vec4(sin(u_time));
+        vec2 scaledUV =  vUVs / u_ratio;                                                  // Scale texture UVs to position correctly on the screen
+        bool within_bounds_1 = all(lessThanEqual(scaledUV, vec2(1.0,1.0)));               // Determine whether scaledUV is outside tex UV bounds 
+        bool within_bounds_2 = all(greaterThanEqual(scaledUV, u_offset));                 // Calculate texture UV offset
+        float within_bounds = float(all(bvec2(within_bounds_1, within_bounds_2)));
+        vec4 textureMask = texture2D(u_texture, scaledUV);                                // Mask the shader to the dream region using u_texture
+        vec4 color = vec4(sin(u_time));                                                   // The dream shader itself
+        gl_FragColor = within_bounds * textureMask * color;
       }
   
   `;
@@ -403,9 +439,9 @@ export class Game {
     square.scale.set(C.CANVAS_WIDTH);
     square.blendMode = BLEND_MODES.ADD;
 
-    lighting.shader = shader;
-    lighting.blendMode = BLEND_MODES.ADD;
+    this.lighting.shader = shader;
+    this.lighting.blendMode = BLEND_MODES.ADD;
 
-    //this.fixedCameraStage.addChild(square); 
+    this.fixedCameraStage.addChild(square);
   };
 }

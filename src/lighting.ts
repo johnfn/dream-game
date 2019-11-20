@@ -7,6 +7,7 @@ import { Game } from "./game";
 import { Line } from "./library/line";
 import { Vector2 } from "./library/vector2";
 import { Hash, DefaultHash } from "./library/hash";
+import { MyName } from "./my_name";
 
 export class Lighting extends Entity {
   activeModes = [GameMode.Normal];
@@ -166,7 +167,7 @@ export class Lighting extends Entity {
       segmentsAtPoint.get(end).push(edge);
     }
 
-    debugger;
+    if (MyName === "grant") debugger;
 
     // Step 2bb: Since all boundary lines are cycles, build the lines by walking
     // around the cycles.
