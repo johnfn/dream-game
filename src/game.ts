@@ -18,6 +18,7 @@ import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
 import { Lighting } from "./lighting";
+import { Hash } from "./library/hash";
 
 export class Game {
   uniforms!: {u_time: number, u_resolution: {x: number, y: number}};
@@ -259,9 +260,9 @@ export class Game {
   };
 
   gameLoop = () => {
-
-    this.uniforms.u_time += 0.01;
-    console.log(this.uniforms.u_time);
+    if (MyName === "gabby") { 
+      this.uniforms.u_time += 0.01;
+    }
 
     this.gameState.keys.update();
 
@@ -283,6 +284,7 @@ export class Game {
   };
 
   shaderStuff = () => {
+    if (MyName === "grant") { return; }
 
     this.uniforms = {u_time: 1, u_resolution: {x:C.CANVAS_WIDTH, y:C.CANVAS_HEIGHT}}
 
