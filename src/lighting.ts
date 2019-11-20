@@ -6,6 +6,7 @@ import { C } from "./constants";
 import { Game } from "./game";
 import { Line } from "./library/line";
 import { Vector2 } from "./library/vector2";
+import { Hash, DefaultHash } from "./library/hash";
 
 export class Lighting extends Entity {
   activeModes = [GameMode.Normal];
@@ -155,15 +156,17 @@ export class Lighting extends Entity {
     // Step 2ba: Make a map of all segments that end at a given point. There are
     // always exactly 2.
 
-    const segmentsAtPoint: { [point: string]: Line[] } = {};
+    const segmentsAtPoint = new DefaultHash<Vector2, Line[]>(() => []);
     const hash = (vector: Vector2) => `${ vector.x }-${ vector.y }`;
 
     for (const edge of segments) {
       const { start, end } = edge;
 
-      segmentsAtPoint[hash(start)] = [...(segmentsAtPoint[hash(start)] || []), edge];
-      segmentsAtPoint[hash(end)  ] = [...(segmentsAtPoint[hash(end)]   || []), edge];
+      segmentsAtPoint.get(start).push(edge);
+      segmentsAtPoint.get(end).push(edge);
     }
+
+    debugger;
 
     // Step 2bb: Since all boundary lines are cycles, build the lines by walking
     // around the cycles.
@@ -191,20 +194,20 @@ export class Lighting extends Entity {
 
         potentialStart = unprocessedSingleTileEdges[i++].start;
       } while (
-        segmentsAtPoint[hash(potentialStart)][0].isXAligned() === 
-        segmentsAtPoint[hash(potentialStart)][1].isXAligned()
+        segmentsAtPoint.get(potentialStart)[0].isXAligned() === 
+        segmentsAtPoint.get(potentialStart)[1].isXAligned()
       );
 
-      segmentsAtPoint[hash(potentialStart)][0].drawOnto(g, 0xffff00);
-      segmentsAtPoint[hash(potentialStart)][1].drawOnto(g, 0xffff00);
+      segmentsAtPoint.get(potentialStart)[0].drawOnto(g, 0xffff00);
+      segmentsAtPoint.get(potentialStart)[1].drawOnto(g, 0xffff00);
 
       // Found a good vertex to start at, let's start building lines!
 
       let initialPositionOfPolygon = potentialStart;
       let initialPositionOfLine    = potentialStart;
       let currentPosition          = potentialStart;
-      let currentSegment           = segmentsAtPoint[hash(potentialStart)][0];
-      let line                     = segmentsAtPoint[hash(potentialStart)][0];
+      let currentSegment           = segmentsAtPoint.get(potentialStart)[0];
+      let line                     = segmentsAtPoint.get(potentialStart)[0];
       const seenSegments           = [currentSegment];
 
       do {
@@ -219,7 +222,7 @@ export class Lighting extends Entity {
         }
 
         let nextSegment: Line;
-        const potentialNextSegments = segmentsAtPoint[hash(nextPosition)];
+        const potentialNextSegments = segmentsAtPoint.get(nextPosition);
 
         if (!currentSegment.equals(potentialNextSegments[0])) {
           nextSegment = potentialNextSegments[0];
@@ -262,8 +265,6 @@ export class Lighting extends Entity {
     for (const boundary of boundaries) {
       boundary.drawOnto(g, 0xff0000);
     }
-
-    console.log(boundaries);
 
     this.addChild(g);
   }

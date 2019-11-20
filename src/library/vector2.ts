@@ -25,6 +25,10 @@ export class Vector2 {
     this._y = props.y;
   }
 
+  hash(): string {
+    return this.toString();
+  }
+
   toString(): string {
     return `[${ this.x }, ${ this.y }]`;
   }

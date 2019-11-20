@@ -34,6 +34,7 @@ import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
 import { Lighting } from "./lighting";
+import { Hash } from "./library/hash";
 
 export class Game {
   uniforms!: {
@@ -286,7 +287,9 @@ export class Game {
   };
 
   gameLoop = () => {
-    this.uniforms.u_time += 0.01;
+    if (MyName !== "grant") { 
+      this.uniforms.u_time += 0.01;
+    }
 
     this.gameState.keys.update();
 
@@ -310,6 +313,8 @@ export class Game {
   };
 
   shaderStuff = () => {
+    if (MyName === "grant") { return; }
+
     //Dummy lighting thingy
     const lighting = new Graphics()
       .beginFill(0xd1be69)
