@@ -56,7 +56,6 @@ export class Game {
     interactable: []
   };
 
-  grid: CollisionGrid;
   debugMode: boolean;
   player!: Character;
   camera!: FollowCamera;
@@ -110,14 +109,6 @@ export class Game {
     C.Stage = this.stage;
 
     document.body.appendChild(this.app.view);
-
-    this.grid = new CollisionGrid({
-      game    : this,
-      width   : 2 * C.CANVAS_WIDTH,
-      height  : 2 * C.CANVAS_HEIGHT,
-      cellSize: 16 * C.TILE_WIDTH,
-      debug   : this.debugMode
-    });
 
     this.lighting = new Graphics()
       .beginFill(0xd1be69)
@@ -195,21 +186,7 @@ export class Game {
   };
 
   private resolveCollisions = () => {
-    this.grid.clear();
-
-    for (const entity of this.entities.collidable) {
-      if (entity.isOnScreen()) {
-        this.grid.add(entity.myGetBounds(), entity);
-      }
-    }
-
-    const mapColliders = this.gameState.map.getCollidersInRegion(
-      this.camera.bounds().expand(100)
-    );
-
-    for (const mapCollider of mapColliders) {
-      this.grid.add(mapCollider, this.gameState.map);
-    }
+    const grid = this.buildCollisionGrid();
 
     const movingEntities: MovingEntity[] = this.entities.collidable.filter(
       ent => ent.entityType === EntityType.MovingEntity
@@ -225,7 +202,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(xVelocity);
 
-      if (this.grid.collides(updatedBounds, entity).length > 0) {
+      if (grid.collides(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
@@ -233,7 +210,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(yVelocity);
 
-      if (this.grid.collides(updatedBounds, entity).length > 0) {
+      if (grid.collides(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
@@ -281,6 +258,32 @@ export class Game {
     } else {
       this.hud.interactText.setText(`%1%e: Nothing`);
     }
+  };
+
+  buildCollisionGrid = (): CollisionGrid => {
+    const grid = new CollisionGrid({
+      game    : this,
+      width   : 2 * C.CANVAS_WIDTH,
+      height  : 2 * C.CANVAS_HEIGHT,
+      cellSize: 16 * C.TILE_WIDTH,
+      debug   : this.debugMode
+    });
+
+    for (const entity of this.entities.collidable) {
+      if (entity.isOnScreen()) {
+        grid.add(entity.myGetBounds(), entity);
+      }
+    }
+
+    const mapColliders = this.gameState.map.getCollidersInRegion(
+      this.camera.bounds().expand(100)
+    );
+
+    for (const mapCollider of mapColliders) {
+      grid.add(mapCollider, this.gameState.map);
+    }
+
+    return grid;
   };
 
   gameLoop = () => {
