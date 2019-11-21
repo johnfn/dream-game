@@ -6,7 +6,7 @@ import { C } from "./constants";
 import { Game } from "./game";
 import { Line } from "./library/line";
 import { Vector2 } from "./library/vector2";
-import { Hash, DefaultHash } from "./library/hash";
+import { HashMap, DefaultHashMap, HashSet } from "./library/hash";
 
 export class Lighting extends Entity {
   activeModes = [GameMode.Normal];
@@ -80,6 +80,8 @@ export class Lighting extends Entity {
 
         outer:
         for (const ent of entities) {
+          if (ent === state.character) { continue; }
+
           // loop over entity grid points
 
           let xLow  = Math.floor(ent.x                / C.TILE_WIDTH);
@@ -156,7 +158,7 @@ export class Lighting extends Entity {
     // Step 2ba: Make a map of all segments that end at a given point. There are
     // always exactly 2.
 
-    const segmentsAtPoint = new DefaultHash<Vector2, Line[]>(() => []);
+    const segmentsAtPoint = new DefaultHashMap<Vector2, Line[]>(() => []);
     const hash = (vector: Vector2) => `${ vector.x }-${ vector.y }`;
 
     for (const edge of segments) {
@@ -166,8 +168,6 @@ export class Lighting extends Entity {
       segmentsAtPoint.get(end).push(edge);
     }
 
-    debugger;
-
     // Step 2bb: Since all boundary lines are cycles, build the lines by walking
     // around the cycles.
 
@@ -176,7 +176,6 @@ export class Lighting extends Entity {
 
     const g = new Graphics();
 
-    let xyz = 0.24;
     g.lineStyle(5, 0xff0000, 1);
 
     while (unprocessedSingleTileEdges.length > 0) {
@@ -262,9 +261,45 @@ export class Lighting extends Entity {
       }
     }
 
+    const allVertices = new HashSet<Vector2>();
+
     for (const boundary of boundaries) {
-      boundary.drawOnto(g, 0xff0000);
+      allVertices.put(boundary.start);
+      allVertices.put(boundary.end);
     }
+
+    const allVerticesByAngle: {[angle: number]: Vector2[] } = {};
+
+    for (const vertex of allVertices.keys()) {
+      const line = new Line({ one: player.positionVector(), two: vertex });
+
+      allVerticesByAngle[line.angleInDegrees] = (allVerticesByAngle[line.angleInDegrees] || []).concat(vertex);
+    }
+
+    for (const list of Object.values(allVerticesByAngle)) {
+
+      outer:
+      for (const v of list) {
+        const line = new Line({ one: player.positionVector(), two: v });
+
+        for (const boundary of boundaries) {
+          if (line.intersects(boundary) && !line.equals(boundary) && (
+            !line.start.equals(boundary.start) &&
+            !line.start.equals(boundary.end) &&
+            !line.end.equals(boundary.start) &&
+            !line.end.equals(boundary.end)
+          )) {
+            continue outer;
+          }
+        }
+
+        line.drawOnto(g, 0xff0000);
+      }
+    }
+
+    // for (const boundary of boundaries) {
+    //   boundary.drawOnto(g, 0xff0000);
+    // }
 
     this.addChild(g);
   }

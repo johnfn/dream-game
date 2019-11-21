@@ -311,9 +311,51 @@ export class Line {
   }
 
   drawOnto(graphics: Graphics, color: number) {
-    graphics.lineStyle(5, color, 1);
+    graphics.lineStyle(2, color, 1);
 
     graphics.moveTo(this.x1, this.y1);
     graphics.lineTo(this.x2, this.y2);
   }
+
+  intersects(other: Line): Vector2 | null {
+    const p1 = this.start;
+    const p2 = this.end;
+    const p3 = other.start;
+    const p4 = other.end;
+
+    const s = (
+      (p4.x - p3.x) * 
+      (p1.y - p3.y) - 
+      (p4.y - p3.y) * 
+      (p1.x - p3.x)) / (
+      (p4.y - p3.y) * 
+      (p2.x - p1.x) - 
+      (p4.x - p3.x) * 
+      (p2.y - p1.y)
+    );
+
+    const x = p1.x + s * (p2.x - p1.x);
+    const y = p1.y + s * (p2.y - p1.y);
+
+    if (
+      // within us
+
+      x >= Math.min(this.x1, this.x2) &&
+      x <= Math.max(this.x1, this.x2) &&
+      y >= Math.min(this.y1, this.y2) &&
+      y <= Math.max(this.y1, this.y2) &&
+
+      // within other
+
+      x >= Math.min(other.x1, other.x2) &&
+      x <= Math.max(other.x1, other.x2) &&
+      y >= Math.min(other.y1, other.y2) &&
+      y <= Math.max(other.y1, other.y2)) {
+
+      return new Vector2({ x, y });
+    }
+
+    return null;
+  }
+
 }

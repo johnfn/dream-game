@@ -34,7 +34,7 @@ import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
 import { Lighting } from "./lighting";
-import { Hash } from "./library/hash";
+import { HashMap } from "./library/hash";
 
 export class Game {
   uniforms!: {
@@ -138,8 +138,8 @@ export class Game {
     this.gameState.character = this.player;
 
     if (MyName === "grant") {
-      this.player.x = 150;
-      this.player.y = 200;
+      this.player.x = 250;
+      this.player.y = 300;
     } else {
       this.player.x = 0;
       this.player.y = 0;
