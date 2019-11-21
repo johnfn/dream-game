@@ -71,4 +71,27 @@ export class Debug {
       toBeRemoved.destroy();
     }
   }
+
+  private static profiles: { [key: string]: number[] } = {};
+
+  public static Profile(name: string, cb: () => void): void {
+    Debug.profiles[name] = Debug.profiles[name] || [];
+
+    const start = window.performance.now();
+
+    cb(); 
+
+    const end = window.performance.now();
+
+    Debug.profiles[name].push(end - start);
+
+    if (Debug.profiles[name].length === 60) {
+      const average = Debug.profiles[name].reduce((a, b) => a + b) / 60;
+      const rounded = Math.floor(average * 100) / 100;
+
+      Debug.profiles[name] = [];
+
+      console.log(`${ name }: ${ rounded }ms`)
+    }
+  }
 }
