@@ -1,12 +1,10 @@
 import {
   Application,
-  SCALE_MODES,
   Container,
   Shader,
   Mesh,
   Geometry,
   BLEND_MODES,
-  Graphics,
   Texture,
   Sprite,
   RenderTexture,
@@ -29,6 +27,7 @@ import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
 import { LightSource } from "./light_source";
+import { Debug } from "./library/debug";
 
 export class Game {
   uniforms!: {
@@ -124,8 +123,8 @@ export class Game {
     this.gameState.character = this.player;
 
     if (MyName === "grant") {
-      this.player.x = 900;
-      this.player.y = 1400;
+      this.player.x = 950;
+      this.player.y = 1595;
     } else {
       this.player.x = 0;
       this.player.y = 0;
@@ -164,7 +163,7 @@ export class Game {
     this.app.ticker.add(() => this.gameLoop());
 
     this.gameState.playerLighting = new LightSource(this.gameState, this.buildCollisionGrid());
-    //this.stage.addChild(this.gameState.playerLighting);
+    this.stage.addChild(this.gameState.playerLighting);
     this.addDreamShader();
   };
 
@@ -269,6 +268,8 @@ export class Game {
   };
 
   gameLoop = () => {
+    Debug.Clear();
+
     this.gameState.keys.update();
 
     const activeEntities = this.entities.all.filter(entity =>
@@ -290,6 +291,8 @@ export class Game {
     this.resolveCollisions(grid);
 
     this.uniforms.u_time += 0.01;
+
+    this.gameState.playerLighting.buildLighting(this.gameState, grid);
 
     C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 

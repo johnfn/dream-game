@@ -8,7 +8,6 @@ import { DefaultHashMap, HashSet } from "./library/hash";
 import { Grid } from "./library/grid";
 import { CollisionGrid } from "./collision_grid";
 import { Rect } from "./library/rect";
-import { Debug } from "./library/debug";
 import { Pair } from "./library/pair";
 
 export class LightSource extends Entity {
@@ -27,8 +26,6 @@ export class LightSource extends Entity {
     this.graphics.endFill();
 
     this.addChild(this.graphics);
-
-    this.buildLighting(state, collisionGrid);
   }
 
   debugDrawRoom(room: Grid<boolean>) {
@@ -61,8 +58,9 @@ export class LightSource extends Entity {
 
     room.set(playerGridX, playerGridY, true);
 
+    let count = 0;
     while (roomEdge.length > 0) {
-      if (room.getCount() > 1000) {
+      if (count++ > 1000) {
         console.log("Maximum room flood size exceeded");
 
         break;
@@ -167,8 +165,6 @@ export class LightSource extends Entity {
     const boundaries: Line[] = [];
     let unprocessedSingleTileEdges = [...segments];
 
-    this.graphics.lineStyle(5, 0xff0000, 1);
-
     while (unprocessedSingleTileEdges.length > 0) {
       let potentialStart: Vector2;
 
@@ -187,9 +183,6 @@ export class LightSource extends Entity {
         segmentsAtPoint.get(potentialStart)[0].isXAligned() === 
         segmentsAtPoint.get(potentialStart)[1].isXAligned()
       );
-
-      segmentsAtPoint.get(potentialStart)[0].drawOnto(this.graphics, 0xffff00);
-      segmentsAtPoint.get(potentialStart)[1].drawOnto(this.graphics, 0xffff00);
 
       // Found a good vertex to start at, let's start building lines!
 
@@ -245,7 +238,8 @@ export class LightSource extends Entity {
 
       boundaries.push(line);
 
-      // Done, clear everything out of the unprocessed list. (TODO)
+      // Done, clear everything out of the unprocessed list.
+      // TODO: This is actually n^2, even though it doesn't have to be.
 
       for (const segment of seenSegments) {
         unprocessedSingleTileEdges = unprocessedSingleTileEdges.filter(unprocessedSegment => !unprocessedSegment.equals(segment));
@@ -255,13 +249,6 @@ export class LightSource extends Entity {
     // Step 3: We have all vertices, but that's actually too many. We should
     // only be considering all vertices that we have direct line of sight to.
     // Let's remove any vertices that we can't see.
-
-    // const allVertices = new HashSet<Vector2>();
-
-    // for (const boundary of boundaries) {
-    //   allVertices.put(boundary.start);
-    //   allVertices.put(boundary.end);
-    // }
 
     const allVisibleVertices = new HashSet<Vector2>();
 
@@ -277,7 +264,6 @@ export class LightSource extends Entity {
 
         // If it's blocked by any other boundary, it's not visible.
 
-        let visible = true;
 
         for (const blockingBoundary of boundaries) {
           if (!blockingBoundary.sharesAVertexWith(rayToVertex)) {
@@ -289,9 +275,7 @@ export class LightSource extends Entity {
           }
         }
 
-        if (visible) {
-          allVisibleVertices.put(vertex);
-        }
+        allVisibleVertices.put(vertex);
       }
     }
 
@@ -300,11 +284,10 @@ export class LightSource extends Entity {
     for (const vertex of allVisibleVertices.values()) {
       const line = new Line({ one: player.positionVector(), two: vertex });
 
-      // allVerticesByAngle[line.angleInDegrees] = (allVerticesByAngle[line.angleInDegrees] || []).concat(vertex);
       anglesToVertices[line.angleInDegrees] = vertex;
     }
 
-    const verticesSortedByAngle = Object.keys(anglesToVertices).map(s => Number(s)).sort().map(angle => anglesToVertices[angle]);
+    const verticesSortedByAngle = Object.keys(anglesToVertices).map(s => Number(s)).sort((a, b) => a - b).map(angle => anglesToVertices[angle]);
 
     // Step 4; Now that we have visible vertices, potentially project the line PAST
     // the vertex it's on. 
@@ -318,16 +301,16 @@ export class LightSource extends Entity {
         .filter(boundary => boundary.start.equals(vertex) || boundary.end.equals(vertex))
         .map(boundary => new Pair(boundary, vertex));
 
-      const ray1 = new Vector2({ x: vertex.x - player.x, y: vertex.y - player.y });
-      const nudgedVertex = ray1.add(ray1.normalize().multiply(3)).add(player.positionVector());
+      const ray = new Vector2({ x: vertex.x - player.x, y: vertex.y - player.y });
+      const nudgedVertex = ray.add(ray.normalize().multiply(3)).add(player.positionVector());
 
       if (collisionGrid.collidesPoint(nudgedVertex).length === 0) {
-        const veryLongV1 = ray1.add(ray1.normalize().multiply(1000));
+        const veryLongV1 = ray.add(ray.normalize().multiply(1000));
         const longRaycast = new Line({
           one: player.positionVector(),
           two: player.positionVector().add(veryLongV1),
         });
-        Debug.DrawLine(longRaycast)
+
         let closestBoundary : Line | null = null;
         let closestPoint    : Vector2 | null = null;
         let closestDistance = Number.POSITIVE_INFINITY;
@@ -349,9 +332,6 @@ export class LightSource extends Entity {
         }
 
         if (closestPoint && closestBoundary) {
-        //   Debug.DrawLine(closestBoundary, 0xffff00);
-        //   Debug.DrawPoint(closestPoint, 0xffff00);
-
           boundaryAndPoint.push(new Pair(closestBoundary, closestPoint))
         }
       }
@@ -359,52 +339,62 @@ export class LightSource extends Entity {
       boundariesAndPoints.push(boundaryAndPoint);
     }
 
-    for (const points of boundariesAndPoints) {
-      for (const { first, second } of points) {
-        Debug.DrawPoint(second);
-        Debug.DrawLine(new Line({ 
-          one: player.positionVector(),
-          two: second,
-        }));
-      }
-    }
+    // let i = 0; 
+    // for (const points of boundariesAndPoints) {
+    //   i++;
 
-    // const v2 = verticesSortedByAngle[(i + 1) % verticesSortedByAngle.length];
+    //   for (const { first, second } of points) {
+    //     Debug.DrawPoint(second);
+    //     Debug.DrawLine(new Line({ 
+    //       one: player.positionVector(),
+    //       two: second,
+    //     }), 0x00ff00);
+    //     Debug.DrawLine(first.add(new Vector2({ x: i, y: i })));
+    //   }
+    // }
 
-    // Step 4:
+    // Step 5bb:
 
     // Now that we have all visible vertices, spin in a circle, drawing a ray to
     // (and potentially through!) each one. Find the (closest!) boundary line
     // that joins the two rays - those three lines make up a polygon of the
     // light raycast.
 
-    // Find all boundaries that this line touches
-    // Find all boundaries that the next line touches
-    // Take the closest one
+    for (let i = 0; i < boundariesAndPoints.length; i++) {
+      const ray1 = boundariesAndPoints[i];
+      const ray2 = boundariesAndPoints[(i + 1) % boundariesAndPoints.length];
 
-    /*
-    for (const list of Object.values(allVerticesByAngle)) {
+      let closestBoundary: Line | null = null;
+      let closestBoundaryDistance = Number.POSITIVE_INFINITY;
 
-      outer:
-      for (const v of list) {
-        const line = new Line({ one: player.positionVector(), two: v });
+      for (const pair of ray1) {
+        const match = ray2.find(secondPair => secondPair.first.getOverlap(pair.first));
 
-        for (const boundary of boundaries) {
-          if (line.intersects(boundary) && !line.equals(boundary) && (
-            !line.start.equals(boundary.start) &&
-            !line.start.equals(boundary.end) &&
-            !line.end.equals(boundary.start) &&
-            !line.end.equals(boundary.end)
-          )) {
-            continue outer;
+        if (match) {
+          const distance = pair.second.distance(player.positionVector());
+
+          if (distance < closestBoundaryDistance) {
+            closestBoundary = new Line({ one: pair.second, two: match.second });
+            closestBoundaryDistance = distance;
           }
         }
+      }
 
-        line.drawOnto(this.graphics, 0xff0000);
+      if (closestBoundary) {
+        this.graphics.beginFill(0xfff, 0.3);
+        this.graphics.lineStyle(0, 0, 0);
+        this.graphics.drawPolygon([
+          player.x, player.y,
+          closestBoundary.start.x, closestBoundary.start.y,
+          closestBoundary.end.x  , closestBoundary.end.y,
+          player.x, player.y,
+        ]);
+
+        this.graphics.endFill()
+      } else {
+        throw new Error("Bad ?!?");
       }
     }
-    */
-
   }
 
   collide = () => {};

@@ -8,6 +8,15 @@ const MAX_LEN = 500;
 export class Debug {
   public static DebugGraphicStack: Graphics[] = [];
 
+  public static Clear(): void {
+    for (const debug of Debug.DebugGraphicStack) {
+      debug.parent.removeChild(debug);
+      debug.destroy();
+    }
+
+    Debug.DebugGraphicStack = [];
+  }
+
   /**
    * Draw a point on the game.
    */

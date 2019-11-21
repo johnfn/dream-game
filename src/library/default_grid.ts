@@ -2,21 +2,14 @@
 export class DefaultGrid<T> {
   private _data: { [key: number]: { [key: number]: T} } = {};
   private _makeDefault: (x: number, y: number) => T;
+  private _count = 0;
 
   constructor(makeDefault: (x: number, y: number) => T) {
     this._makeDefault = makeDefault;
   }
 
   getCount() {
-    let count = 0;
-
-    for (const key of Object.keys(this._data)) {
-      const inner = this._data[Number(key)];
-
-      count += Object.keys(inner).length;
-    }
-
-    return count;
+    return this._count;
   }
 
   keys(): { x: number, y: number }[] {
@@ -54,6 +47,10 @@ export class DefaultGrid<T> {
   set(x: number, y: number, value: T) {
     if (!this._data[x]) {
       this._data[x] = {};
+    }
+
+    if (!this._data[x][y]) {
+      this._count++;
     }
 
     this._data[x][y] = value;
