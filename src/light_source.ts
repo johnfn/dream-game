@@ -9,6 +9,7 @@ import { Grid } from "./library/grid";
 import { CollisionGrid } from "./collision_grid";
 import { Rect } from "./library/rect";
 import { Debug } from "./library/debug";
+import { Pair } from "./library/pair";
 
 export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
@@ -279,9 +280,6 @@ export class LightSource extends Entity {
         let visible = true;
 
         for (const blockingBoundary of boundaries) {
-          blockingBoundary.drawOnto(this.graphics, 0xff0000);
-          boundary.drawOnto(this.graphics, 0x00ff00);
-
           if (!blockingBoundary.sharesAVertexWith(rayToVertex)) {
             const intersection = blockingBoundary.segmentIntersection(rayToVertex);
 
@@ -297,13 +295,81 @@ export class LightSource extends Entity {
       }
     }
 
-    const allVerticesByAngle: {[angle: number]: Vector2[] } = {};
+    const anglesToVertices: {[angle: number]: Vector2 } = {};
 
     for (const vertex of allVisibleVertices.values()) {
       const line = new Line({ one: player.positionVector(), two: vertex });
 
-      allVerticesByAngle[line.angleInDegrees] = (allVerticesByAngle[line.angleInDegrees] || []).concat(vertex);
+      // allVerticesByAngle[line.angleInDegrees] = (allVerticesByAngle[line.angleInDegrees] || []).concat(vertex);
+      anglesToVertices[line.angleInDegrees] = vertex;
     }
+
+    const verticesSortedByAngle = Object.keys(anglesToVertices).map(s => Number(s)).sort().map(angle => anglesToVertices[angle]);
+
+    // Step 4; Now that we have visible vertices, potentially project the line PAST
+    // the vertex it's on. 
+
+    const boundariesAndPoints: Pair<Line, Vector2>[][] = [];
+
+    for (let i = 0; i < verticesSortedByAngle.length; i++) {
+      const vertex = verticesSortedByAngle[i];
+
+      const boundaryAndPoint: Pair<Line, Vector2>[] = boundaries
+        .filter(boundary => boundary.start.equals(vertex) || boundary.end.equals(vertex))
+        .map(boundary => new Pair(boundary, vertex));
+
+      const ray1 = new Vector2({ x: vertex.x - player.x, y: vertex.y - player.y });
+      const nudgedVertex = ray1.add(ray1.normalize().multiply(3)).add(player.positionVector());
+
+      if (collisionGrid.collidesPoint(nudgedVertex).length === 0) {
+        const veryLongV1 = ray1.add(ray1.normalize().multiply(1000));
+        const longRaycast = new Line({
+          one: player.positionVector(),
+          two: player.positionVector().add(veryLongV1),
+        });
+        Debug.DrawLine(longRaycast)
+        let closestBoundary : Line | null = null;
+        let closestPoint    : Vector2 | null = null;
+        let closestDistance = Number.POSITIVE_INFINITY;
+
+        for (const boundary of boundaries) {
+          const collision = boundary.segmentIntersection(longRaycast);
+
+          if (collision) {
+            const distance = collision.distance(player.positionVector());
+
+            if (distance < closestDistance) {
+              if (boundaryAndPoint.find(pair => pair.first.equals(boundary)) === undefined) {
+                closestDistance = distance;
+                closestBoundary = boundary;
+                closestPoint    = collision;
+              }
+            }
+          }
+        }
+
+        if (closestPoint && closestBoundary) {
+        //   Debug.DrawLine(closestBoundary, 0xffff00);
+        //   Debug.DrawPoint(closestPoint, 0xffff00);
+
+          boundaryAndPoint.push(new Pair(closestBoundary, closestPoint))
+        }
+      }
+
+      boundariesAndPoints.push(boundaryAndPoint);
+    }
+
+    for (const points of boundariesAndPoints) {
+      for (const { first, second } of points) {
+        Debug.DrawPoint(second);
+        Debug.DrawLine(new Line({ 
+          one: player.positionVector(),
+          two: second,
+        }));
+      }
+    }
+
+    // const v2 = verticesSortedByAngle[(i + 1) % verticesSortedByAngle.length];
 
     // Step 4:
 
@@ -315,14 +381,6 @@ export class LightSource extends Entity {
     // Find all boundaries that this line touches
     // Find all boundaries that the next line touches
     // Take the closest one
-
-    for (const list of Object.values(allVerticesByAngle)) {
-      for (const v of list) {
-        const line = new Line({ one: player.positionVector(), two: v });
-
-        line.drawOnto(this.graphics, 0xff0000);
-      }
-    }
 
     /*
     for (const list of Object.values(allVerticesByAngle)) {

@@ -20,7 +20,7 @@ export class Debug {
 
       y1: point.y - 10,
       y2: point.y + 10,
-    }).drawOnto(graphics, 0xff0000);
+    }).drawOnto(graphics, color);
 
     new Line({
       x1: point.x + 10,
@@ -28,7 +28,7 @@ export class Debug {
 
       y1: point.y - 10,
       y2: point.y + 10,
-    }).drawOnto(graphics, 0xff0000);
+    }).drawOnto(graphics, color);
 
     Game.Instance.stage.addChild(graphics);
 
@@ -37,8 +37,29 @@ export class Debug {
     if (this.DebugGraphicStack.length > MAX_LEN) {
       const toBeRemoved = this.DebugGraphicStack.shift()!;
 
-      toBeRemoved.destroy();
       toBeRemoved.parent.removeChild(toBeRemoved);
+      toBeRemoved.destroy();
+    }
+  }
+
+  public static DrawLineV2(one: Vector2, two: Vector2, color = 0xff0000) {
+    Debug.DrawLine(new Line({ one, two }), color);
+  }
+
+  public static DrawLine(line: Line, color = 0xff0000) {
+    const graphics = new Graphics();
+
+    line.drawOnto(graphics, color);
+
+    Game.Instance.stage.addChild(graphics);
+
+    this.DebugGraphicStack.push(graphics);
+
+    if (this.DebugGraphicStack.length > MAX_LEN) {
+      const toBeRemoved = this.DebugGraphicStack.shift()!;
+
+      toBeRemoved.parent.removeChild(toBeRemoved);
+      toBeRemoved.destroy();
     }
   }
 }

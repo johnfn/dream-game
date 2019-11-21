@@ -253,7 +253,9 @@ export class Line {
     return `Line: [(${ this.x1 },${ this.y1 }) -> (${ this.x2 },${ this.y2 })]`;
   }
 
-  equals(other: Line) {
+  equals(other: Line | null) {
+    if (other === null) { return false; }
+
     return (
       this.x1 === other.x1 &&
       this.x2 === other.x2 &&
@@ -376,5 +378,24 @@ export class Line {
     }
 
     return null;
+  }
+
+  normalize(): Line {
+    const mag = Math.sqrt(
+      (this.x1 - this.x2) ** 2 +
+      (this.y1 - this.y2) ** 2
+    );
+
+    return new Line({
+      one: this.start,
+      two: new Vector2({
+        x: this.start.x + (this.end.x - this.start.x) / mag,
+        y: this.start.x + (this.end.y - this.start.y) / mag,
+      })
+    })
+  }
+
+  hash(): string {
+    return this.toString();
   }
 }

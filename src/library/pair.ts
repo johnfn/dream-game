@@ -1,5 +1,3 @@
-
-
 export class Pair<T extends { hash(): string }, U extends { hash(): string }> {
   private _first: T;
   private _second: U;
@@ -11,5 +9,13 @@ export class Pair<T extends { hash(): string }, U extends { hash(): string }> {
 
   hash(): string {
     return `${ this._first.hash() }|${ this._second.hash() }`
+  }
+
+  get first() {
+    return this._first;
+  }
+
+  get second() {
+    return this._second;
   }
 }

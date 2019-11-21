@@ -64,9 +64,10 @@ export class Vector2 {
     return Math.max(Math.abs(p.x - this.x), Math.abs(p.y - this.y));
   }
 
-  l2Distance(p: Vector2): number {
+  distance(p: Vector2): number {
     let dx = Math.abs(p.x - this.x);
     let dy = Math.abs(p.y - this.y);
+
     return Math.sqrt(dx * dx + dy * dy);
   }
 
@@ -162,9 +163,16 @@ export class Vector2 {
   }
 
   normalize(): Vector2 {
-    if (this.x === 0 && this.y === 0) { return this; }
+    if (this.x === 0 && this.y === 0) { 
+      return this; 
+    }
+
     const length = Math.sqrt(this.x * this.x + this.y * this.y);
-    return new Vector2({x: this.x / length, y: this.y / length});
+
+    return new Vector2({
+      x: this.x / length, 
+      y: this.y / length
+    });
   }
 
   lerp(other: Vector2, t: number): Vector2 {
