@@ -1,6 +1,7 @@
 import { Vector2 } from "./library/vector2";
 import { Entity } from "./library/entity";
 import * as PIXI from "pixi.js";
+import { Rect } from "./library/rect";
 
 export class FollowCamera {
   private _position: Vector2 = Vector2.Zero;
@@ -22,6 +23,15 @@ export class FollowCamera {
     return new Vector2({
       x: this._position.x + this._width / 2,
       y: this._position.y + this._height / 2
+    });
+  }
+
+  public bounds(): Rect {
+    return new Rect({
+      x: this.center.x - this._width / 2,
+      y: this.center.y - this._height / 2,
+      w: this._width,
+      h: this._height,
     });
   }
 

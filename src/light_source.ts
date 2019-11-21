@@ -1,53 +1,61 @@
 import { Graphics } from "pixi.js";
 import { Entity } from "./library/entity";
 import { GameState, GameMode } from "./state";
-import { Grid } from "./library/tilemap";
 import { C } from "./constants";
-import { Game } from "./game";
 import { Line } from "./library/line";
 import { Vector2 } from "./library/vector2";
-import { Hash, DefaultHash } from "./library/hash";
-import { MyName } from "./my_name";
+import { DefaultHashMap, HashSet } from "./library/hash";
+import { Grid } from "./library/grid";
+import { CollisionGrid } from "./collision_grid";
+import { Rect } from "./library/rect";
+import { Debug } from "./library/debug";
 
-export class Lighting extends Entity {
+export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
-  public graphics: Graphics;
+  graphics: Graphics;
 
-  constructor(state: GameState) {
+  constructor(state: GameState, collisionGrid: CollisionGrid) {
     super({
       collidable: false,
       dynamic   : false,
     });
 
-    const g = new Graphics();
+    this.graphics = new Graphics();
+    this.graphics.beginFill(0x5d0015);
+    this.graphics.drawPolygon([10, 10, 120, 100, 120, 200, 70, 200]);
+    this.graphics.endFill();
 
-    g.beginFill(0x8a8a8a);
-    g.drawPolygon([10, 10, 120, 100, 120, 200, 70, 200]);
-    g.endFill();
+    this.addChild(this.graphics);
 
-    this.graphics = g;
-    this.addChild(g);
-
-    this.buildLighting(state);
+    this.buildLighting(state, collisionGrid);
   }
 
-  // TODO: Use collision grid etc
+  debugDrawRoom(room: Grid<boolean>) {
+    for (const { x, y } of room.keys()) {
+      this.graphics.drawRect(
+        x * C.TILE_WIDTH,
+        y * C.TILE_HEIGHT,
+        C.TILE_WIDTH,
+        C.TILE_HEIGHT
+      );
+    }
+  }
 
-  buildLighting(state: GameState) {
-    type Point = { x: number, y: number };
+  buildLighting(state: GameState, collisionGrid: CollisionGrid) {
+    // Step -1: Clear out old state.
+
+    this.graphics.clear();
 
     // Step 0: Get useful variables!
 
     const player   = state.character;
-    const map      = state.map;
-    const entities = Game.Instance.entities.collidable;
 
     // Step 1: BFS to find bounds of current room.
 
     const playerGridX = Math.floor(player.x / C.TILE_WIDTH);
     const playerGridY = Math.floor(player.y / C.TILE_HEIGHT);
 
-    let roomEdge: Point[] = [{ x: playerGridX, y: playerGridY }];
+    let roomEdge: Vector2[] = [new Vector2({ x: playerGridX, y: playerGridY })];
     const room = new Grid<boolean>();
 
     room.set(playerGridX, playerGridY, true);
@@ -75,38 +83,21 @@ export class Lighting extends Entity {
           continue;
         }
 
-        let isWall = map.doesMapHaveCollisionAtTile(neighborX * C.TILE_WIDTH, neighborY * C.TILE_HEIGHT);
+        const isWall = collisionGrid.collidesRect(new Rect({
+          x: neighborX * C.TILE_WIDTH,
+          y: neighborY * C.TILE_HEIGHT,
+          w: C.TILE_WIDTH,
+          h: C.TILE_HEIGHT,
+        }).shrink(1), player);
 
-        if (isWall) {
-          continue;
-        }
-
-        outer:
-        for (const ent of entities) {
-          // loop over entity grid points
-
-          let xLow  = Math.floor(ent.x                / C.TILE_WIDTH);
-          let yLow  = Math.floor(ent.y                / C.TILE_HEIGHT);
-          let xHigh = Math.floor((ent.x + ent.width)  / C.TILE_WIDTH);
-          let yHigh = Math.floor((ent.y + ent.height) / C.TILE_HEIGHT);
-
-          for (let x = xLow; x < xHigh; x++) {
-            for (let y = yLow; y < yHigh; y++) {
-              if (x === neighborX && y === neighborY) {
-                isWall = true;
-
-                break outer;
-              }
-            }
-          }
-        }
-
-        if (!isWall) {
+        if (isWall.length === 0) {
           room.set(neighborX, neighborY, true);
-          roomEdge.push({ x: neighborX, y: neighborY });
+          roomEdge.push(new Vector2({ x: neighborX, y: neighborY }));
         }
       }
     }
+
+    this.debugDrawRoom(room);
 
     // Step 2: Build lines for boundaries of the room.
 
@@ -159,7 +150,7 @@ export class Lighting extends Entity {
     // Step 2ba: Make a map of all segments that end at a given point. There are
     // always exactly 2.
 
-    const segmentsAtPoint = new DefaultHash<Vector2, Line[]>(() => []);
+    const segmentsAtPoint = new DefaultHashMap<Vector2, Line[]>(() => []);
     const hash = (vector: Vector2) => `${ vector.x }-${ vector.y }`;
 
     for (const edge of segments) {
@@ -169,18 +160,13 @@ export class Lighting extends Entity {
       segmentsAtPoint.get(end).push(edge);
     }
 
-    if (MyName === "grant") debugger;
-
     // Step 2bb: Since all boundary lines are cycles, build the lines by walking
     // around the cycles.
 
     const boundaries: Line[] = [];
     let unprocessedSingleTileEdges = [...segments];
 
-    const g = new Graphics();
-
-    let xyz = 0.24;
-    g.lineStyle(5, 0xff0000, 1);
+    this.graphics.lineStyle(5, 0xff0000, 1);
 
     while (unprocessedSingleTileEdges.length > 0) {
       let potentialStart: Vector2;
@@ -201,8 +187,8 @@ export class Lighting extends Entity {
         segmentsAtPoint.get(potentialStart)[1].isXAligned()
       );
 
-      segmentsAtPoint.get(potentialStart)[0].drawOnto(g, 0xffff00);
-      segmentsAtPoint.get(potentialStart)[1].drawOnto(g, 0xffff00);
+      segmentsAtPoint.get(potentialStart)[0].drawOnto(this.graphics, 0xffff00);
+      segmentsAtPoint.get(potentialStart)[1].drawOnto(this.graphics, 0xffff00);
 
       // Found a good vertex to start at, let's start building lines!
 
@@ -265,11 +251,102 @@ export class Lighting extends Entity {
       }
     }
 
+    // Step 3: We have all vertices, but that's actually too many. We should
+    // only be considering all vertices that we have direct line of sight to.
+    // Let's remove any vertices that we can't see.
+
+    // const allVertices = new HashSet<Vector2>();
+
+    // for (const boundary of boundaries) {
+    //   allVertices.put(boundary.start);
+    //   allVertices.put(boundary.end);
+    // }
+
+    const allVisibleVertices = new HashSet<Vector2>();
+
     for (const boundary of boundaries) {
-      boundary.drawOnto(g, 0xff0000);
+      outer:
+      for (const vertex of [boundary.start, boundary.end]) {
+        // Let's see if this vertex is visible
+
+        const rayToVertex = new Line({
+          one: player.positionVector(),
+          two: vertex,
+        });
+
+        // If it's blocked by any other boundary, it's not visible.
+
+        let visible = true;
+
+        for (const blockingBoundary of boundaries) {
+          blockingBoundary.drawOnto(this.graphics, 0xff0000);
+          boundary.drawOnto(this.graphics, 0x00ff00);
+
+          if (!blockingBoundary.sharesAVertexWith(rayToVertex)) {
+            const intersection = blockingBoundary.segmentIntersection(rayToVertex);
+
+            if (intersection) {
+              continue outer;
+            }
+          }
+        }
+
+        if (visible) {
+          allVisibleVertices.put(vertex);
+        }
+      }
     }
 
-    this.addChild(g);
+    const allVerticesByAngle: {[angle: number]: Vector2[] } = {};
+
+    for (const vertex of allVisibleVertices.values()) {
+      const line = new Line({ one: player.positionVector(), two: vertex });
+
+      allVerticesByAngle[line.angleInDegrees] = (allVerticesByAngle[line.angleInDegrees] || []).concat(vertex);
+    }
+
+    // Step 4:
+
+    // Now that we have all visible vertices, spin in a circle, drawing a ray to
+    // (and potentially through!) each one. Find the (closest!) boundary line
+    // that joins the two rays - those three lines make up a polygon of the
+    // light raycast.
+
+    // Find all boundaries that this line touches
+    // Find all boundaries that the next line touches
+    // Take the closest one
+
+    for (const list of Object.values(allVerticesByAngle)) {
+      for (const v of list) {
+        const line = new Line({ one: player.positionVector(), two: v });
+
+        line.drawOnto(this.graphics, 0xff0000);
+      }
+    }
+
+    /*
+    for (const list of Object.values(allVerticesByAngle)) {
+
+      outer:
+      for (const v of list) {
+        const line = new Line({ one: player.positionVector(), two: v });
+
+        for (const boundary of boundaries) {
+          if (line.intersects(boundary) && !line.equals(boundary) && (
+            !line.start.equals(boundary.start) &&
+            !line.start.equals(boundary.end) &&
+            !line.end.equals(boundary.start) &&
+            !line.end.equals(boundary.end)
+          )) {
+            continue outer;
+          }
+        }
+
+        line.drawOnto(this.graphics, 0xff0000);
+      }
+    }
+    */
+
   }
 
   collide = () => {};

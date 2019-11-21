@@ -1,5 +1,6 @@
 import { Vector2 } from "./vector2"
 import { Graphics } from "pixi.js";
+import { epsGreaterThan, epsLessThan } from "./eps";
 
 export class Line {
   private _x1: number;
@@ -101,13 +102,14 @@ export class Line {
     });
   }
 
-  sharesAVertexWith(other: Line): boolean {
-    return (
-      (this.x1 === other.x1 && this.y1 === other.y1) ||
-      (this.x1 === other.x2 && this.y1 === other.y2) ||
-      (this.x2 === other.x1 && this.y2 === other.y1) ||
-      (this.x2 === other.x2 && this.y2 === other.y2)
-    );
+  sharesAVertexWith(other: Line): Vector2 | null {
+    if (this.start.equals(other.start)) { return this.start; }
+    if (this.start.equals(other.end))   { return this.start; }
+
+    if (this.end.equals(other.start)) { return this.end; }
+    if (this.end.equals(other.end))   { return this.end; }
+
+    return null;
   }
 
   static DeserializeLine(s: string): Line {
@@ -310,10 +312,69 @@ export class Line {
     });
   }
 
-  drawOnto(graphics: Graphics, color: number) {
-    graphics.lineStyle(5, color, 1);
+  drawOnto(graphics: Graphics, color = 0xff0000) {
+    graphics.lineStyle(2, color, 1);
 
     graphics.moveTo(this.x1, this.y1);
     graphics.lineTo(this.x2, this.y2);
+  }
+
+  /** 
+   * Returns the point where these two lines, if extended arbitrarily, would
+   * intersect.
+   */
+  lineIntersection(other: Line): Vector2 {
+    const p1 = this.start;
+    const p2 = this.end;
+    const p3 = other.start;
+    const p4 = other.end;
+
+    const s = (
+      (p4.x - p3.x) * 
+      (p1.y - p3.y) - 
+      (p4.y - p3.y) * 
+      (p1.x - p3.x)) / (
+      (p4.y - p3.y) * 
+      (p2.x - p1.x) - 
+      (p4.x - p3.x) * 
+      (p2.y - p1.y)
+    );
+
+    const x = p1.x + s * (p2.x - p1.x);
+    const y = p1.y + s * (p2.y - p1.y);
+
+    return new Vector2({ x, y });
+  }
+
+  /**
+   * Returns the point where these two segments exist, if there is one.
+   */
+  segmentIntersection(other: Line): Vector2 | null {
+    const lineIntersection = this.lineIntersection(other);
+
+    const x = lineIntersection.x;
+    const y = lineIntersection.y;
+
+    if (
+      (
+        // within us
+
+        epsGreaterThan(x, Math.min(this.x1, this.x2)) &&
+        epsLessThan   (x, Math.max(this.x1, this.x2)) &&
+        epsGreaterThan(y, Math.min(this.y1, this.y2)) &&
+        epsLessThan   (y, Math.max(this.y1, this.y2))
+      ) && (
+        // within other
+
+        epsGreaterThan(x, Math.min(other.x1, other.x2)) &&
+        epsLessThan   (x, Math.max(other.x1, other.x2)) &&
+        epsGreaterThan(y, Math.min(other.y1, other.y2)) &&
+        epsLessThan   (y, Math.max(other.y1, other.y2))
+      )
+    ) {
+      return lineIntersection;
+    }
+
+    return null;
   }
 }

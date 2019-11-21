@@ -103,4 +103,11 @@ export abstract class Entity extends Container {
       this.position.y < C.CANVAS_HEIGHT
     );
   };
+
+  positionVector() {
+    return new Vector2({
+      x: this.x,
+      y: this.y,
+    });
+  }
 }

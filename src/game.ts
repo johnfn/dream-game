@@ -1,27 +1,20 @@
 import {
   Application,
   SCALE_MODES,
-  settings,
   Container,
   Shader,
   Mesh,
   Geometry,
   BLEND_MODES,
-  Filter,
   Graphics,
   Texture,
   Sprite,
-  Rectangle,
-  BaseTexture,
-  TextureMatrix,
   RenderTexture,
-  Renderer
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
 import { Entity, EntityType } from "./library/entity";
-import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
 import { FollowCamera } from "./camera";
@@ -35,8 +28,7 @@ import { HeadsUpDisplay } from "./heads_up_display";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
-import { Lighting } from "./lighting";
-import { Hash } from "./library/hash";
+import { LightSource } from "./light_source";
 
 export class Game {
   uniforms!: {
@@ -45,8 +37,6 @@ export class Game {
   };
 
   renderTex!: RenderTexture;
-
-  lighting: Graphics;
 
   dreamShader!: Sprite;
   static Instance: Game;
@@ -66,10 +56,9 @@ export class Game {
     interactable: []
   };
 
-  grid: CollisionGrid;
-  debugMode: boolean;
-  player!: Character;
-  camera!: FollowCamera;
+  debugMode   : boolean;
+  player     !: Character;
+  camera     !: FollowCamera;
 
   /**
    * The stage of the game. Put everything in-game on here.
@@ -119,29 +108,6 @@ export class Game {
     C.Stage = this.stage;
 
     document.body.appendChild(this.app.view);
-
-    this.grid = new CollisionGrid({
-      game: this,
-      width: 2 * C.CANVAS_WIDTH,
-      height: 2 * C.CANVAS_HEIGHT,
-      cellSize: 16 * C.TILE_WIDTH,
-      debug: this.debugMode
-    });
-
-    this.lighting = new Graphics()
-      .beginFill(0xd1be69)
-      .moveTo(300, 300)
-      .lineTo(0, 0)
-      .lineTo(200, 0)
-      .lineTo(300, 300)
-      .endFill()
-      .beginFill(0xd1be69)
-      .moveTo(300, 300)
-      .lineTo(C.CANVAS_WIDTH, 0)
-      .lineTo(C.CANVAS_WIDTH, 200)
-      .lineTo(300, 300)
-      .endFill();
-
     C.Loader.onLoadComplete(this.startGame);
   }
 
@@ -158,8 +124,8 @@ export class Game {
     this.gameState.character = this.player;
 
     if (MyName === "grant") {
-      this.player.x = 150;
-      this.player.y = 200;
+      this.player.x = 1100;
+      this.player.y = 1400;
     } else {
       this.player.x = 0;
       this.player.y = 0;
@@ -197,42 +163,12 @@ export class Game {
 
     this.app.ticker.add(() => this.gameLoop());
 
-    this.gameState.lighting = new Lighting(this.gameState);
-    //this.stage.addChild(this.gameState.lighting);
-
+    this.gameState.playerLighting = new LightSource(this.gameState, this.buildCollisionGrid());
+    //this.stage.addChild(this.gameState.playerLighting);
     this.addDreamShader();
   };
 
-  // Note: For now, we treat map as a special case.
-  // TODO: Load map into collision grid and use collision grid ONLY.
-  private doesRectHitAnything = (
-    rect: Rect,
-    associatedEntity: Entity
-  ): boolean => {
-    const hitMap = this.gameState.map.doesRectCollideMap(rect);
-
-    if (hitMap) {
-      return true;
-    }
-
-    const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
-
-    if (gridCollisions.length > 0) {
-      return true;
-    }
-
-    return false;
-  };
-
-  private resolveCollisions = () => {
-    this.grid.clear();
-
-    for (const entity of this.entities.collidable) {
-      if (entity.isOnScreen()) {
-        this.grid.add(entity.myGetBounds(), entity);
-      }
-    }
-
+  private resolveCollisions = (grid: CollisionGrid) => {
     const movingEntities: MovingEntity[] = this.entities.collidable.filter(
       ent => ent.entityType === EntityType.MovingEntity
     ) as MovingEntity[];
@@ -247,7 +183,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(xVelocity);
 
-      if (this.doesRectHitAnything(updatedBounds, entity)) {
+      if (grid.collidesRect(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
@@ -255,7 +191,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(yVelocity);
 
-      if (this.doesRectHitAnything(updatedBounds, entity)) {
+      if (grid.collidesRect(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
@@ -278,6 +214,7 @@ export class Game {
             new Vector2(this.player.position)
           )
       );
+
     let targetInteractor: InteractableEntity | null = sortedInteractors[0];
 
     if (targetInteractor) {
@@ -305,6 +242,32 @@ export class Game {
     }
   };
 
+  buildCollisionGrid = (): CollisionGrid => {
+    const grid = new CollisionGrid({
+      game    : this,
+      width   : 2 * C.CANVAS_WIDTH,
+      height  : 2 * C.CANVAS_HEIGHT,
+      cellSize: 16 * C.TILE_WIDTH,
+      debug   : this.debugMode
+    });
+
+    for (const entity of this.entities.collidable) {
+      if (entity.isOnScreen()) {
+        grid.add(entity.myGetBounds(), entity);
+      }
+    }
+
+    const mapColliders = this.gameState.map.getCollidersInRegion(
+      this.camera.bounds().expand(1000)
+    );
+
+    for (const mapCollider of mapColliders) {
+      grid.add(mapCollider, this.gameState.map);
+    }
+
+    return grid;
+  };
+
   gameLoop = () => {
     this.gameState.keys.update();
 
@@ -322,11 +285,13 @@ export class Game {
 
     this.handleInteractions(activeInteractableEntities);
 
-    this.resolveCollisions();
+    const grid = this.buildCollisionGrid();
+
+    this.resolveCollisions(grid);
 
     this.uniforms.u_time += 0.01;
 
-    C.Renderer.render(this.gameState.lighting.graphics, this.renderTex);
+    C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
     this.camera.update();
   };
@@ -336,7 +301,7 @@ export class Game {
       width: C.CANVAS_WIDTH,
       height: C.CANVAS_HEIGHT
     });
-    C.Renderer.render(this.gameState.lighting.graphics, this.renderTex);
+    C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
     this.uniforms = {
       u_time: 1,

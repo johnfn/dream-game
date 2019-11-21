@@ -221,7 +221,7 @@ export class Rect {
     ];
   }
 
-  getPointsFromRect(): Vector2[] {
+  getCorners(): Vector2[] {
     return [
       new Vector2({ x: this.x, y: this.y }),
       new Vector2({ x: this.x + this.w, y: this.y }),

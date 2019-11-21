@@ -4,76 +4,11 @@ import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledT
 import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
 import { TextureEntity } from '../texture_entity';
+import { Grid } from './grid';
 
 export type MapLayer = {
   layerName: string;
   entity   : Entity;
-}
-
-// 2D array that allows for negative indices
-export class Grid<T> {
-  private _data: { [key: number]: { [key: number]: T} } = {};
-
-  getCount() {
-    let count = 0;
-
-    for (const key of Object.keys(this._data)) {
-      const inner = this._data[Number(key)];
-
-      for (const _ of Object.keys(inner)) {
-        ++count;
-      }
-    }
-
-    return count;
-  }
-
-  keys(): { x: number, y: number }[] {
-    const result: { x: number, y: number }[] = [];
-
-    for (const x of Object.keys(this._data)) {
-      const inner = this._data[Number(x)];
-
-      for (const y of Object.keys(inner)) {
-        result.push({ 
-          x: Number(x), 
-          y: Number(y),
-        });
-      }
-    }
-
-    return result;
-  }
-
-  set(x: number, y: number, value: T) {
-    if (!this._data[x]) {
-      this._data[x] = {};
-    }
-
-    this._data[x][y] = value;
-  }
-
-  get(x: number, y: number): T | null {
-    if (!this._data[x]) {
-      return null;
-    }
-
-    if (this._data[x][y] === undefined) {
-      return null;
-    }
-
-    return this._data[x][y];
-  }
-
-  getOrDefault(x: number, y: number, otherwise: T): T {
-    const result = this.get(x, y);
-
-    if (result === null) {
-      return otherwise;
-    } else {
-      return result;
-    }
-  }
 }
 
 type TilemapCustomObjectSingle = {
@@ -96,6 +31,8 @@ type TilemapCustomObjects =
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
 
 export class TiledTilemap {
+  private tileWidth: number;
+  private tileHeight: number;
   private data: TiledJSON;
   private tilesets: Tileset[];
   private tileLayers: { [tilesetName: string]: Grid<Tile> };
@@ -114,6 +51,8 @@ export class TiledTilemap {
     this.customObjects = customObjects;
     this.data = data;
     this.renderer = renderer;
+    this.tileWidth = this.data.tilewidth;
+    this.tileHeight = this.data.tileheight;
 
     this.tilesets = TiledTilemap.LoadTilesets(pathToTilemap, this.data);
     this.gidHasCollision = this.buildCollisionInfoForTiles()
@@ -525,7 +464,7 @@ export class TiledTilemap {
     return layers;
   }
 
-  public getTilesAt(x: number, y: number): Tile[] {
+  public getTilesAtAbs(x: number, y: number): Tile[] {
     const tileWidth  = this.data.tilewidth;
     const tileHeight = this.data.tileheight;
 
@@ -543,5 +482,38 @@ export class TiledTilemap {
     }
 
     return tiles;
+  }
+
+  getCollidersInRegion(region: Rect): Rect[] {
+    const lowX = Math.floor(region.x / this.tileWidth);
+    const lowY = Math.floor(region.y / this.tileHeight);
+
+    const highX = Math.ceil(region.right  / this.tileWidth);
+    const highY = Math.ceil(region.bottom / this.tileHeight);
+
+    const colliders: Rect[] = [];
+
+    for (let x = lowX; x <= highX; x++) {
+
+      outer:
+      for (let y = lowY; y <= highY; y++) {
+        const tiles = this.getTilesAtAbs(x * this.tileWidth, y * this.tileHeight);
+        
+        for (const tile of tiles) {
+          if (tile.isCollider) {
+            colliders.push(new Rect({
+              x: x * this.tileWidth,
+              y: y * this.tileHeight,
+              w: this.tileWidth,
+              h: this.tileHeight,
+            }));
+
+            continue outer;
+          }
+        }
+      }
+    }
+
+    return colliders;
   }
 }
