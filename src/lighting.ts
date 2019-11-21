@@ -11,6 +11,7 @@ import { MyName } from "./my_name";
 
 export class Lighting extends Entity {
   activeModes = [GameMode.Normal];
+  public graphics: Graphics;
 
   constructor(state: GameState) {
     super({
@@ -20,10 +21,11 @@ export class Lighting extends Entity {
 
     const g = new Graphics();
 
-    g.beginFill(0x5d0015);
+    g.beginFill(0x8a8a8a);
     g.drawPolygon([10, 10, 120, 100, 120, 200, 70, 200]);
     g.endFill();
 
+    this.graphics = g;
     this.addChild(g);
 
     this.buildLighting(state);
