@@ -141,7 +141,7 @@ export class DreamMap extends Entity {
   // TODO: Have to ignore invisible layers. Somehow?!?
 
   doesMapHaveCollisionAtTile(x: number, y: number): boolean {
-    const tiles = this.map.getTilesAt(x, y);
+    const tiles = this.map.getTilesAtAbs(x, y);
 
     for (const tile of tiles) {
       if (tile.isCollider) {
@@ -154,10 +154,10 @@ export class DreamMap extends Entity {
 
   doesRectCollideMap(rect: Rect): boolean {
     const tiles = [
-      ...this.map.getTilesAt(rect.x, rect.y),
-      ...this.map.getTilesAt(rect.x + rect.w, rect.y),
-      ...this.map.getTilesAt(rect.x, rect.y + rect.h),
-      ...this.map.getTilesAt(rect.x + rect.w, rect.y + rect.h)
+      ...this.map.getTilesAtAbs(rect.x, rect.y),
+      ...this.map.getTilesAtAbs(rect.x + rect.w, rect.y),
+      ...this.map.getTilesAtAbs(rect.x, rect.y + rect.h),
+      ...this.map.getTilesAtAbs(rect.x + rect.w, rect.y + rect.h)
     ];
 
     for (const tile of tiles) {
@@ -169,5 +169,9 @@ export class DreamMap extends Entity {
     }
 
     return false;
+  }
+
+  getCollidersInRegion(region: Rect): Rect[] {
+    return this.map.getCollidersInRegion(region);
   }
 }

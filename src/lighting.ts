@@ -1,12 +1,12 @@
 import { Graphics } from "pixi.js";
 import { Entity } from "./library/entity";
 import { GameState, GameMode } from "./state";
-import { Grid } from "./library/tilemap";
 import { C } from "./constants";
 import { Game } from "./game";
 import { Line } from "./library/line";
 import { Vector2 } from "./library/vector2";
-import { HashMap, DefaultHashMap, HashSet } from "./library/hash";
+import { DefaultHashMap, HashSet } from "./library/hash";
+import { Grid } from "./library/grid";
 
 export class Lighting extends Entity {
   activeModes = [GameMode.Normal];
@@ -270,7 +270,7 @@ export class Lighting extends Entity {
 
     const allVerticesByAngle: {[angle: number]: Vector2[] } = {};
 
-    for (const vertex of allVertices.keys()) {
+    for (const vertex of allVertices.values()) {
       const line = new Line({ one: player.positionVector(), two: vertex });
 
       allVerticesByAngle[line.angleInDegrees] = (allVerticesByAngle[line.angleInDegrees] || []).concat(vertex);

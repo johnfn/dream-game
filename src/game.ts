@@ -1,18 +1,13 @@
 import {
   Application,
   SCALE_MODES,
-  settings,
   Container,
   Shader,
   Mesh,
   Geometry,
   BLEND_MODES,
-  Filter,
   Graphics,
   Texture,
-  Sprite,
-  Rectangle,
-  BaseTexture,
   TextureMatrix
 } from "pixi.js";
 import { C } from "./constants";
@@ -34,7 +29,6 @@ import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
 import { Lighting } from "./lighting";
-import { HashMap } from "./library/hash";
 
 export class Game {
   uniforms!: {
@@ -138,8 +132,8 @@ export class Game {
     this.gameState.character = this.player;
 
     if (MyName === "grant") {
-      this.player.x = 250;
-      this.player.y = 300;
+      this.player.x = 1000;
+      this.player.y = 1300;
     } else {
       this.player.x = 0;
       this.player.y = 0;
@@ -189,12 +183,6 @@ export class Game {
     rect: Rect,
     associatedEntity: Entity
   ): boolean => {
-    const hitMap = this.gameState.map.doesRectCollideMap(rect);
-
-    if (hitMap) {
-      return true;
-    }
-
     const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
 
     if (gridCollisions.length > 0) {
@@ -211,6 +199,14 @@ export class Game {
       if (entity.isOnScreen()) {
         this.grid.add(entity.myGetBounds(), entity);
       }
+    }
+
+    const mapColliders = this.gameState.map.getCollidersInRegion(
+      this.camera.bounds().expand(100)
+    );
+
+    for (const mapCollider of mapColliders) {
+      this.grid.add(mapCollider, this.gameState.map);
     }
 
     const movingEntities: MovingEntity[] = this.entities.collidable.filter(

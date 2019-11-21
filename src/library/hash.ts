@@ -1,8 +1,12 @@
 export class HashSet<K extends { hash(): string }> {
   private _values: HashMap<K, K>;
 
-  constructor() {
+  constructor(initialValues: K[] = []) {
     this._values = new HashMap<K, K>();
+
+    for (const value of initialValues) {
+      this.put(value);
+    }
   }
 
   put(key: K): void {
@@ -13,17 +17,13 @@ export class HashSet<K extends { hash(): string }> {
     return this._values.get(key) !== undefined;
   }
 
-  keys(): K[] {
-    return this._values.values()
+  values(): K[] {
+    return this._values.values();
   }
 }
 
 export class HashMap<K extends { hash(): string }, V> {
   private _values: { [key: string]: V } = {};
-
-  constructor() {
-
-  }
 
   put(key: K, value: V) {
     this._values[key.hash()] = value;
