@@ -2,16 +2,17 @@ import { Graphics } from "pixi.js";
 import { Entity } from "./library/entity";
 import { GameState, GameMode } from "./state";
 import { C } from "./constants";
-import { Game } from "./game";
 import { Line } from "./library/line";
 import { Vector2 } from "./library/vector2";
 import { DefaultHashMap, HashSet } from "./library/hash";
 import { Grid } from "./library/grid";
+import { CollisionGrid } from "./collision_grid";
+import { Rect } from "./library/rect";
 
 export class Lighting extends Entity {
   activeModes = [GameMode.Normal];
 
-  constructor(state: GameState) {
+  constructor(state: GameState, collisionGrid: CollisionGrid) {
     super({
       collidable: false,
       dynamic   : false,
@@ -25,19 +26,17 @@ export class Lighting extends Entity {
 
     this.addChild(g);
 
-    this.buildLighting(state);
+    this.buildLighting(state, collisionGrid);
   }
 
   // TODO: Use collision grid etc
 
-  buildLighting(state: GameState) {
+  buildLighting(state: GameState, collisionGrid: CollisionGrid) {
     type Point = { x: number, y: number };
 
     // Step 0: Get useful variables!
 
     const player   = state.character;
-    const map      = state.map;
-    const entities = Game.Instance.entities.collidable;
 
     // Step 1: BFS to find bounds of current room.
 
@@ -72,35 +71,14 @@ export class Lighting extends Entity {
           continue;
         }
 
-        let isWall = map.doesMapHaveCollisionAtTile(neighborX * C.TILE_WIDTH, neighborY * C.TILE_HEIGHT);
+        const isWall = collisionGrid.collidesRect(new Rect({
+          x: neighborX * C.TILE_WIDTH,
+          y: neighborY * C.TILE_HEIGHT,
+          w: C.TILE_WIDTH,
+          h: C.TILE_HEIGHT,
+        }).shrink(1));
 
-        if (isWall) {
-          continue;
-        }
-
-        outer:
-        for (const ent of entities) {
-          if (ent === state.character) { continue; }
-
-          // loop over entity grid points
-
-          let xLow  = Math.floor(ent.x                / C.TILE_WIDTH);
-          let yLow  = Math.floor(ent.y                / C.TILE_HEIGHT);
-          let xHigh = Math.floor((ent.x + ent.width)  / C.TILE_WIDTH);
-          let yHigh = Math.floor((ent.y + ent.height) / C.TILE_HEIGHT);
-
-          for (let x = xLow; x < xHigh; x++) {
-            for (let y = yLow; y < yHigh; y++) {
-              if (x === neighborX && y === neighborY) {
-                isWall = true;
-
-                break outer;
-              }
-            }
-          }
-        }
-
-        if (!isWall) {
+        if (isWall.length === 0) {
           room.set(neighborX, neighborY, true);
           roomEdge.push({ x: neighborX, y: neighborY });
         }

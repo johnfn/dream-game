@@ -7,13 +7,22 @@ import { Entity } from "./library/entity";
 import { DefaultGrid } from "./library/default_grid";
 import { HashSet } from "./library/hash";
 
-type CollisionResult = {
+type CollisionResultRect = {
   firstRect    : Rect;
   secondRect   : Rect;
   firstEntity ?: Entity
   secondEntity?: Entity;
   overlap      : Rect;
 };
+
+type CollisionResultPoint = {
+  firstRect    : Rect;
+  secondRect   : Rect;
+  firstEntity ?: Entity
+  secondEntity?: Entity;
+  overlap      : Vector2;
+};
+
 
 export class CollisionGrid {
   private _position: Vector2 = Vector2.Zero;
@@ -61,16 +70,15 @@ export class CollisionGrid {
    * Checks if the rect would collide with anything on the grid. (Does not add
    * the rect to the grid.)
    */
-  collides = (rect: Rect, entity?: Entity): CollisionResult[] => {
+  collidesRect = (rect: Rect, entity?: Entity): CollisionResultRect[] => {
     const corners = rect.getCorners();
     const cells = corners.map(corner => this._cells.get(
       Math.floor(corner.x / this._cellSize),
       Math.floor(corner.y / this._cellSize),
     ));
 
+    const collisions: CollisionResultRect[] = [];
     const uniqueCells = new HashSet(cells);
-
-    const collisions: CollisionResult[] = [];
 
     for (const cell of uniqueCells.values()) {
       for (const { rect: rectInCell, entity: entityInCell } of cell.colliders) {
@@ -97,11 +105,38 @@ export class CollisionGrid {
     return collisions;
   };
 
+  // NOTE: I haven't actually tested this
+  collidesPoint = (point: Vector2, entity?: Entity): CollisionResultPoint[] => {
+    const cell = this._cells.get(
+      Math.floor(point.x / this._cellSize),
+      Math.floor(point.y / this._cellSize),
+    );
+    const collisions: CollisionResultPoint[] = [];
+
+    for (const { rect, entity: entityInCell } of cell.colliders) {
+      const overlap = rect.contains(point);
+
+      if (overlap) {
+        collisions.push({
+          firstRect   : rect,
+          firstEntity : entityInCell,
+
+          secondRect  : rect,
+          secondEntity: entity,
+
+          overlap     : point,
+        });
+      }
+    }
+
+    return collisions;
+  };
+
   /**
    * Get all collisions on the grid.
    */
-  getAllCollisions = (): CollisionResult[] => {
-    const result: CollisionResult[] = [];
+  getAllCollisions = (): CollisionResultRect[] => {
+    const result: CollisionResultRect[] = [];
 
     for (let cell of this.cells) {
       const cellRects = cell.colliders;

@@ -13,7 +13,6 @@ import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
 import { Entity, EntityType } from "./library/entity";
-import { Rect } from "./library/rect";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
 import { FollowCamera } from "./camera";
@@ -56,9 +55,9 @@ export class Game {
     interactable: []
   };
 
-  debugMode: boolean;
-  player!: Character;
-  camera!: FollowCamera;
+  debugMode   : boolean;
+  player     !: Character;
+  camera     !: FollowCamera;
   dreamShader!: PIXI.Graphics;
 
   /**
@@ -181,7 +180,7 @@ export class Game {
 
     this.app.ticker.add(() => this.gameLoop());
 
-    this.gameState.lighting = new Lighting(this.gameState);
+    this.gameState.lighting = new Lighting(this.gameState, this.buildCollisionGrid());
     this.stage.addChild(this.gameState.lighting);
   };
 
@@ -202,7 +201,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(xVelocity);
 
-      if (grid.collides(updatedBounds, entity).length > 0) {
+      if (grid.collidesRect(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
@@ -210,7 +209,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(yVelocity);
 
-      if (grid.collides(updatedBounds, entity).length > 0) {
+      if (grid.collidesRect(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
@@ -233,6 +232,7 @@ export class Game {
             new Vector2(this.player.position)
           )
       );
+
     let targetInteractor: InteractableEntity | null = sortedInteractors[0];
 
     if (targetInteractor) {
