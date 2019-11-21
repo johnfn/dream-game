@@ -8,6 +8,8 @@ import {
   BLEND_MODES,
   Graphics,
   Texture,
+  Sprite,
+  RenderTexture,
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -31,13 +33,12 @@ import { LightSource } from "./light_source";
 export class Game {
   uniforms!: {
     u_time: number;
-    u_resolution: { x: number; y: number };
     u_texture: Texture;
-    u_ratio: { x: number; y: number };
-    u_offset: { x: number; y: number };
   };
 
-  lighting: Graphics;
+  renderTex!: RenderTexture;
+
+  dreamShader!: Sprite;
   static Instance: Game;
 
   app: PIXI.Application;
@@ -58,7 +59,6 @@ export class Game {
   debugMode   : boolean;
   player     !: Character;
   camera     !: FollowCamera;
-  dreamShader!: PIXI.Graphics;
 
   /**
    * The stage of the game. Put everything in-game on here.
@@ -108,21 +108,6 @@ export class Game {
     C.Stage = this.stage;
 
     document.body.appendChild(this.app.view);
-
-    this.lighting = new Graphics()
-      .beginFill(0xd1be69)
-      .moveTo(300, 300)
-      .lineTo(0, 0)
-      .lineTo(200, 0)
-      .lineTo(300, 300)
-      .endFill()
-      .beginFill(0xd1be69)
-      .moveTo(300, 300)
-      .lineTo(C.CANVAS_WIDTH, 0)
-      .lineTo(C.CANVAS_WIDTH, 200)
-      .lineTo(300, 300)
-      .endFill();
-
     C.Loader.onLoadComplete(this.startGame);
   }
 
@@ -176,12 +161,11 @@ export class Game {
     this.gameState.dialog = new Dialog();
     this.fixedCameraStage.addChild(this.gameState.dialog);
 
-    this.shaderStuff();
-
     this.app.ticker.add(() => this.gameLoop());
 
     this.gameState.playerLighting = new LightSource(this.gameState, this.buildCollisionGrid());
-    this.stage.addChild(this.gameState.playerLighting);
+    //this.stage.addChild(this.gameState.playerLighting);
+    this.addDreamShader();
   };
 
   private resolveCollisions = (grid: CollisionGrid) => {
@@ -285,10 +269,6 @@ export class Game {
   };
 
   gameLoop = () => {
-    if (MyName !== "grant") {
-      this.uniforms.u_time += 0.01;
-    }
-
     this.gameState.keys.update();
 
     const activeEntities = this.entities.all.filter(entity =>
@@ -309,74 +289,28 @@ export class Game {
 
     this.resolveCollisions(grid);
 
-    const rndSX = Math.random() * C.CANVAS_WIDTH;
-    const rndSY = Math.random() * C.CANVAS_HEIGHT;
+    this.uniforms.u_time += 0.01;
 
-    this.gameState.playerLighting.buildLighting(this.gameState, grid);
-
-    if (MyName === "gabby") {
-      this.lighting = new Graphics()
-        .beginFill(0xd1be69)
-        .moveTo(rndSX, rndSY)
-        .lineTo(Math.random() * C.CANVAS_WIDTH, Math.random() * C.CANVAS_HEIGHT)
-        .lineTo(Math.random() * C.CANVAS_WIDTH, Math.random() * C.CANVAS_HEIGHT)
-        .lineTo(rndSX, rndSY)
-        .endFill();
-
-      const tex = C.Renderer.generateTexture(
-        this.lighting,
-        SCALE_MODES.NEAREST,
-        window.devicePixelRatio
-      );
-      this.uniforms.u_texture = tex;
-
-      this.uniforms.u_ratio = {
-        x: tex.width / C.CANVAS_WIDTH,
-        y: tex.height / C.CANVAS_HEIGHT
-      };
-      this.uniforms.u_offset = {
-        x: this.lighting.x / C.CANVAS_WIDTH,
-        y: this.lighting.y / C.CANVAS_HEIGHT
-      };
-    }
+    C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
     this.camera.update();
   };
 
-  shaderStuff = () => {
-    if (MyName === "grant") {
-      return;
-    }
-
-    let texture = C.Renderer.generateTexture(
-      this.lighting,
-      SCALE_MODES.NEAREST,
-      window.devicePixelRatio
-    );
+  addDreamShader = () => {
+    this.renderTex = RenderTexture.create({
+      width: C.CANVAS_WIDTH,
+      height: C.CANVAS_HEIGHT
+    });
+    C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
     this.uniforms = {
-      u_ratio: {
-        x: texture.width / C.CANVAS_WIDTH,
-        y: texture.height / C.CANVAS_HEIGHT
-      },
       u_time: 1,
-      u_resolution: { x: C.CANVAS_WIDTH, y: C.CANVAS_HEIGHT },
-      u_texture: texture,
-      u_offset: {
-        x: this.lighting.x / C.CANVAS_WIDTH,
-        y: this.lighting.y / C.CANVAS_HEIGHT
-      }
+      u_texture: this.renderTex
     };
 
-    const stageShader = new Geometry()
-      .addAttribute("aVertexPosition", [0, 0, 1, 0, 0, 1, 1, 1], 2)
-      .addAttribute("aUVs", [0, 0, 1, 0, 0, 1, 1, 1], 2)
-      .addAttribute("aColor", [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1], 3)
-      .addIndex([0, 1, 2, 1, 2, 3]);
-
     const vertexSrc = `
-
       precision mediump float;
+      
       attribute vec2 aUVs;
       attribute vec2 aVertexPosition;
       attribute vec3 aColor;
@@ -395,37 +329,33 @@ export class Game {
   
       }`;
 
-    const fragSrc = `precision mediump float;
+    const fragSrc = `
+      precision mediump float;
 
       varying vec2 vUVs;
       varying vec3 vColor;
 
       uniform float u_time;
-      uniform vec2 u_resolution;
       uniform sampler2D u_texture;
-      uniform vec2 u_ratio;
-      uniform vec2 u_offset;
+    
   
       void main() {
-        vec2 scaledUV =  vUVs / u_ratio;                                                  // Scale texture UVs to position correctly on the screen
-        bool within_bounds_1 = all(lessThanEqual(scaledUV, vec2(1.0,1.0)));               // Determine whether scaledUV is outside tex UV bounds 
-        bool within_bounds_2 = all(greaterThanEqual(scaledUV, u_offset));                 // Calculate texture UV offset
-        float within_bounds = float(all(bvec2(within_bounds_1, within_bounds_2)));
-        vec4 textureMask = texture2D(u_texture, scaledUV);                                // Mask the shader to the dream region using u_texture
-        vec4 color = vec4(sin(u_time));                                                   // The dream shader itself
-        gl_FragColor = within_bounds * textureMask * color;
+        vec4 color = vec4(sin(u_time));
+        vec4 texture = texture2D(u_texture, vUVs);
+        gl_FragColor = texture * color;
       }
-  
   `;
+
+    const stageBounds = new Geometry()
+      .addAttribute("aVertexPosition", [0, 0, C.CANVAS_WIDTH, 0, 0, C.CANVAS_HEIGHT, C.CANVAS_WIDTH, C.CANVAS_HEIGHT], 2)
+      .addAttribute("aUVs", [0, 0, 1, 0, 0, 1, 1, 1], 2)
+      .addAttribute("aColor", [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1], 3)
+      .addIndex([0, 1, 2, 1, 2, 3]);
+
     const shader = Shader.from(vertexSrc, fragSrc, this.uniforms);
-
-    const square = new Mesh(stageShader, shader);
-    square.scale.set(C.CANVAS_WIDTH);
+    const square = new Mesh(stageBounds, shader);
+    //square.scale.set(C.CANVAS_WIDTH);
     square.blendMode = BLEND_MODES.ADD;
-
-    this.lighting.shader = shader;
-    this.lighting.blendMode = BLEND_MODES.ADD;
-
-    this.fixedCameraStage.addChild(square);
+    this.stage.addChild(square);
   };
 }
