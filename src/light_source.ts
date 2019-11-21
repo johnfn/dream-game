@@ -21,10 +21,6 @@ export class LightSource extends Entity {
     });
 
     this.graphics = new Graphics();
-    this.graphics.beginFill(0x5d0015);
-    this.graphics.drawPolygon([10, 10, 120, 100, 120, 200, 70, 200]);
-    this.graphics.endFill();
-
     this.addChild(this.graphics);
   }
 
