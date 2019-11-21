@@ -264,7 +264,6 @@ export class LightSource extends Entity {
 
         // If it's blocked by any other boundary, it's not visible.
 
-
         for (const blockingBoundary of boundaries) {
           if (!blockingBoundary.sharesAVertexWith(rayToVertex)) {
             const intersection = blockingBoundary.segmentIntersection(rayToVertex);
@@ -289,8 +288,9 @@ export class LightSource extends Entity {
 
     const verticesSortedByAngle = Object.keys(anglesToVertices).map(s => Number(s)).sort((a, b) => a - b).map(angle => anglesToVertices[angle]);
 
-    // Step 4; Now that we have visible vertices, potentially project the line PAST
-    // the vertex it's on. 
+    // Step 4: 
+    // Now that we have visible vertices, potentially project the line PAST the
+    // vertex it's on.
 
     const boundariesAndPoints: Pair<Line, Vector2>[][] = [];
 
@@ -339,20 +339,6 @@ export class LightSource extends Entity {
       boundariesAndPoints.push(boundaryAndPoint);
     }
 
-    // let i = 0; 
-    // for (const points of boundariesAndPoints) {
-    //   i++;
-
-    //   for (const { first, second } of points) {
-    //     Debug.DrawPoint(second);
-    //     Debug.DrawLine(new Line({ 
-    //       one: player.positionVector(),
-    //       two: second,
-    //     }), 0x00ff00);
-    //     Debug.DrawLine(first.add(new Vector2({ x: i, y: i })));
-    //   }
-    // }
-
     // Step 5bb:
 
     // Now that we have all visible vertices, spin in a circle, drawing a ray to
@@ -392,7 +378,9 @@ export class LightSource extends Entity {
 
         this.graphics.endFill()
       } else {
-        throw new Error("Bad ?!?");
+        // TODO: investigate why this happens?
+
+        console.log("BAD?!?")
       }
     }
   }
