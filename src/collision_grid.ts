@@ -67,8 +67,9 @@ export class CollisionGrid {
   }
 
   /** 
-   * Checks if the rect would collide with anything on the grid. (Does not add
-   * the rect to the grid.)
+   * Checks if the provided rect would collide with anything on the grid. If an
+   * entity is passed in, ignores that entity when checking for collisions.
+   * (Does not add the rect to the grid.)
    */
   collidesRect = (rect: Rect, entity?: Entity): CollisionResultRect[] => {
     const corners = rect.getCorners();

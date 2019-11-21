@@ -26,7 +26,7 @@ import { HeadsUpDisplay } from "./heads_up_display";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
-import { Lighting } from "./lighting";
+import { LightSource } from "./light_source";
 
 export class Game {
   uniforms!: {
@@ -139,7 +139,7 @@ export class Game {
     this.gameState.character = this.player;
 
     if (MyName === "grant") {
-      this.player.x = 1000;
+      this.player.x = 1300;
       this.player.y = 1300;
     } else {
       this.player.x = 0;
@@ -180,13 +180,11 @@ export class Game {
 
     this.app.ticker.add(() => this.gameLoop());
 
-    this.gameState.lighting = new Lighting(this.gameState, this.buildCollisionGrid());
-    this.stage.addChild(this.gameState.lighting);
+    this.gameState.playerLighting = new LightSource(this.gameState, this.buildCollisionGrid());
+    this.stage.addChild(this.gameState.playerLighting);
   };
 
-  private resolveCollisions = () => {
-    const grid = this.buildCollisionGrid();
-
+  private resolveCollisions = (grid: CollisionGrid) => {
     const movingEntities: MovingEntity[] = this.entities.collidable.filter(
       ent => ent.entityType === EntityType.MovingEntity
     ) as MovingEntity[];
@@ -276,7 +274,7 @@ export class Game {
     }
 
     const mapColliders = this.gameState.map.getCollidersInRegion(
-      this.camera.bounds().expand(100)
+      this.camera.bounds().expand(1000)
     );
 
     for (const mapCollider of mapColliders) {
@@ -307,10 +305,14 @@ export class Game {
 
     this.handleInteractions(activeInteractableEntities);
 
-    this.resolveCollisions();
+    const grid = this.buildCollisionGrid();
+
+    this.resolveCollisions(grid);
 
     const rndSX = Math.random() * C.CANVAS_WIDTH;
     const rndSY = Math.random() * C.CANVAS_HEIGHT;
+
+    this.gameState.playerLighting.buildLighting(this.gameState, grid);
 
     if (MyName === "gabby") {
       this.lighting = new Graphics()

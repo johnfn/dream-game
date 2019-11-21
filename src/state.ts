@@ -5,7 +5,7 @@ import * as PIXI from "pixi.js";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
 import { Entity } from "./library/entity";
-import { Lighting } from "./lighting";
+import { LightSource } from "./light_source";
 import { Character } from "./character";
 
 export enum GameMode {
@@ -20,7 +20,7 @@ export class GameState {
 
   character       !: Character;
   level           !: number;
-  lighting        !: Lighting;
+  playerLighting  !: LightSource;
   dreamMapLayer   !: Entity;
   realityMapLayer !: Entity;
   objectLayer     !: Entity;

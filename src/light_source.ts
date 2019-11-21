@@ -9,8 +9,9 @@ import { Grid } from "./library/grid";
 import { CollisionGrid } from "./collision_grid";
 import { Rect } from "./library/rect";
 
-export class Lighting extends Entity {
+export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
+  graphics: Graphics;
 
   constructor(state: GameState, collisionGrid: CollisionGrid) {
     super({
@@ -18,21 +19,31 @@ export class Lighting extends Entity {
       dynamic   : false,
     });
 
-    const g = new Graphics();
+    this.graphics = new Graphics();
+    this.graphics.beginFill(0x5d0015);
+    this.graphics.drawPolygon([10, 10, 120, 100, 120, 200, 70, 200]);
+    this.graphics.endFill();
 
-    g.beginFill(0x5d0015);
-    g.drawPolygon([10, 10, 120, 100, 120, 200, 70, 200]);
-    g.endFill();
-
-    this.addChild(g);
+    this.addChild(this.graphics);
 
     this.buildLighting(state, collisionGrid);
   }
 
-  // TODO: Use collision grid etc
+  debugDrawRoom(room: Grid<boolean>) {
+    for (const { x, y } of room.keys()) {
+      this.graphics.drawRect(
+        x * C.TILE_WIDTH,
+        y * C.TILE_HEIGHT,
+        C.TILE_WIDTH,
+        C.TILE_HEIGHT
+      );
+    }
+  }
 
   buildLighting(state: GameState, collisionGrid: CollisionGrid) {
-    type Point = { x: number, y: number };
+    // Step -1: Clear out old state.
+
+    this.graphics.clear();
 
     // Step 0: Get useful variables!
 
@@ -43,7 +54,7 @@ export class Lighting extends Entity {
     const playerGridX = Math.floor(player.x / C.TILE_WIDTH);
     const playerGridY = Math.floor(player.y / C.TILE_HEIGHT);
 
-    let roomEdge: Point[] = [{ x: playerGridX, y: playerGridY }];
+    let roomEdge: Vector2[] = [new Vector2({ x: playerGridX, y: playerGridY })];
     const room = new Grid<boolean>();
 
     room.set(playerGridX, playerGridY, true);
@@ -76,14 +87,18 @@ export class Lighting extends Entity {
           y: neighborY * C.TILE_HEIGHT,
           w: C.TILE_WIDTH,
           h: C.TILE_HEIGHT,
-        }).shrink(1));
+        }).shrink(1), player);
 
         if (isWall.length === 0) {
           room.set(neighborX, neighborY, true);
-          roomEdge.push({ x: neighborX, y: neighborY });
+          roomEdge.push(new Vector2({ x: neighborX, y: neighborY }));
+        } else {
+          debugger;
         }
       }
     }
+
+    this.debugDrawRoom(room);
 
     // Step 2: Build lines for boundaries of the room.
 
@@ -152,9 +167,7 @@ export class Lighting extends Entity {
     const boundaries: Line[] = [];
     let unprocessedSingleTileEdges = [...segments];
 
-    const g = new Graphics();
-
-    g.lineStyle(5, 0xff0000, 1);
+    this.graphics.lineStyle(5, 0xff0000, 1);
 
     while (unprocessedSingleTileEdges.length > 0) {
       let potentialStart: Vector2;
@@ -175,8 +188,8 @@ export class Lighting extends Entity {
         segmentsAtPoint.get(potentialStart)[1].isXAligned()
       );
 
-      segmentsAtPoint.get(potentialStart)[0].drawOnto(g, 0xffff00);
-      segmentsAtPoint.get(potentialStart)[1].drawOnto(g, 0xffff00);
+      segmentsAtPoint.get(potentialStart)[0].drawOnto(this.graphics, 0xffff00);
+      segmentsAtPoint.get(potentialStart)[1].drawOnto(this.graphics, 0xffff00);
 
       // Found a good vertex to start at, let's start building lines!
 
@@ -239,6 +252,12 @@ export class Lighting extends Entity {
       }
     }
 
+    // Step 3:
+
+    // Now that we have all vertices, spin in a circle, drawing a ray to (and
+    // potentially through!) each one. Find the boundary line that joins the two
+    // rays - those three lines make up a polygon of the light raycast.
+
     const allVertices = new HashSet<Vector2>();
 
     for (const boundary of boundaries) {
@@ -253,6 +272,10 @@ export class Lighting extends Entity {
 
       allVerticesByAngle[line.angleInDegrees] = (allVerticesByAngle[line.angleInDegrees] || []).concat(vertex);
     }
+
+    // Find all boundaries that this line touches
+    // Find all boundaries that the next line touches
+    // Take the closest one
 
     for (const list of Object.values(allVerticesByAngle)) {
 
@@ -271,15 +294,9 @@ export class Lighting extends Entity {
           }
         }
 
-        line.drawOnto(g, 0xff0000);
+        line.drawOnto(this.graphics, 0xff0000);
       }
     }
-
-    // for (const boundary of boundaries) {
-    //   boundary.drawOnto(g, 0xff0000);
-    // }
-
-    this.addChild(g);
   }
 
   collide = () => {};
