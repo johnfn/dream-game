@@ -112,11 +112,11 @@ export class Game {
     document.body.appendChild(this.app.view);
 
     this.grid = new CollisionGrid({
-      game: this,
-      width: 2 * C.CANVAS_WIDTH,
-      height: 2 * C.CANVAS_HEIGHT,
+      game    : this,
+      width   : 2 * C.CANVAS_WIDTH,
+      height  : 2 * C.CANVAS_HEIGHT,
       cellSize: 16 * C.TILE_WIDTH,
-      debug: this.debugMode
+      debug   : this.debugMode
     });
 
     this.lighting = new Graphics()
@@ -194,21 +194,6 @@ export class Game {
     this.stage.addChild(this.gameState.lighting);
   };
 
-  // Note: For now, we treat map as a special case.
-  // TODO: Load map into collision grid and use collision grid ONLY.
-  private doesRectHitAnything = (
-    rect: Rect,
-    associatedEntity: Entity
-  ): boolean => {
-    const gridCollisions = this.grid.checkForCollision(rect, associatedEntity);
-
-    if (gridCollisions.length > 0) {
-      return true;
-    }
-
-    return false;
-  };
-
   private resolveCollisions = () => {
     this.grid.clear();
 
@@ -240,7 +225,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(xVelocity);
 
-      if (this.doesRectHitAnything(updatedBounds, entity)) {
+      if (this.grid.collides(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
@@ -248,7 +233,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(yVelocity);
 
-      if (this.doesRectHitAnything(updatedBounds, entity)) {
+      if (this.grid.collides(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 

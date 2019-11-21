@@ -61,7 +61,7 @@ export class CollisionGrid {
    * Checks if the rect would collide with anything on the grid. (Does not add
    * the rect to the grid.)
    */
-  checkForCollision = (rect: Rect, entity?: Entity): CollisionResult[] => {
+  collides = (rect: Rect, entity?: Entity): CollisionResult[] => {
     const corners = rect.getCorners();
     const cells = corners.map(corner => this._cells.get(
       Math.floor(corner.x / this._cellSize),
