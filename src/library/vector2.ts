@@ -1,3 +1,5 @@
+const EPSILON = 0.0000001;
+
 export interface IVector2 {
   x: number;
   y: number;
@@ -106,9 +108,14 @@ export class Vector2 {
   }
 
   equals(other: Vector2 | undefined): boolean {
-    if (other === undefined) { return false; }
+    if (other === undefined) { 
+      return false; 
+    }
 
-    return this.x === other.x && this.y === other.y;
+    return (
+      Math.abs(this.x - other.x) < EPSILON && 
+      Math.abs(this.y - other.y) < EPSILON
+    );
   }
 
   multiply(other: Vector2 | number): Vector2 {

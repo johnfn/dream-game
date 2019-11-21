@@ -8,6 +8,7 @@ import { DefaultHashMap, HashSet } from "./library/hash";
 import { Grid } from "./library/grid";
 import { CollisionGrid } from "./collision_grid";
 import { Rect } from "./library/rect";
+import { Debug } from "./library/debug";
 
 export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
@@ -92,8 +93,6 @@ export class LightSource extends Entity {
         if (isWall.length === 0) {
           room.set(neighborX, neighborY, true);
           roomEdge.push(new Vector2({ x: neighborX, y: neighborY }));
-        } else {
-          debugger;
         }
       }
     }
@@ -252,31 +251,80 @@ export class LightSource extends Entity {
       }
     }
 
-    // Step 3:
+    // Step 3: We have all vertices, but that's actually too many. We should
+    // only be considering all vertices that we have direct line of sight to.
+    // Let's remove any vertices that we can't see.
 
-    // Now that we have all vertices, spin in a circle, drawing a ray to (and
-    // potentially through!) each one. Find the boundary line that joins the two
-    // rays - those three lines make up a polygon of the light raycast.
+    // const allVertices = new HashSet<Vector2>();
 
-    const allVertices = new HashSet<Vector2>();
+    // for (const boundary of boundaries) {
+    //   allVertices.put(boundary.start);
+    //   allVertices.put(boundary.end);
+    // }
+
+    const allVisibleVertices = new HashSet<Vector2>();
 
     for (const boundary of boundaries) {
-      allVertices.put(boundary.start);
-      allVertices.put(boundary.end);
+      outer:
+      for (const vertex of [boundary.start, boundary.end]) {
+        // Let's see if this vertex is visible
+
+        const rayToVertex = new Line({
+          one: player.positionVector(),
+          two: vertex,
+        });
+
+        // If it's blocked by any other boundary, it's not visible.
+
+        let visible = true;
+
+        for (const blockingBoundary of boundaries) {
+          blockingBoundary.drawOnto(this.graphics, 0xff0000);
+          boundary.drawOnto(this.graphics, 0x00ff00);
+
+          if (!blockingBoundary.sharesAVertexWith(rayToVertex)) {
+            const intersection = blockingBoundary.segmentIntersection(rayToVertex);
+
+            if (intersection) {
+              continue outer;
+            }
+          }
+        }
+
+        if (visible) {
+          allVisibleVertices.put(vertex);
+        }
+      }
     }
 
     const allVerticesByAngle: {[angle: number]: Vector2[] } = {};
 
-    for (const vertex of allVertices.values()) {
+    for (const vertex of allVisibleVertices.values()) {
       const line = new Line({ one: player.positionVector(), two: vertex });
 
       allVerticesByAngle[line.angleInDegrees] = (allVerticesByAngle[line.angleInDegrees] || []).concat(vertex);
     }
 
+    // Step 4:
+
+    // Now that we have all visible vertices, spin in a circle, drawing a ray to
+    // (and potentially through!) each one. Find the (closest!) boundary line
+    // that joins the two rays - those three lines make up a polygon of the
+    // light raycast.
+
     // Find all boundaries that this line touches
     // Find all boundaries that the next line touches
     // Take the closest one
 
+    for (const list of Object.values(allVerticesByAngle)) {
+      for (const v of list) {
+        const line = new Line({ one: player.positionVector(), two: v });
+
+        line.drawOnto(this.graphics, 0xff0000);
+      }
+    }
+
+    /*
     for (const list of Object.values(allVerticesByAngle)) {
 
       outer:
@@ -297,6 +345,8 @@ export class LightSource extends Entity {
         line.drawOnto(this.graphics, 0xff0000);
       }
     }
+    */
+
   }
 
   collide = () => {};

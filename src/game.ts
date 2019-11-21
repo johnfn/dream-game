@@ -139,8 +139,8 @@ export class Game {
     this.gameState.character = this.player;
 
     if (MyName === "grant") {
-      this.player.x = 1300;
-      this.player.y = 1300;
+      this.player.x = 1100;
+      this.player.y = 1400;
     } else {
       this.player.x = 0;
       this.player.y = 0;
