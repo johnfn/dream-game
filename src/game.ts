@@ -126,8 +126,8 @@ export class Game {
       this.player.x = 950;
       this.player.y = 1595;
     } else {
-      this.player.x = 0;
-      this.player.y = 0;
+      this.player.x = 950;
+      this.player.y = 1595;
     }
 
     this.stage.addChild(this.player);
@@ -164,7 +164,7 @@ export class Game {
 
     this.gameState.playerLighting = new LightSource(this.gameState, this.buildCollisionGrid());
     this.stage.addChild(this.gameState.playerLighting);
-    this.addDreamShader();
+    //this.addDreamShader();
   };
 
   private resolveCollisions = (grid: CollisionGrid) => {
@@ -290,10 +290,10 @@ export class Game {
 
     this.resolveCollisions(grid);
 
-    this.uniforms.u_time += 0.01;
 
     this.gameState.playerLighting.buildLighting(this.gameState, grid);
 
+    this.uniforms.u_time += 0.01;
     C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
     this.camera.update();
@@ -345,20 +345,20 @@ export class Game {
       void main() {
         vec4 color = vec4(sin(u_time));
         vec4 texture = texture2D(u_texture, vUVs);
-        gl_FragColor = texture * color;
+        gl_FragColor = texture * vec4(1.0,1.0,1.0,1.0);
       }
   `;
 
     const stageBounds = new Geometry()
-      .addAttribute("aVertexPosition", [0, 0, C.CANVAS_WIDTH, 0, 0, C.CANVAS_HEIGHT, C.CANVAS_WIDTH, C.CANVAS_HEIGHT], 2)
+      .addAttribute("aVertexPosition", [0, 0, 1, 0, 0, 1, 1, 1], 2)
       .addAttribute("aUVs", [0, 0, 1, 0, 0, 1, 1, 1], 2)
       .addAttribute("aColor", [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1], 3)
       .addIndex([0, 1, 2, 1, 2, 3]);
 
     const shader = Shader.from(vertexSrc, fragSrc, this.uniforms);
     const square = new Mesh(stageBounds, shader);
-    //square.scale.set(C.CANVAS_WIDTH);
     square.blendMode = BLEND_MODES.ADD;
-    this.stage.addChild(square);
+    square.scale.set(C.CANVAS_WIDTH);
+    this.fixedCameraStage.addChild(square);
   };
 }
