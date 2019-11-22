@@ -9,6 +9,7 @@ import { Grid } from "./library/grid";
 import { CollisionGrid } from "./collision_grid";
 import { Rect } from "./library/rect";
 import { Pair } from "./library/pair";
+import { Debug } from "./library/debug";
 
 export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
@@ -22,17 +23,6 @@ export class LightSource extends Entity {
 
     this.graphics = new Graphics();
     this.addChild(this.graphics);
-  }
-
-  debugDrawRoom(room: Grid<boolean>) {
-    for (const { x, y } of room.keys()) {
-      this.graphics.drawRect(
-        x * C.TILE_WIDTH,
-        y * C.TILE_HEIGHT,
-        C.TILE_WIDTH,
-        C.TILE_HEIGHT
-      );
-    }
   }
 
   buildLighting(state: GameState, collisionGrid: CollisionGrid) {
@@ -53,6 +43,8 @@ export class LightSource extends Entity {
     const room = new Grid<boolean>();
 
     room.set(playerGridX, playerGridY, true);
+
+    Debug.Profile("flood", () => {
 
     let count = 0;
     while (roomEdge.length > 0) {
@@ -78,21 +70,22 @@ export class LightSource extends Entity {
           continue;
         }
 
-        const isWall = collisionGrid.collidesRect(new Rect({
-          x: neighborX * C.TILE_WIDTH,
-          y: neighborY * C.TILE_HEIGHT,
-          w: C.TILE_WIDTH,
-          h: C.TILE_HEIGHT,
-        }).shrink(1), player);
+        const isWall = collisionGrid.collidesRectFast(new Rect({
+          x: neighborX * C.TILE_WIDTH + 1,
+          y: neighborY * C.TILE_HEIGHT + 1,
+          w: C.TILE_WIDTH - 2,
+          h: C.TILE_HEIGHT - 2,
+        }), player);
 
-        if (isWall.length === 0) {
+        if (!isWall) {
           room.set(neighborX, neighborY, true);
           roomEdge.push(new Vector2({ x: neighborX, y: neighborY }));
         }
       }
     }
 
-    this.debugDrawRoom(room);
+    })
+
 
     // Step 2: Build lines for boundaries of the room.
 
@@ -374,7 +367,9 @@ export class LightSource extends Entity {
 
         this.graphics.endFill()
       } else {
-        // TODO: investigate why this happens?
+        // TODO: this happens when two vertices perfectly line up
+        // Easy to repro by immediately walking to the bottom wall and then
+        // walking left/right
 
         console.log("BAD?!?")
       }

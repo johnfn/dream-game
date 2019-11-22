@@ -246,7 +246,7 @@ export class Game {
       game    : this,
       width   : 2 * C.CANVAS_WIDTH,
       height  : 2 * C.CANVAS_HEIGHT,
-      cellSize: 16 * C.TILE_WIDTH,
+      cellSize: 8 * C.TILE_WIDTH,
       debug   : this.debugMode
     });
 
@@ -291,7 +291,9 @@ export class Game {
     this.resolveCollisions(grid);
 
 
-    this.gameState.playerLighting.buildLighting(this.gameState, grid);
+    Debug.Profile("lighting", () => {
+      this.gameState.playerLighting.buildLighting(this.gameState, grid);
+    })
 
     this.uniforms.u_time += 0.01;
     C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);

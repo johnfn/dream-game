@@ -79,9 +79,13 @@ export class CollisionGrid {
     ));
 
     const collisions: CollisionResultRect[] = [];
-    const uniqueCells = new HashSet(cells);
+    const uniqueCells: { [key: string]: Cell } = {};
 
-    for (const cell of uniqueCells.values()) {
+    for (const cell of cells) {
+      uniqueCells[cell.hash()] = cell;
+    }
+
+    for (const cell of Object.values(uniqueCells)) {
       for (const { rect: rectInCell, entity: entityInCell } of cell.colliders) {
         if (entityInCell === entity) {
           continue;
@@ -104,6 +108,41 @@ export class CollisionGrid {
     }
 
     return collisions;
+  };
+
+  /** 
+   * Same as collidesRect but immediately returns true if there's a collision.
+   */
+  collidesRectFast = (rect: Rect, entity?: Entity): boolean => {
+    const corners = rect.getCorners();
+    const cells = corners.map(corner => this._cells.get(
+      Math.floor(corner.x / this._cellSize),
+      Math.floor(corner.y / this._cellSize),
+    ));
+
+    const uniqueCells: { [key: string]: Cell } = {};
+
+    for (const cell of cells) {
+      uniqueCells[cell.hash()] = cell;
+    }
+
+    const values = Object.values(uniqueCells);
+
+    for (const cell of values) {
+      for (const { rect: rectInCell, entity: entityInCell } of cell.colliders) {
+        if (entityInCell === entity) {
+          continue;
+        }
+
+        const overlap = rect.intersects(rectInCell, { edgesOnlyIsAnIntersection: false });
+
+        if (overlap) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   };
 
   // NOTE: I haven't actually tested this
