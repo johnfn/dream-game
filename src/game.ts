@@ -8,6 +8,7 @@ import {
   Texture,
   Sprite,
   RenderTexture,
+  Rectangle,
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -28,6 +29,7 @@ import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
 import { LightSource } from "./light_source";
 import { Debug } from "./library/debug";
+import { thisExpression } from "@babel/types";
 
 export class Game {
   uniforms!: {
@@ -126,8 +128,8 @@ export class Game {
       this.player.x = 950;
       this.player.y = 1595;
     } else {
-      this.player.x = 950;
-      this.player.y = 1595;
+      this.player.x = 200;
+      this.player.y = 300;
     }
 
     this.stage.addChild(this.player);
@@ -163,8 +165,8 @@ export class Game {
     this.app.ticker.add(() => this.gameLoop());
 
     this.gameState.playerLighting = new LightSource(this.gameState, this.buildCollisionGrid());
-    this.stage.addChild(this.gameState.playerLighting);
-    //this.addDreamShader();
+    //this.stage.addChild(this.gameState.playerLighting);
+    this.addDreamShader();
   };
 
   private resolveCollisions = (grid: CollisionGrid) => {
@@ -303,8 +305,8 @@ export class Game {
 
   addDreamShader = () => {
     this.renderTex = RenderTexture.create({
-      width: C.CANVAS_WIDTH,
-      height: C.CANVAS_HEIGHT
+      width: this.gameState.map.width,
+      height: this.gameState.map.height,
     });
     C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
@@ -345,14 +347,14 @@ export class Game {
     
   
       void main() {
-        vec4 color = vec4(sin(u_time));
+        vec4 color = vec4(sin(u_time), sin(u_time+1.0), sin(u_time+1.5), 1.0);
         vec4 texture = texture2D(u_texture, vUVs);
-        gl_FragColor = texture * vec4(1.0,1.0,1.0,1.0);
+        gl_FragColor = texture * color;
       }
   `;
 
     const stageBounds = new Geometry()
-      .addAttribute("aVertexPosition", [0, 0, 1, 0, 0, 1, 1, 1], 2)
+      .addAttribute("aVertexPosition", [0, 0, this.gameState.map.width, 0, 0, this.gameState.map.height, this.gameState.map.width, this.gameState.map.height], 2)
       .addAttribute("aUVs", [0, 0, 1, 0, 0, 1, 1, 1], 2)
       .addAttribute("aColor", [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1], 3)
       .addIndex([0, 1, 2, 1, 2, 3]);
@@ -360,7 +362,6 @@ export class Game {
     const shader = Shader.from(vertexSrc, fragSrc, this.uniforms);
     const square = new Mesh(stageBounds, shader);
     square.blendMode = BLEND_MODES.ADD;
-    square.scale.set(C.CANVAS_WIDTH);
-    this.fixedCameraStage.addChild(square);
+    this.stage.addChild(square);
   };
 }

@@ -356,7 +356,7 @@ export class LightSource extends Entity {
       }
 
       if (closestBoundary) {
-        this.graphics.beginFill(0xfff, 0.3);
+        this.graphics.beginFill(0xFFFFFF);
         this.graphics.lineStyle(0, 0, 0);
         this.graphics.drawPolygon([
           player.x, player.y,
