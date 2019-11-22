@@ -8,11 +8,6 @@ import {
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
 
-const displacementSprite: Sprite = Sprite.from(
-  "https://res.cloudinary.com/dvxikybyi/image/upload/v1486634113/2yYayZk_vqsyzx.png"
-);
-displacementSprite.texture.baseTexture.wrapMode = WRAP_MODES.REPEAT;
-
 export class C {
   public static CANVAS_WIDTH = 640;
   public static CANVAS_HEIGHT = 640;

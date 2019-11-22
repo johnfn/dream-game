@@ -8,7 +8,7 @@ import {
   Texture,
   Sprite,
   RenderTexture,
-  Rectangle,
+  WRAP_MODES,
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -29,12 +29,13 @@ import { DreamMap } from "./dream_map";
 import { MyName } from "./my_name";
 import { LightSource } from "./light_source";
 import { Debug } from "./library/debug";
-import { thisExpression } from "@babel/types";
 
 export class Game {
   uniforms!: {
     u_time: number;
-    u_texture: Texture;
+    u_lighting_tex: Texture;
+    u_displacement: Texture;
+    u_displacement_amt: number;
   };
 
   renderTex!: RenderTexture;
@@ -128,8 +129,8 @@ export class Game {
       this.player.x = 950;
       this.player.y = 1595;
     } else {
-      this.player.x = 200;
-      this.player.y = 300;
+      this.player.x = 950;
+      this.player.y = 1595;
     }
 
     this.stage.addChild(this.player);
@@ -310,11 +311,19 @@ export class Game {
     });
     C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
+    const displacementSprite: Sprite = Sprite.from(
+      "https://res.cloudinary.com/dvxikybyi/image/upload/v1486634113/2yYayZk_vqsyzx.png"
+    );
+
+    displacementSprite.texture.baseTexture.wrapMode = WRAP_MODES.MIRRORED_REPEAT
+
     this.uniforms = {
       u_time: 1,
-      u_texture: this.renderTex
+      u_lighting_tex: this.renderTex,
+      u_displacement: displacementSprite.texture,
+      u_displacement_amt: 0.02, //in texels
     };
-
+    
     const vertexSrc = `
       precision mediump float;
       
@@ -343,12 +352,23 @@ export class Game {
       varying vec3 vColor;
 
       uniform float u_time;
-      uniform sampler2D u_texture;
-    
+      uniform sampler2D u_lighting_tex;
+      uniform sampler2D u_displacement;
+      uniform float u_displacement_amt;
   
       void main() {
+
+        float time_e      = u_time * 0.1;
+
+        vec2 uv_t         = vec2(vUVs.s + time_e, vUVs.t + time_e);
+        vec4 displace     = texture2D(u_displacement, uv_t);
+ 
+        float displace_k  = displace.g * u_displacement_amt;
+        vec2 uv_displaced = vec2(vUVs.x + displace_k, vUVs.y + displace_k);
+
         vec4 color = vec4(sin(u_time), sin(u_time+1.0), sin(u_time+1.5), 1.0);
-        vec4 texture = texture2D(u_texture, vUVs);
+        vec2 adjust = vec2(u_displacement_amt)/2.;
+        vec4 texture = texture2D(u_lighting_tex, uv_displaced-adjust);
         gl_FragColor = texture * color;
       }
   `;
@@ -362,6 +382,7 @@ export class Game {
     const shader = Shader.from(vertexSrc, fragSrc, this.uniforms);
     const square = new Mesh(stageBounds, shader);
     square.blendMode = BLEND_MODES.ADD;
+
     this.stage.addChild(square);
   };
 }
