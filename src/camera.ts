@@ -43,21 +43,31 @@ export class FollowCamera {
     });
   }
 
-  centerOn = (position: Vector2) => {
-    this._position = position.subtract({
+  private halfDimensions(): Vector2 {
+    return new Vector2({
       x: this._width / 2,
       y: this._height / 2
     });
+  }
+
+  centerOn = (position: Vector2) => {
+    this._position = position.subtract(this.halfDimensions());
   };
 
-  keepWithinBounds = (state: GameState) => {
+  calculateDesiredPosition = (state: GameState): Vector2 => {
+    let desiredPosition = Vector2.Zero;
+
+    if (this._target) {
+      desiredPosition = this._target.center.subtract(this.halfDimensions());
+    }
+
     const mapBounds    = state.map.getCameraBounds();
     const currentBound = mapBounds.find(bound => bound.contains(this._target.positionVector()));
 
     if (!currentBound) {
       console.error("no bound for camera!");
 
-      return;
+      return desiredPosition;
     }
 
     if (currentBound.w < C.CANVAS_WIDTH || currentBound.h < C.CANVAS_HEIGHT) {
@@ -66,29 +76,29 @@ export class FollowCamera {
 
     // fit the camera rect into the bounds rect
 
-    if (this.bounds().left < currentBound.left) {
-      this._position = this._position.withX(currentBound.left);
+    if (desiredPosition.x < currentBound.left) {
+      desiredPosition = desiredPosition.withX(currentBound.left);
     }
 
-    if (this.bounds().right > currentBound.right) {
-      this._position = this._position.withX(currentBound.right - this._width);
+    if (desiredPosition.x + this.bounds().w > currentBound.right) {
+      desiredPosition = desiredPosition.withX(currentBound.right - this._width);
     }
 
-    if (this.bounds().top < currentBound.top) {
-      this._position = this._position.withY(currentBound.top);
+    if (desiredPosition.y < currentBound.top) {
+      desiredPosition = desiredPosition.withY(currentBound.top);
     }
 
-    if (this.bounds().bottom > currentBound.bottom) {
-      this._position = this._position.withY(currentBound.bottom - this._height);
+    if (desiredPosition.y + this.bounds().h > currentBound.bottom) {
+      desiredPosition = desiredPosition.withY(currentBound.bottom - this._height);
     }
+
+    return desiredPosition;
   };
 
   update = (state: GameState) => {
-    if (this._target) {
-      this.centerOn(this.center.lerp(new Vector2(this._target.center), FollowCamera.LERP_SPEED));
-    }
+    const desiredPosition = this.calculateDesiredPosition(state);
 
-    this.keepWithinBounds(state);
+    this._position = this._position.lerp(desiredPosition, FollowCamera.LERP_SPEED);
 
     this._stage.position = new PIXI.Point(
       Math.floor(-this._position.x), 
