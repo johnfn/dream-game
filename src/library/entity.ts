@@ -30,7 +30,6 @@ export abstract class Entity extends Container {
   constructor(props: {
     texture   ?: Texture;
     collidable : boolean;
-    dynamic    : boolean;
   }) {
     super();
 

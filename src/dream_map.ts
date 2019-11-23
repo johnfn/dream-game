@@ -6,7 +6,9 @@ import { TiledTilemap } from "./library/tilemap";
 import { C } from "./constants";
 import { TextureEntity } from "./texture_entity";
 import { Trapdoor } from "./library/trapdoor";
-import { Door } from "./door";
+import { Door } from "./entities/door";
+import { CharacterStart } from "./entities/character_start";
+import { Glass } from "./entities/glass";
 
 type MapLevel = {
   dreamGroundLayer: Entity | undefined;
@@ -23,7 +25,6 @@ export class DreamMap extends Entity {
   constructor(gameState: GameState) {
     super({
       collidable: false,
-      dynamic: false
     });
 
     const tilemap = new TiledTilemap({
@@ -59,8 +60,15 @@ export class DreamMap extends Entity {
           type: "single" as const,
 
           name: "characterStart",
-          getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "characterStart" })
-        }
+          getInstanceType: (tex: Texture) => new CharacterStart(),
+        },
+
+        {
+          type: "single" as const,
+
+          name: "glass",
+          getInstanceType: (tex: Texture) => new Glass(tex),
+        },
       ]
     });
 

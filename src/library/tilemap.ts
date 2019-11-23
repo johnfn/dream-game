@@ -227,9 +227,9 @@ export class TiledTilemap {
         tileProperties: tileProperties,
       };
 
-      for (const customObject of this.customObjects) {
-        const tileType = tileProperties.type;
+      const tileType = tileProperties.type;
 
+      for (const customObject of this.customObjects) {
         if (typeof tileType !== "string") {
           continue;
         }
@@ -254,6 +254,10 @@ export class TiledTilemap {
             });
           }
         }
+      }
+
+      if (tileType === undefined) {
+        throw new Error("Custom object needs a tile type");
       }
 
       if (newObj) {

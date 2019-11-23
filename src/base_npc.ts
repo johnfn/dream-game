@@ -13,7 +13,6 @@ export class BaseNPC extends InteractableEntity {
     super({
       texture   : PIXI.Texture.WHITE,
       collidable: true,
-      dynamic   : true,
     });
 
     this.position.set(200, 200)

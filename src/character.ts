@@ -60,6 +60,9 @@ export class Character extends MovingEntity {
     this._animFrame %= 60;
 
     this.updateSprite();
+
+    window.localStorage.setItem("characterx", String(this.x));
+    window.localStorage.setItem("charactery", String(this.y));
   };
 
   collide = (other: Entity, intersection: Rect) => {

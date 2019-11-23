@@ -1,11 +1,9 @@
-import * as PIXI from "pixi.js";
 import { Rect } from "./library/rect";
 import { Line } from "./library/line";
 import { Game } from "./game";
 import { Vector2 } from "./library/vector2";
 import { Entity } from "./library/entity";
 import { DefaultGrid } from "./library/default_grid";
-import { HashSet } from "./library/hash";
 import { Graphics } from "pixi.js";
 
 type CollisionResultRect = {

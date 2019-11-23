@@ -9,7 +9,6 @@ export class HeadsUpDisplay extends Entity {
   constructor() {
     super({
       collidable: false,
-      dynamic   : false,
     });
 
     this.interactText = new TextEntity(

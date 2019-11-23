@@ -19,7 +19,6 @@ export class DreamShard extends InteractableEntity {
     super({
       texture   : C.Loader.getResource("art/temp.png").texture,
       collidable: false,
-      dynamic   : false
     });
 
     Game.Instance.entities.interactable.push(this);

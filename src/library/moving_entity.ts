@@ -21,7 +21,6 @@ export class MovingEntity extends Entity {
   }) {
     super({
       ...props,
-      dynamic: true
     });
 
     this._collidable = props.collidable;

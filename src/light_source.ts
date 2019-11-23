@@ -17,7 +17,6 @@ export class LightSource extends Entity {
   constructor() {
     super({
       collidable: false,
-      dynamic   : false,
     });
 
     this.graphics = new Graphics();

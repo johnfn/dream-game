@@ -13,7 +13,6 @@ export class TextureEntity extends Entity {
     super({
       texture   : props.texture,
       collidable: false,
-      dynamic   : true,
     });
 
     this.name = props.name || "unnamed texture someone should really name!";

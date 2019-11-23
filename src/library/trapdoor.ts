@@ -11,7 +11,6 @@ export class Trapdoor extends InteractableEntity {
   constructor(props: { stairType: StairType }) {
     super({
       collidable: true,
-      dynamic   : false
     });
 
     this.stairType = props.stairType;

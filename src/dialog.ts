@@ -14,7 +14,6 @@ export class Dialog extends InteractableEntity {
     super({
       texture   : C.Loader.getResource("art/dialog_box.png").texture,
       collidable: false,
-      dynamic   : true,
     });
 
     Dialog.Instance = this;

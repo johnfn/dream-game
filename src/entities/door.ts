@@ -1,6 +1,6 @@
-import { GameState, GameMode } from "./state";
-import { InteractableEntity } from "./library/interactable_entity";
-import { C } from "./constants";
+import { GameState, GameMode } from "../state";
+import { InteractableEntity } from "../library/interactable_entity";
+import { C } from "../constants";
 
 export class Door extends InteractableEntity {
   activeModes = [GameMode.Normal];
@@ -10,7 +10,6 @@ export class Door extends InteractableEntity {
   constructor() {
     super({
       collidable: true,
-      dynamic   : true,
     });
   }
 
