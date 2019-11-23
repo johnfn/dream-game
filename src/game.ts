@@ -296,9 +296,7 @@ export class Game {
 
     this.resolveCollisions(grid);
 
-    Debug.Profile("lighting", () => {
-      this.gameState.playerLighting.buildLighting(this.gameState, grid);
-    })
+    this.gameState.playerLighting.buildLighting(this.gameState, grid);
 
     this.uniforms.u_time += 0.01;
     C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
@@ -370,7 +368,7 @@ export class Game {
         float displace_k  = displace.g * u_displacement_amt;
         vec2 uv_displaced = vec2(vUVs.x + displace_k, vUVs.y + displace_k);
 
-        vec4 color = vec4(sin(u_time), sin(u_time+1.0), sin(u_time+1.5), 1.0);
+        vec4 color = vec4(abs(sin(u_time)), abs(sin(u_time+0.5)), abs(sin(u_time+1.0)), 1.0);
         vec2 adjust = vec2(u_displacement_amt)/2.;
         vec4 texture = texture2D(u_lighting_tex, uv_displaced-adjust);
         gl_FragColor = texture * color;

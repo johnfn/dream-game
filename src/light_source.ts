@@ -9,7 +9,6 @@ import { Grid } from "./library/grid";
 import { CollisionGrid } from "./collision_grid";
 import { Rect } from "./library/rect";
 import { Pair } from "./library/pair";
-import { Debug } from "./library/debug";
 
 export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
@@ -48,8 +47,6 @@ export class LightSource extends Entity {
     const room = new Grid<boolean>();
 
     room.set(playerGridX, playerGridY, true);
-
-    Debug.Profile("flood", () => {
 
     let count = 0;
     while (roomEdge.length > 0) {
@@ -94,8 +91,6 @@ export class LightSource extends Entity {
         }
       }
     }
-
-    })
 
 
     // Step 2: Build lines for boundaries of the room.
