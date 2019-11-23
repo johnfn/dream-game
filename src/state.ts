@@ -7,6 +7,7 @@ import { DreamMap } from "./dream_map";
 import { Entity } from "./library/entity";
 import { LightSource } from "./light_source";
 import { Character } from "./character";
+import { FollowCamera } from "./camera";
 
 export enum GameMode {
   Normal,
@@ -19,6 +20,7 @@ export class GameState {
   map             !: DreamMap;
 
   character       !: Character;
+  camera          !: FollowCamera;
   level           !: number;
   playerLighting  !: LightSource;
   dreamMapLayer   !: Entity;

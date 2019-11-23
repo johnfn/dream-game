@@ -141,6 +141,7 @@ export class Game {
       width: C.CANVAS_WIDTH,
       height: C.CANVAS_HEIGHT
     });
+    this.gameState.camera = this.camera;
 
     const testShard = new DreamShard();
     testShard.position.set(5, 5);
@@ -165,7 +166,7 @@ export class Game {
 
     this.app.ticker.add(() => this.gameLoop());
 
-    this.gameState.playerLighting = new LightSource(this.gameState, this.buildCollisionGrid());
+    this.gameState.playerLighting = new LightSource();
     //this.stage.addChild(this.gameState.playerLighting);
     this.addDreamShader();
   };

@@ -15,7 +15,7 @@ export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
   graphics: Graphics;
 
-  constructor(state: GameState, collisionGrid: CollisionGrid) {
+  constructor() {
     super({
       collidable: false,
       dynamic   : false,
@@ -32,7 +32,12 @@ export class LightSource extends Entity {
 
     // Step 0: Get useful variables!
 
-    const player   = state.character;
+    const player       = state.character;
+    const camera       = state.camera;
+    const cameraBounds = camera.bounds();
+
+    // The furthest the light will go
+    const lightBounds  = cameraBounds.expand(100);
 
     // Step 1: BFS to find bounds of current room.
 
@@ -70,12 +75,18 @@ export class LightSource extends Entity {
           continue;
         }
 
-        const isWall = collisionGrid.collidesRectFast(new Rect({
+        const nextTile = new Rect({
           x: neighborX * C.TILE_WIDTH + 1,
           y: neighborY * C.TILE_HEIGHT + 1,
           w: C.TILE_WIDTH - 2,
           h: C.TILE_HEIGHT - 2,
-        }), player);
+        });
+
+        if (!lightBounds.intersects(nextTile, { edgesOnlyIsAnIntersection: false })) {
+          continue;
+        }
+
+        const isWall = collisionGrid.collidesRectFast(nextTile, player);
 
         if (!isWall) {
           room.set(neighborX, neighborY, true);
