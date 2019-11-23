@@ -4,7 +4,6 @@ import * as PIXI from "pixi.js";
 import { Rect } from "./library/rect";
 import { GameState } from "./state";
 import { C } from "./constants";
-import { Debug } from "./library/debug";
 
 export class FollowCamera {
   private static LERP_SPEED = 0.09;

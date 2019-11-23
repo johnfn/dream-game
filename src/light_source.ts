@@ -23,7 +23,11 @@ export class LightSource extends Entity {
     this.addChild(this.graphics);
   }
 
-  buildLighting(state: GameState, collisionGrid: CollisionGrid) {
+  buildLighting(state: GameState, collisionGrid: CollisionGrid): {
+    graphics: Graphics;
+    offsetX : number;
+    offsetY : number;
+  } {
     // Step -1: Clear out old state.
 
     this.graphics.clear();
@@ -346,6 +350,8 @@ export class LightSource extends Entity {
     // that joins the two rays - those three lines make up a polygon of the
     // light raycast.
 
+    let polygons: [number, number][][] = [];
+
     for (let i = 0; i < boundariesAndPoints.length; i++) {
       const ray1 = boundariesAndPoints[i];
       const ray2 = boundariesAndPoints[(i + 1) % boundariesAndPoints.length];
@@ -367,16 +373,12 @@ export class LightSource extends Entity {
       }
 
       if (closestBoundary) {
-        this.graphics.beginFill(0xFFFFFF);
-        this.graphics.lineStyle(0, 0, 0);
-        this.graphics.drawPolygon([
-          player.x, player.y,
-          closestBoundary.start.x, closestBoundary.start.y,
-          closestBoundary.end.x  , closestBoundary.end.y,
-          player.x, player.y,
-        ]);
-
-        this.graphics.endFill()
+        polygons.push([
+          [player.x               , player.y],
+          [closestBoundary.start.x, closestBoundary.start.y],
+          [closestBoundary.end.x  , closestBoundary.end.y],
+          [player.x               , player.y],
+        ])
       } else {
         // TODO: this happens when two vertices perfectly line up
         // Easy to repro by immediately walking to the bottom wall and then
@@ -385,6 +387,33 @@ export class LightSource extends Entity {
         console.log("BAD?!?")
       }
     }
+
+    // offset polygons and graphics so that we dont draw at negative coordinates.
+
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+
+    for (const polygon of polygons) {
+      for (const [x, y] of polygon) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+      }
+    }
+
+    for (const polygon of polygons) {
+      const verts = polygon.flatMap(([x, y]) => [x - minX, y - minY]);
+
+      this.graphics.beginFill(0xFFFFFF);
+      this.graphics.lineStyle(0, 0, 0);
+      this.graphics.drawPolygon(verts);
+      this.graphics.endFill();
+    }
+
+    return {
+      graphics: this.graphics,
+      offsetX : minX,
+      offsetY : minY
+    };
   }
 
   collide = () => {};

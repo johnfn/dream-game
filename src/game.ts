@@ -9,6 +9,7 @@ import {
   Sprite,
   RenderTexture,
   WRAP_MODES,
+  Graphics,
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -59,9 +60,10 @@ export class Game {
     interactable: []
   };
 
-  debugMode   : boolean;
-  player     !: Character;
-  camera     !: FollowCamera;
+  debugMode      : boolean;
+  player        !: Character;
+  camera        !: FollowCamera;
+  shadedLighting!: Mesh;
 
   /**
    * The stage of the game. Put everything in-game on here.
@@ -177,6 +179,15 @@ export class Game {
       this.player.y = 1595;
     }
 
+    // const gg = new Graphics();
+    // gg.beginFill(0xFFFF00);
+    // gg.drawPolygon([
+    //   538.3347775862885, -65.8349570550372,
+    //   640, 0,
+    //   704, 0,
+    //   538.3347775862885, -65.8349570550372,
+    // ]);
+    // this.stage.addChild(gg);
   };
 
   private resolveCollisions = (grid: CollisionGrid) => {
@@ -304,14 +315,22 @@ export class Game {
 
     this.resolveCollisions(grid);
 
-    this.gameState.playerLighting.buildLighting(this.gameState, grid);
-
     this.uniforms.u_time += 0.01;
-    C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
+
+    this.renderLightingToTexture(this.renderTex, grid);
 
     this.camera.update(this.gameState);
 
     Debug.ClearDrawCount();
+  };
+
+  renderLightingToTexture = (renderTexture: RenderTexture, grid: CollisionGrid) => {
+    const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid);
+
+    C.Renderer.render(graphics, renderTexture);
+
+    this.shadedLighting.x = offsetX;
+    this.shadedLighting.y = offsetY;
   };
 
   addDreamShader = () => {
@@ -389,9 +408,9 @@ export class Game {
       .addIndex([0, 1, 2, 1, 2, 3]);
 
     const shader = Shader.from(vertexSrc, fragSrc, this.uniforms);
-    const square = new Mesh(stageBounds, shader);
-    square.blendMode = BLEND_MODES.ADD;
+    this.shadedLighting = new Mesh(stageBounds, shader);
+    this.shadedLighting.blendMode = BLEND_MODES.ADD;
 
-    this.stage.addChild(square);
+    this.stage.addChild(this.shadedLighting);
   };
 }
