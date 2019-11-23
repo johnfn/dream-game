@@ -178,16 +178,6 @@ export class Game {
       this.player.x = 950;
       this.player.y = 1595;
     }
-
-    // const gg = new Graphics();
-    // gg.beginFill(0xFFFF00);
-    // gg.drawPolygon([
-    //   538.3347775862885, -65.8349570550372,
-    //   640, 0,
-    //   704, 0,
-    //   538.3347775862885, -65.8349570550372,
-    // ]);
-    // this.stage.addChild(gg);
   };
 
   private resolveCollisions = (grid: CollisionGrid) => {
@@ -327,6 +317,10 @@ export class Game {
   renderLightingToTexture = (renderTexture: RenderTexture, grid: CollisionGrid) => {
     const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid);
 
+    // Note: we need to be careful not to render to negative coordinates on the
+    // render texture because anything rendered at a negative coordinate is
+    // clipped immediately. That's why lighting always renders to (0, 0) and
+    // passes back an offset.
     C.Renderer.render(graphics, renderTexture);
 
     this.shadedLighting.x = offsetX;
