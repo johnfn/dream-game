@@ -24,6 +24,16 @@ export class TypewriterText extends TextEntity {
     this.started = true;
   }
 
+  isDone(): boolean {
+    return this.finalText === this.displayedText;
+  }
+
+  finishText(): void {
+    this.setText(this.finalText);
+
+    this.displayedText = this.finalText;
+  }
+
   update = (state: GameState) => {
     if (!this.started) {
       return;
