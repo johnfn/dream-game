@@ -241,9 +241,9 @@ export class LightSource extends Entity {
       // Done, clear everything out of the unprocessed list.
       // TODO: This is actually n^2, even though it doesn't have to be.
 
-      for (const segment of seenSegments) {
-        unprocessedSingleTileEdges = unprocessedSingleTileEdges.filter(unprocessedSegment => !unprocessedSegment.equals(segment));
-      }
+      const seenSegmentHash = new HashSet(seenSegments);
+
+      unprocessedSingleTileEdges = unprocessedSingleTileEdges.filter(unprocessedSegment => !seenSegmentHash.get(unprocessedSegment));
     }
 
     // Step 3: We have all vertices, but that's actually too many. We should
