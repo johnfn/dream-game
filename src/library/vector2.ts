@@ -175,6 +175,21 @@ export class Vector2 {
     });
   }
 
+  withX(newX: number): Vector2 {
+    return new Vector2({
+      x: newX,
+      y: this.y,
+    });
+  }
+
+  withY(newY: number): Vector2 {
+    return new Vector2({
+      x: this.x,
+      y: newY,
+    });
+  }
+
+
   lerp(other: Vector2, t: number): Vector2 {
     if (t > 1 || t < 0) { console.error("Lerp t must be between 0 and 1."); }
     if (t === 0) return this;

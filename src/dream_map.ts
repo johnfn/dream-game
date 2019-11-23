@@ -18,9 +18,10 @@ type MapLevel = {
 };
 
 export class DreamMap extends Entity {
-  activeModes = [GameMode.Normal];
-  map: TiledTilemap;
-  levels: { [key: number]: MapLevel } = [];
+  activeModes  = [GameMode.Normal];
+  map          : TiledTilemap;
+  levels       : { [key: number]: MapLevel } = [];
+  _cameraBounds: Rect[] = [];
 
   constructor(gameState: GameState) {
     super({
@@ -69,6 +70,12 @@ export class DreamMap extends Entity {
           name: "glass",
           getInstanceType: (tex: Texture) => new Glass(tex),
         },
+
+        {
+          type     : "rect" as const,
+          layerName: "Camera Bounds",
+          process  : (cameraBound) => this._cameraBounds.push(cameraBound),
+        }
       ]
     });
 
@@ -82,8 +89,13 @@ export class DreamMap extends Entity {
         h: 4096
       })
     );
+
     this.loadAllLayers(layers);
     this.updateLevel(gameState.level, gameState);
+  }
+
+  getCameraBounds(): Rect[] {
+    return this._cameraBounds;
   }
 
   updateLevel = (level: number, gameState: GameState) => {

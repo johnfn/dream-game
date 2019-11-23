@@ -9,24 +9,32 @@ import { Grid } from './grid';
 export type MapLayer = {
   layerName: string;
   entity   : Entity;
-}
+};
 
 type TilemapCustomObjectSingle = {
-  type: "single";
-  name: string;
-  getInstanceType: (tex: Texture) => Entity;
+  type            : "single";
+  name            : string;
+  getInstanceType : (tex: Texture) => Entity;
 };
 
 type TilemapCustomObjectGroup = {
-  type: "group";
-  names: string[];
-  getInstanceType: (tex: Texture) => Entity;
-  getGroupInstanceType: () => Entity;
+  type                 : "group";
+  names                : string[];
+  getInstanceType      : (tex: Texture) => Entity;
+  getGroupInstanceType : () => Entity;
 };
+
+type TilemapCustomObjectRect = {
+  type     : "rect";
+  layerName: string;
+  process  : (rect: Rect) => void;
+};
+
 
 type TilemapCustomObjects = 
   | TilemapCustomObjectGroup
   | TilemapCustomObjectSingle
+  | TilemapCustomObjectRect
 
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
 
@@ -226,11 +234,27 @@ export class TiledTilemap {
     // Step 0: 
     // Add all single objects
 
+    processObject:
     for (const obj of layer.objects) {
       if (!obj.gid) {
-        console.error("object in object layer without gid! very bad?!?");
+        // this is probably a region, so see if we have one of those.
 
-        continue;
+        for (const customObject of this.customObjects) {
+          if (customObject.type === "rect" && customObject.layerName === layer.name) {
+            customObject.process(
+              new Rect({
+                x: obj.x,
+                y: obj.y,
+                w: obj.width,
+                h: obj.height,
+              })
+            );
+
+            continue processObject;
+          }
+        }
+
+        throw new Error("you probably have a rect region in your tilemap that's not being processed in dream_map");
       }
 
       const { spritesheet, tileProperties } = this.gidInfo(obj.gid);
@@ -464,8 +488,6 @@ export class TiledTilemap {
 
           sprite.x = tile.x - region.x;
           sprite.y = tile.y - region.y;
-
-          console.log(sprite.x, sprite.y);
 
           this.renderer.render(sprite, renderTexture, false);
         }

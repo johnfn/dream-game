@@ -309,7 +309,7 @@ export class Game {
     this.uniforms.u_time += 0.01;
     C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
-    this.camera.update();
+    this.camera.update(this.gameState);
 
     Debug.ClearDrawCount();
   };

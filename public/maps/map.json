@@ -2,6 +2,39 @@
  "infinite":true,
  "layers":[
         {
+         "draworder":"topdown",
+         "id":20,
+         "name":"Camera Bounds",
+         "objects":[
+                {
+                 "height":1408,
+                 "id":32,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":1472,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "height":1024,
+                 "id":37,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":1472,
+                 "x":0,
+                 "y":-1024
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "id":18,
          "layers":[
                 {
@@ -565,8 +598,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":20,
- "nextobjectid":32,
+ "nextlayerid":21,
+ "nextobjectid":39,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.2.3",
