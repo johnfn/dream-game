@@ -76,10 +76,10 @@ export class DreamMap extends Entity {
 
     const layers = this.map.loadRegionLayers(
       new Rect({
-        x: 0,
-        y: 0,
-        w: 2048,
-        h: 2048
+        x: -2048,
+        y: -2048,
+        w: 4096,
+        h: 4096
       })
     );
     this.loadAllLayers(layers);

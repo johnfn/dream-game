@@ -1,6 +1,6 @@
 import { Sprite, Renderer, RenderTexture, Texture } from 'pixi.js'
 import { Rect } from './rect'
-import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON } from './tilemap_types';
+import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON, TiledLayerTypes } from './tilemap_types';
 import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
 import { TextureEntity } from '../texture_entity';
@@ -163,10 +163,29 @@ export class TiledTilemap {
     throw new Error("gid out of range. ask gabby what to do?!?");
   }
 
+  /**
+   * Returns all layers as a flat array - most notably flattens
+   * layer groups, which are nested.
+   */
+  private getAllLayers(root: TiledLayerTypes[]): (TiledTileLayerJSON | TiledObjectLayerJSON)[] {
+    let result: (TiledTileLayerJSON | TiledObjectLayerJSON)[] = [];
+
+    for (const layer of root) {
+      if (layer.type === "group") {
+        result = [...result, ...this.getAllLayers(layer.layers)];
+      } else {
+        result.push(layer);
+      }
+    }
+
+    return result;
+  }
+
   private loadTileLayers(): { [layerName: string]: Grid<Tile> } {
     const result: { [layerName: string]: Grid<Tile> } = {};
+    const layers = this.getAllLayers(this.data.layers);
 
-    for (const layer of this.data.layers) {
+    for (const layer of layers) {
       if (layer.type === "tilelayer") {
         const grid = this.loadTiles(layer);
 
@@ -180,7 +199,7 @@ export class TiledTilemap {
   private loadObjectLayers(): { entity: Entity, layerName: string }[] {
     let objectLayers: { entity: Entity, layerName: string }[] = [];
 
-    for (const layer of this.data.layers) {
+    for (const layer of this.getAllLayers(this.data.layers)) {
       if (layer.type === "objectgroup") {
         objectLayers.push({
           entity   : this.loadObjectLayer(layer),
@@ -344,8 +363,6 @@ export class TiledTilemap {
 
       // BFS complete; `group` contains entire group.
 
-      // TODO move everything to (0, 0) in the group
-
       for (const obj of group) {
         grid.get(obj.gridX, obj.gridY)!.grouped = true;
       }
@@ -448,12 +465,19 @@ export class TiledTilemap {
           sprite.x = tile.x - region.x;
           sprite.y = tile.y - region.y;
 
+          console.log(sprite.x, sprite.y);
+
           this.renderer.render(sprite, renderTexture, false);
         }
       }
 
+      const layerEntity = new TextureEntity({ texture: renderTexture, name: "map layer" });
+
+      layerEntity.x = region.x;
+      layerEntity.y = region.y;
+
       layers.push({
-        entity   : new TextureEntity({ texture: renderTexture, name: "map layer" }),
+        entity   : layerEntity,
         layerName,
       })
     }

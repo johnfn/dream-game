@@ -21,6 +21,17 @@ export interface TiledTileLayerJSON {
   y: number;
 }
 
+export interface TiledGroupLayerJSON {
+  id: number;
+  layers: TiledLayerTypes[];
+  name: string;
+  opacity: string;
+  type: "group";
+  visible: boolean;
+  x: number;
+  y: number;
+};
+
 export interface TiledObjectJSON {
   gid?: number;
 
@@ -77,6 +88,11 @@ export interface TilesetJSON {
   tiles     ?: TilesetTilesJSON[];
 }
 
+export type TiledLayerTypes = 
+  | TiledTileLayerJSON
+  | TiledObjectLayerJSON
+  | TiledGroupLayerJSON
+
 export interface TiledJSON {
   height: number;
   width : number;
@@ -87,7 +103,7 @@ export interface TiledJSON {
   tilewidth: number;
   version: number;
 
-  layers: (TiledTileLayerJSON | TiledObjectLayerJSON)[];
+  layers: TiledLayerTypes[];
   tilesets: TilesetJSON[];
 }
 
