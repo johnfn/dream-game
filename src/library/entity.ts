@@ -26,10 +26,12 @@ export abstract class Entity extends Container {
 
   entityType = EntityType.NormalEntity;
   sprite: Sprite;
+  transparent: boolean;
 
   constructor(props: {
-    texture   ?: Texture;
-    collidable : boolean;
+    texture    ?: Texture;
+    transparent?: boolean;
+    collidable  : boolean;
   }) {
     super();
 
@@ -44,6 +46,8 @@ export abstract class Entity extends Container {
 
     this.sprite.anchor.set(0);
     this.addChild(this.sprite);
+
+    this.transparent = props.transparent || false;
   }
 
   abstract activeModes: GameMode[];

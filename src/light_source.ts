@@ -82,9 +82,15 @@ export class LightSource extends Entity {
           continue;
         }
 
-        const isWall = collisionGrid.collidesRectFast(nextTile, player);
+        const hits = collisionGrid.collidesRect(nextTile, player);
+        const isObscured = hits.filter(hit => {
+          return (
+            hit.firstEntity && !hit.firstEntity.transparent &&
+            hit.secondEntity && !hit.secondEntity.transparent
+          );
+        }).length;
 
-        if (!isWall) {
+        if (!isObscured) {
           room.set(neighborX, neighborY, true);
           roomEdge.push(new Vector2({ x: neighborX, y: neighborY }));
         }

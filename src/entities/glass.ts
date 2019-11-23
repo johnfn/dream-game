@@ -11,6 +11,7 @@ export class Glass extends Entity {
     super({
       collidable: true,
       texture,
+      transparent: true,
     });
   }
 
