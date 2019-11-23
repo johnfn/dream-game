@@ -1,5 +1,5 @@
 import { Vector2 } from "./vector2";
-import { Graphics } from "pixi.js";
+import { Graphics, Sprite, Container } from "pixi.js";
 import { Line } from "./line";
 import { Game } from "../game";
 
@@ -94,4 +94,49 @@ export class Debug {
       console.log(`${ name }: ${ rounded }ms`)
     }
   }
+
+  static ClearDrawCount() {
+    (Sprite as any).drawCount = 0;
+    (Container as any).drawCount = 0;
+  }
+
+  static GetDrawCount() {
+    return (
+      (Sprite as any).drawCount + 
+      (Container as any).drawCount
+    );
+  }
 }
+
+(Sprite as any).drawCount = 0;
+
+(Sprite.prototype as any).__render = (Sprite.prototype as any)._render;
+(Sprite.prototype as any)._render = function (renderer: any) {
+  (Sprite as any).drawCount++;
+  this.__render(renderer);
+};
+
+
+(Sprite.prototype as any).__renderCanvas = (Sprite.prototype as any)._renderCanvas;
+(Sprite.prototype as any)._renderCanvas = function (renderer: any) {
+  (Sprite as any).drawCount++;
+  this.__renderCanvas(renderer);
+};
+
+
+// PIXI.Container
+
+(Container as any).drawCount = 0;
+
+(Container.prototype as any).__render = (Container.prototype as any)._render;
+(Container.prototype as any)._render = function (renderer: any) {
+  (Container as any).drawCount++;
+  this.__render(renderer);
+};
+
+
+(Container.prototype as any).__renderCanvas = (Container.prototype as any)._renderCanvas;
+(Container.prototype as any)._renderCanvas = function (renderer: any) {
+  (Container as any).drawCount++;
+  this.__renderCanvas(renderer);
+};

@@ -250,7 +250,7 @@ export class Game {
       width   : 2 * C.CANVAS_WIDTH,
       height  : 2 * C.CANVAS_HEIGHT,
       cellSize: 8 * C.TILE_WIDTH,
-      debug   : this.debugMode
+      debug   : false,
     });
 
     for (const entity of this.entities.collidable) {
@@ -271,6 +271,8 @@ export class Game {
   };
 
   gameLoop = () => {
+    // console.log(Debug.GetDrawCount());
+
     Debug.Clear();
 
     this.gameState.keys.update();
@@ -293,7 +295,6 @@ export class Game {
 
     this.resolveCollisions(grid);
 
-
     Debug.Profile("lighting", () => {
       this.gameState.playerLighting.buildLighting(this.gameState, grid);
     })
@@ -302,6 +303,8 @@ export class Game {
     C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
     this.camera.update();
+
+    Debug.ClearDrawCount();
   };
 
   addDreamShader = () => {

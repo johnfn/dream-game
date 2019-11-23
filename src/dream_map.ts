@@ -79,7 +79,6 @@ export class DreamMap extends Entity {
   }
 
   updateLevel = (level: number, gameState: GameState) => {
-    
     if (level < 0 || level > 2) return;
 
     this.removeChild(

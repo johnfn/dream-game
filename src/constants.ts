@@ -9,6 +9,8 @@ import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
 
 export class C {
+  public static DEBUG = true;
+
   public static CANVAS_WIDTH = 640;
   public static CANVAS_HEIGHT = 640;
 

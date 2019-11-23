@@ -6,6 +6,7 @@ import { Vector2 } from "./library/vector2";
 import { Entity } from "./library/entity";
 import { DefaultGrid } from "./library/default_grid";
 import { HashSet } from "./library/hash";
+import { Graphics } from "pixi.js";
 
 type CollisionResultRect = {
   firstRect    : Rect;
@@ -34,6 +35,8 @@ export class CollisionGrid {
   private _numCellsPerCol: number;
   private _cells: DefaultGrid<Cell>;
 
+  private _renderLines: Graphics | null = null;
+
   constructor(props: {
     game: Game;
     width: number;
@@ -42,10 +45,16 @@ export class CollisionGrid {
     debug: boolean;
   }) {
     const { game, width, height, cellSize, debug } = props;
+
     this._game = game;
     this._width = width;
     this._height = height;
     this._cellSize = cellSize;
+
+    if (debug) {
+      this._renderLines = new Graphics();
+      this._game.stage.addChild(this._renderLines);
+    }
 
     this._numCellsPerRow = Math.floor(width / cellSize);
     this._numCellsPerCol = Math.floor(height / cellSize);
@@ -231,37 +240,36 @@ export class CollisionGrid {
 
   // Shows the grid outline for debugging
   drawGrid = () => {
-    const lines: Line[] = [];
-    for (let x = 0; x < this._numCellsPerRow; x++) {
-      lines.push(
-        new Line({
-          x1: x * this._cellSize,
-          x2: x * this._cellSize,
-          y1: 0,
-          y2: this._height
-        })
-      );
-    }
-    for (let y = 0; y < this._numCellsPerRow; y++) {
-      lines.push(
-        new Line({
-          x1: 0,
-          x2: this._width,
-          y1: y * this._cellSize,
-          y2: y * this._cellSize
-        })
-      );
-    }
+    if (this._renderLines) {
+      const lines: Line[] = [];
+      for (let x = 0; x < this._numCellsPerRow; x++) {
+        lines.push(
+          new Line({
+            x1: x * this._cellSize,
+            x2: x * this._cellSize,
+            y1: 0,
+            y2: this._height
+          })
+        );
+      }
+      for (let y = 0; y < this._numCellsPerRow; y++) {
+        lines.push(
+          new Line({
+            x1: 0,
+            x2: this._width,
+            y1: y * this._cellSize,
+            y2: y * this._cellSize
+          })
+        );
+      }
 
-    let renderLines = new PIXI.Graphics();
-    for (let line of lines) {
-      renderLines
-        .lineStyle(1, 0xffffff)
-        .moveTo(line.x1, line.y1)
-        .lineTo(line.x2, line.y2);
+      for (let line of lines) {
+        this._renderLines
+          .lineStyle(1, 0xffffff)
+          .moveTo(line.x1, line.y1)
+          .lineTo(line.x2, line.y2);
+      }
     }
-
-    this._game.stage.addChild(renderLines);
   };
 }
 
