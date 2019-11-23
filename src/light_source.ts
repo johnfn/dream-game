@@ -13,6 +13,7 @@ import { Pair } from "./library/pair";
 export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
   graphics: Graphics;
+  loggedOnce = false;
 
   constructor() {
     super({
@@ -381,10 +382,11 @@ export class LightSource extends Entity {
         ])
       } else {
         // TODO: this happens when two vertices perfectly line up
-        // Easy to repro by immediately walking to the bottom wall and then
-        // walking left/right
 
-        console.log("BAD?!?")
+        if (!this.loggedOnce) {
+          this.loggedOnce = true;
+          console.log("grant still hasnt fixed the lighting edgecase");
+        }
       }
     }
 

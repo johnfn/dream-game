@@ -9,7 +9,6 @@ import {
   Sprite,
   RenderTexture,
   WRAP_MODES,
-  Graphics,
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -215,7 +214,7 @@ export class Game {
     // find potential interactor
 
     const sortedInteractors = activeEntities
-      .filter(ent => ent.canInteract())
+      .filter(ent => ent.canInteract() && new Vector2(ent.position).diagonalDistance(this.player.positionVector()) < ent.interactRange)
       .slice()
       .sort(
         (a, b) =>
@@ -228,16 +227,6 @@ export class Game {
       );
 
     let targetInteractor: InteractableEntity | null = sortedInteractors[0];
-
-    if (targetInteractor) {
-      const distance = new Vector2(targetInteractor.position).diagonalDistance(
-        new Vector2(this.player.position)
-      );
-
-      if (distance > C.INTERACTION_DISTANCE) {
-        targetInteractor = null;
-      }
-    }
 
     // found it. interact
 

@@ -15,7 +15,8 @@ export class BaseNPC extends InteractableEntity {
       collidable: true,
     });
 
-    this.position.set(200, 200)
+    this.position.set(500, 500);
+
     this.sprite.width  = 50;
     this.sprite.height = 50;
   }
