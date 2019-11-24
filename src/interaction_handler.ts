@@ -59,7 +59,7 @@ export class InteractionHandler {
       this.interactText.visible = true;
       this.interactText.setTarget(targetInteractorText);
 
-      this.interactText.setText(`%1%${ targetInteractorText.interactText() }`);
+      this.interactText.setText(`%1%${ targetInteractorText.interactText(gameState) }`);
     } else {
       this.interactText.visible = false;
       this.interactText.setText(`%1%`);

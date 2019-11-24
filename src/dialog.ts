@@ -8,7 +8,7 @@ export class Dialog extends InteractableEntity {
   static Instance: Dialog;
 
   activeModes = [GameMode.Dialog];
-  text: TypewriterText;
+  text        : TypewriterText;
 
   constructor() {
     super({
@@ -23,7 +23,7 @@ export class Dialog extends InteractableEntity {
 
     this.text = new TypewriterText(
       "%1%This is some dialog text", {
-        1: { color   : "white", fontSize: 18, align: "left" }
+        1: { color: "white", fontSize: 18, align: "left" }
       }
     );
 

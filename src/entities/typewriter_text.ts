@@ -17,8 +17,8 @@ export class TypewriterText extends TextEntity {
   started   = false;
   state     = TypewritingState.Writing;
 
-  constructor(text: string, styles: TextStyles) {
-    super("", styles);
+  constructor(text: string, styles: TextStyles, width = 400, height = 300) {
+    super("", styles, width, height);
 
     this.finalText     = text;
     this.displayedText = "";

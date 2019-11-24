@@ -16,7 +16,7 @@ export class Door extends InteractableEntity {
   }
 
   interactRange = C.INTERACTION_RANGE;
-  interactText  = () => {
+  interactText(state: GameState): string {
     if (this.open) {
       return "Close"
     } else {
@@ -26,7 +26,7 @@ export class Door extends InteractableEntity {
 
   canInteract = () => true;
 
-  interact = (other: Entity, state: GameState) => {
+  interact(other: Entity, state: GameState) {
     if (this.open) {
       if (other.myGetBounds().intersects(this.myGetBounds())) {
         Dialog.StartDialog(state, "%1%What? Close the door? On myself? NO!!");

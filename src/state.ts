@@ -37,12 +37,12 @@ export class GameState {
   /**
    * number of keys we've picked up in game
    */
-  keyCount         = 0;
+  keyCount         = 1;
   
   constructor() {
-    this.mode = GameMode.Normal
+    this.mode  = GameMode.Normal
     this.level = 1;
-    this.keys = new KeyboardState();
+    this.keys  = new KeyboardState();
 
     this.shader = new PIXI.Graphics()
       .beginFill(0xffffff)
