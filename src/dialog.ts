@@ -36,8 +36,6 @@ export class Dialog extends InteractableEntity {
   update = (state: GameState) => {
   };
 
-  isOnScreen = () => true
-
   interact = (other: Entity, gameState: GameState) => {
     if (this.text.isDone()) {
       Dialog.EndDialog(gameState);

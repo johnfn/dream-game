@@ -587,6 +587,18 @@
                          "width":64,
                          "x":320,
                          "y":-320
+                        }, 
+                        {
+                         "gid":46,
+                         "height":64,
+                         "id":44,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":64,
+                         "y":448
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -634,7 +646,7 @@
          "y":0
         }],
  "nextlayerid":21,
- "nextobjectid":44,
+ "nextobjectid":45,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.2.3",
@@ -756,6 +768,15 @@
                          "name":"type",
                          "type":"string",
                          "value":"lockedDoorRight"
+                        }]
+                }, 
+                {
+                 "id":45,
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"treasureChest"
                         }]
                 }],
          "tilewidth":64

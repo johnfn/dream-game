@@ -225,7 +225,7 @@ export class Game {
     });
 
     for (const entity of this.entities.collidable) {
-      if (entity.isOnScreen()) {
+      if (this.camera.bounds().intersects(entity.bounds, { edgesOnlyIsAnIntersection: false })) {
         grid.add(entity.myGetBounds(), entity);
       }
     }

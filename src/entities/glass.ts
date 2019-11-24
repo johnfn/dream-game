@@ -20,6 +20,4 @@ export class Glass extends Entity {
   update = (state: GameState) => {
 
   };
-
-  isOnScreen = () => true
 }

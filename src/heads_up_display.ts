@@ -26,6 +26,4 @@ export class HeadsUpDisplay extends Entity {
   interact = () => {}
   collide = () => {}
   update = (state: GameState) => {}
-
-  isOnScreen = () => true
 }

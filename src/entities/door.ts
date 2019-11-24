@@ -13,7 +13,7 @@ export class Door extends InteractableEntity {
     });
   }
 
-  interactRange = C.INTERACTION_DISTANCE;
+  interactRange = C.INTERACTION_RANGE;
   interactText  = () => "Open door";
   canInteract   = () => !this.open;
 
@@ -28,6 +28,4 @@ export class Door extends InteractableEntity {
 
   update = (state: GameState) => {
   };
-
-  isOnScreen = () => true
 }

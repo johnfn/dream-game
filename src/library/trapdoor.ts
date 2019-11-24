@@ -34,7 +34,7 @@ export class Trapdoor extends InteractableEntity {
     }
   };
 
-  interactRange = C.INTERACTION_DISTANCE;
+  interactRange = C.INTERACTION_RANGE;
   interactText  = () => "take some stairs";
   canInteract   = () => true;
 }

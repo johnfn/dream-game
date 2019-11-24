@@ -35,7 +35,7 @@ export class DreamShard extends InteractableEntity {
 
   checkForInteractions = (other: Entity, gameState: GameState) => {
     if (
-      new Vector2(other.position).diagonalDistance(new Vector2(this.position)) < C.INTERACTION_DISTANCE
+      new Vector2(other.position).diagonalDistance(new Vector2(this.position)) < C.INTERACTION_RANGE
     ) {
       if (gameState.keys.justDown.E) {
         return true;
@@ -51,7 +51,7 @@ export class DreamShard extends InteractableEntity {
     }
   };
 
-  interactRange = C.INTERACTION_DISTANCE;
+  interactRange = C.INTERACTION_RANGE;
   interactText  = () => "Dream";
   canInteract   = () => true;
 

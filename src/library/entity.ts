@@ -2,7 +2,6 @@ import { Game } from "../game";
 import { Vector2 } from "./vector2";
 import { Rect } from "./rect";
 import { Sprite, Texture, Container }from "pixi.js";
-import { C } from "../constants";
 import { GameState, GameMode } from "../state";
 
 export enum EntityType {
@@ -93,19 +92,6 @@ export abstract class Entity extends Container {
       y: this.height / 2
     });
   }
-
-  // TODO: Check entire bounds
-  // TODO: Check against camera too
-  isOnScreen = () => {
-    // Checks the center
-
-    return (
-      this.position.x > 0 &&
-      this.position.x < C.CANVAS_WIDTH &&
-      this.position.y > 0 &&
-      this.position.y < C.CANVAS_HEIGHT
-    );
-  };
 
   positionVector() {
     return new Vector2({

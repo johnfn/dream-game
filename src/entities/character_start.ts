@@ -24,6 +24,4 @@ export class CharacterStart extends Entity {
   update = (state: GameState) => {
 
   };
-
-  isOnScreen = () => true
 }

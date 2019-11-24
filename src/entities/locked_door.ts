@@ -15,7 +15,7 @@ export class LockedDoor extends InteractableEntity {
     });
   }
 
-  interactRange = C.INTERACTION_DISTANCE;
+  interactRange = C.INTERACTION_RANGE;
   interactText  = () => "Try door";
   canInteract   = () => !this.open;
 
@@ -34,6 +34,4 @@ export class LockedDoor extends InteractableEntity {
 
   update = (state: GameState) => {
   };
-
-  isOnScreen = () => true
 }

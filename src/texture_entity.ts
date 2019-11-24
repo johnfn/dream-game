@@ -22,6 +22,4 @@ export class TextureEntity extends Entity {
   collide = () => {}
   update = (state: GameState) => {
   }
-
-  isOnScreen = () => true
 }
