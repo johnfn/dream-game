@@ -3,7 +3,7 @@ import { BaseTextEntity } from "./base_text_entity";
 export type TextEntityStyle = {
   color   : string;
   fontSize: number;
-  align  ?: "left" | "right";
+  align  ?: "left" | "right" | "center";
 }
 
 export type TextStyles = {
@@ -46,8 +46,8 @@ export class TextEntity extends BaseTextEntity {
    * 
    * "%1%This is some red text% normal text %2%blue text!%".
    */
-  constructor(text: string, styles: TextStyles) {
-    super("" , 500, 300);
+  constructor(text: string, styles: TextStyles, width = 500, height = 300) {
+    super("" , width, height);
 
     this.styles = styles;
     this.setText(text);
@@ -58,13 +58,13 @@ export class TextEntity extends BaseTextEntity {
 
     const html = textSegments.map(segment => {
       return (
-        `<span 
+        `<div 
           style="
             color: ${ segment.style.color }; 
             font-family: FreePixel; 
-            text-align: ${ segment.style.align || "left" }
+            text-align: ${ segment.style.align || "left" };
             font-size: ${ segment.style.fontSize }px;"
-        >${ segment.text }</span>`
+        >${ segment.text }</div>`
       )
     }).join("").replace(/\n/g, "");
 

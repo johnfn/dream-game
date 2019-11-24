@@ -64,7 +64,7 @@ export class Game {
   player            !: Character;
   camera            !: FollowCamera;
   shadedLighting    !: Mesh;
-  interactionHandler : InteractionHandler;
+  interactionHandler!: InteractionHandler;
 
   /**
    * The stage of the game. Put everything in-game on here.
@@ -99,8 +99,6 @@ export class Game {
 
     this.fixedCameraStage = new Container();
     this.app.stage.addChild(this.fixedCameraStage);
-
-    this.interactionHandler = new InteractionHandler(this.stage);
 
     // This is insanity:
 
@@ -168,6 +166,8 @@ export class Game {
     this.gameState.playerLighting = new LightSource();
     //this.stage.addChild(this.gameState.playerLighting);
     this.addDreamShader();
+
+    this.interactionHandler = new InteractionHandler(this.stage);
 
     if (MyName === "grant") {
       this.player.x = Number(window.localStorage.getItem("characterx")) || CharacterStart.Instance.x;
@@ -260,11 +260,6 @@ export class Game {
       entity.update(this.gameState);
     }
 
-    this.interactionHandler.update({
-      activeEntities: activeInteractableEntities,
-      gameState     : this.gameState,
-    });
-
     const grid = this.buildCollisionGrid();
 
     this.resolveCollisions(grid);
@@ -274,6 +269,11 @@ export class Game {
     this.renderLightingToTexture(this.renderTex, grid);
 
     this.camera.update(this.gameState);
+
+    this.interactionHandler.update({
+      activeEntities: activeInteractableEntities,
+      gameState     : this.gameState,
+    });
 
     Debug.ClearDrawCount();
   };

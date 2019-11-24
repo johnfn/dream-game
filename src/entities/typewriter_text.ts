@@ -1,5 +1,5 @@
-import { GameState, GameMode } from "./state";
-import { TextEntity, TextStyles, TextSegmentState, AdvanceState as AdvanceTextState } from "./library/text_entity";
+import { GameState, GameMode } from "../state";
+import { TextEntity, TextStyles, TextSegmentState, AdvanceState as AdvanceTextState } from "../library/text_entity";
 
 export enum TypewritingState {
   Writing,

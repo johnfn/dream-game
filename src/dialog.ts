@@ -2,7 +2,7 @@ import { GameState, GameMode } from "./state";
 import { Entity } from "./library/entity";
 import { C } from "./constants";
 import { InteractableEntity } from "./library/interactable_entity";
-import { TypewriterText, TypewritingState } from "./typewriter_text";
+import { TypewriterText, TypewritingState } from "./entities/typewriter_text";
 
 export class Dialog extends InteractableEntity {
   static Instance: Dialog;
