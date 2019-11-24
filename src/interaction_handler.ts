@@ -37,7 +37,10 @@ export class InteractionHandler {
           )
       );
 
-    let targetInteractor: InteractableEntity | null = sortedInteractors[0];
+    const sortedInteractorsWithMode = sortedInteractors
+      .filter(ent => ent.activeModes.includes(gameState.mode))
+
+    let targetInteractor: InteractableEntity | null = sortedInteractorsWithMode[0];
 
     // found it. interact
 
@@ -45,13 +48,17 @@ export class InteractionHandler {
       targetInteractor.interact(character, gameState);
     }
 
+    // We relax our restrictions for showing text a little
+
+    let targetInteractorText: InteractableEntity | null = sortedInteractors[0];
+
     // update HUD (maybe move this code into HUD)
 
-    if (targetInteractor) {
+    if (targetInteractorText) {
       this.interactText.visible = true;
-      this.interactText.setTarget(targetInteractor);
+      this.interactText.setTarget(targetInteractorText);
 
-      this.interactText.setText(`%1%${ targetInteractor.interactText() }`);
+      this.interactText.setText(`%1%${ targetInteractorText.interactText() }`);
     } else {
       this.interactText.visible = false;
       this.interactText.setText(`%1%`);

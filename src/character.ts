@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+
 import { Entity } from "./library/entity";
 import { Game } from "./game";
 import { Vector2 } from "./library/vector2";

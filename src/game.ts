@@ -252,10 +252,6 @@ export class Game {
       entity.activeModes.includes(this.gameState.mode)
     );
 
-    const activeInteractableEntities = this.entities.interactable.filter(
-      entity => entity.activeModes.includes(this.gameState.mode)
-    );
-
     for (const entity of activeEntities) {
       entity.update(this.gameState);
     }
@@ -271,7 +267,7 @@ export class Game {
     this.camera.update(this.gameState);
 
     this.interactionHandler.update({
-      activeEntities: activeInteractableEntities,
+      activeEntities: this.entities.interactable,
       gameState     : this.gameState,
     });
 
