@@ -37,7 +37,7 @@ export class GameState {
   /**
    * number of keys we've picked up in game
    */
-  keyCount         = 4;
+  keyCount         = 0;
   
   constructor() {
     this.mode = GameMode.Normal

@@ -14,7 +14,7 @@ export type MapLayer = {
 type TilemapCustomObjectSingle = {
   type            : "single";
   name            : string;
-  getInstanceType : (tex: Texture) => Entity;
+  getInstanceType : (tex: Texture, tileProperties: { [key: string]: unknown }) => Entity;
 };
 
 type TilemapCustomObjectGroup = {
@@ -257,6 +257,17 @@ export class TiledTilemap {
       }
 
       const { spritesheet, tileProperties } = this.gidInfo(obj.gid);
+      const objProperties: { [key: string]: unknown } = {};
+
+      for (const { name, value } of (obj.properties || [])) {
+        tileProperties[name] = value;
+      }
+
+      const allProperties = {
+        ...tileProperties,
+        ...objProperties,
+      };
+
       let newObj: Entity | null = null;
       const tile = {
         x             : obj.x,
@@ -266,10 +277,10 @@ export class TiledTilemap {
         tile          : spritesheet,
         isCollider    : this.gidHasCollision[obj.gid] || false,
         gid           : obj.gid,
-        tileProperties: tileProperties,
+        tileProperties: allProperties,
       };
 
-      const tileType = tileProperties.type as string;
+      const tileType = allProperties.type as string;
 
       if (tileType === undefined) {
         throw new Error("Custom object needs a tile type");
@@ -295,7 +306,7 @@ export class TiledTilemap {
         if (associatedObject.name === tileType) {
           const spriteTex = TextureCache.GetTextureForTile(tile); 
 
-          newObj = associatedObject.getInstanceType(spriteTex);
+          newObj = associatedObject.getInstanceType(spriteTex, allProperties);
         }
       } else if (associatedObject.type === "group") {
         // add to the list of grouped objects, which we will process later.

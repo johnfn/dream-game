@@ -5,16 +5,28 @@ import { C } from "../constants";
 import { Texture } from "pixi.js";
 import { Dialog } from "../dialog";
 
+type TreasureChestContents =
+  | "key"
+
 export class TreasureChest extends InteractableEntity {
   activeModes = [GameMode.Normal];
-  name = "TreasureChest";
-  open = false;
+  name        = "TreasureChest";
+  open        = false;
+  contents    : TreasureChestContents;
 
-  constructor(texture: Texture) {
+  constructor(texture: Texture, props: { [key: string]: unknown }) {
     super({
       collidable: true,
       texture   ,
     });
+
+    const contents = props.contents;
+
+    if (!contents || typeof contents !== "string") {
+      throw new Error("Treasure chest object in map with no contents!");
+    }
+
+    this.contents = contents as unknown as TreasureChestContents;
   }
 
   collide = () => {};
@@ -25,6 +37,12 @@ export class TreasureChest extends InteractableEntity {
 
   canInteract = () => true;
 
+  giveItemToCharacter(gameState: GameState) {
+    if (this.contents === "key") {
+      gameState.keyCount += 1;
+    }
+  }
+
   interact(other: Entity, gameState: GameState) {
     if (this.open) {
       Dialog.StartDialog(gameState, "%1%This is an empty chest.");
@@ -32,6 +50,8 @@ export class TreasureChest extends InteractableEntity {
       this.open = true;
 
       Dialog.StartDialog(gameState, "%1%You open the chest!");
+
+      this.giveItemToCharacter(gameState);
     }
   }
 

@@ -78,7 +78,7 @@ export class DreamMap extends Entity {
           type: "single" as const,
 
           name: "treasureChest",
-          getInstanceType: (tex: Texture) => new TreasureChest(tex),
+          getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new TreasureChest(tex, props),
         },
         
         {
