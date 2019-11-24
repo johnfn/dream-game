@@ -11,6 +11,7 @@ export const ResourcesToLoad = {
   "logo192.png"              : ResourceType.Image,
   "art/tileset"              : ResourceType.Image,
   "art/temp.png"             : ResourceType.Image,
+  "art/key.png"              : ResourceType.Image,
   "art/char.png"             : ResourceType.Image,
   "art/char_spritesheet.json": ResourceType.Spritesheet,
   "maps/map.json"            : ResourceType.Tileset,

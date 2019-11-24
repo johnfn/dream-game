@@ -33,6 +33,11 @@ export class GameState {
 
   // TODO: Maybe mode should be a stack?
   mode             : GameMode;
+
+  /**
+   * number of keys we've picked up in game
+   */
+  keyCount         = 4;
   
   constructor() {
     this.mode = GameMode.Normal
