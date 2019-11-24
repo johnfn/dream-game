@@ -52,7 +52,7 @@ export class DreamShard extends InteractableEntity {
   };
 
   interactRange = C.INTERACTION_DISTANCE;
-  interactText  = "Dream";
+  interactText  = () => "Dream";
   canInteract   = () => true;
 
   toggleDream = (gameState: GameState) => {

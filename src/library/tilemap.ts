@@ -270,37 +270,47 @@ export class TiledTilemap {
         tileProperties: tileProperties,
       };
 
-      const tileType = tileProperties.type;
-
-      for (const customObject of this.customObjects) {
-        if (typeof tileType !== "string") {
-          continue;
-        }
-
-        if (customObject.type === "single") {
-          if (customObject.name === tileType) {
-            const spriteTex = TextureCache.GetTextureForTile(tile); 
-
-            newObj = customObject.getInstanceType(spriteTex);
-          }
-        } else if (customObject.type === "group") {
-          // add to the list of grouped objects, which we will process later.
-
-          if (customObject.names.includes(tileType)) {
-            objectsToGroup.push({
-              name: tileType,
-              tile: tile,
-              // TODO: We're making an assumption that the size of the objects
-              // are all the same. I think this is safe tho?
-              gridX: tile.x / obj.width,
-              gridY: tile.y / obj.height,
-            });
-          }
-        }
-      }
+      const tileType = tileProperties.type as string;
 
       if (tileType === undefined) {
         throw new Error("Custom object needs a tile type");
+      }
+
+      const associatedObject = this.customObjects.find(obj => {
+        if (obj.type === "single") {
+          return obj.name === tileType;
+        }
+
+        if (obj.type === "group") {
+          return obj.names.includes(tileType);
+        }
+
+        return false;
+      });
+
+      if (associatedObject === undefined) {
+        throw new Error(`Unhandled tile type: ${ tileType }`);
+      }
+
+      if (associatedObject.type === "single") {
+        if (associatedObject.name === tileType) {
+          const spriteTex = TextureCache.GetTextureForTile(tile); 
+
+          newObj = associatedObject.getInstanceType(spriteTex);
+        }
+      } else if (associatedObject.type === "group") {
+        // add to the list of grouped objects, which we will process later.
+
+        if (associatedObject.names.includes(tileType)) {
+          objectsToGroup.push({
+            name: tileType,
+            tile: tile,
+            // TODO: We're making an assumption that the size of the objects
+            // are all the same. I think this is safe tho?
+            gridX: tile.x / obj.width,
+            gridY: tile.y / obj.height,
+          });
+        }
       }
 
       if (newObj) {

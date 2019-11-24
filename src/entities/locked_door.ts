@@ -4,7 +4,7 @@ import { C } from "../constants";
 
 export class Door extends InteractableEntity {
   activeModes = [GameMode.Normal];
-  name = "Door";
+  name = "Locked Door";
   open = false;
 
   constructor() {
@@ -14,7 +14,7 @@ export class Door extends InteractableEntity {
   }
 
   interactRange = C.INTERACTION_DISTANCE;
-  interactText  = () => "Open door";
+  interactText  = () => "Try door";
   canInteract   = () => !this.open;
 
   interact = () => {

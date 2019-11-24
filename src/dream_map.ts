@@ -58,6 +58,15 @@ export class DreamMap extends Entity {
         },
 
         {
+          type: "group" as const,
+
+          names: ["lockedDoorLeft", "lockedDoorRight"],
+          getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "door" }),
+          getGroupInstanceType: () => new Door()
+        },
+
+
+        {
           type: "single" as const,
 
           name: "characterStart",
