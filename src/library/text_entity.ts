@@ -55,6 +55,8 @@ export class TextEntity extends BaseTextEntity {
 
   setText(text: string): void {
     if (text === "") {
+      this.html = "";
+
       return;
     }
 
@@ -69,7 +71,7 @@ export class TextEntity extends BaseTextEntity {
             text-align: ${ segment.style.align || "left" };
             font-size: ${ segment.style.fontSize }px;"
         >${ segment.text }</div>`
-      )
+      );
     }).join("").replace(/\n/g, "");
 
     this.html = html;

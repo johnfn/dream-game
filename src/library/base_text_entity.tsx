@@ -56,9 +56,11 @@ export class BaseTextEntity extends Entity {
   };
 
   set html(value: string) {
-    this._html = value;
+    if (this._html !== value) {
+      this._html = value;
 
-    this.buildTextGraphic()
+      this.buildTextGraphic()
+    }
   }
 
   // converting woff into dataurl:
