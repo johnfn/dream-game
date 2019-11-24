@@ -2,7 +2,7 @@ import { GameState, GameMode } from "./state";
 import { Entity } from "./library/entity";
 import { C } from "./constants";
 import { InteractableEntity } from "./library/interactable_entity";
-import { TypewriterText } from "./typewriter_text";
+import { TypewriterText, TypewritingState } from "./typewriter_text";
 
 export class Dialog extends InteractableEntity {
   static Instance: Dialog;
@@ -47,7 +47,13 @@ export class Dialog extends InteractableEntity {
   };
 
   interactRange = Number.POSITIVE_INFINITY;
-  interactText  = () => "Keep Talking";
+  interactText  = () => {
+    if (this.text.state === TypewritingState.Writing) {
+      return "Jump to End";
+    } else {
+      return "Keep Talking"
+    }
+  };
   canInteract   = () => true;
 
   static StartDialog(gameState: GameState, text: string) {
