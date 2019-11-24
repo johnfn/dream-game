@@ -54,6 +54,10 @@ export class TextEntity extends BaseTextEntity {
   }
 
   setText(text: string): void {
+    if (text === "") {
+      return;
+    }
+
     const textSegments = this.buildTextSegments(text);
 
     const html = textSegments.map(segment => {

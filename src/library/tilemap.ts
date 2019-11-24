@@ -30,7 +30,6 @@ type TilemapCustomObjectRect = {
   process  : (rect: Rect) => void;
 };
 
-
 type TilemapCustomObjects = 
   | TilemapCustomObjectGroup
   | TilemapCustomObjectSingle

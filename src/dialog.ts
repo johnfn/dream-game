@@ -18,12 +18,12 @@ export class Dialog extends InteractableEntity {
 
     Dialog.Instance = this;
 
-    this.position.set(200, 200)
+    this.position.set(200, 300)
     this.sprite.width = 400;
 
     this.text = new TypewriterText(
       "%1%This is some dialog text", {
-        1: { color   : "white", fontSize: 18, align: "right" }
+        1: { color   : "white", fontSize: 18, align: "left" }
       }
     );
 
