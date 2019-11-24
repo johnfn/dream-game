@@ -90,7 +90,7 @@ export class Game {
       antialias: true,
       transparent: false,
       resolution: window.devicePixelRatio,
-      autoDensity: true,
+      autoDensity : true,
       backgroundColor: 0x666666
     });
 
@@ -186,7 +186,7 @@ export class Game {
 
   private resolveCollisions = (grid: CollisionGrid) => {
     const movingEntities: MovingEntity[] = this.entities.collidable.filter(
-      ent => ent.entityType === EntityType.MovingEntity
+      ent => ent.entityType === EntityType.MovingEntity && ent.activeModes.includes(this.gameState.mode)
     ) as MovingEntity[];
 
     for (const entity of movingEntities) {

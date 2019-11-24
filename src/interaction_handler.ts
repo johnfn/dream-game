@@ -42,13 +42,14 @@ export class InteractionHandler {
 
     let targetInteractor: InteractableEntity | null = sortedInteractorsWithMode[0];
 
-    // found it. interact
+    // Found it. interact
 
     if (targetInteractor && gameState.keys.justDown.E) {
       targetInteractor.interact(character, gameState);
     }
 
     // We relax our restrictions for showing text a little
+    // It doesn't make sense for interaction text to disappear while dialog is shown.
 
     let targetInteractorText: InteractableEntity | null = sortedInteractors[0];
 
