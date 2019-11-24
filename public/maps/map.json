@@ -593,6 +593,12 @@
                          "height":64,
                          "id":44,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"contents",
+                                 "type":"string",
+                                 "value":"key"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,

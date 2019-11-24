@@ -83,7 +83,7 @@ export class LightSource extends Entity {
           h: C.TILE_HEIGHT - 2,
         });
 
-        if (!lightBounds.intersects(nextTile, { edgesOnlyIsAnIntersection: false })) {
+        if (!lightBounds.intersects(nextTile)) {
           continue;
         }
 

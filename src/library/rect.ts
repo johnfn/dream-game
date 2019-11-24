@@ -237,7 +237,7 @@ export class Rect {
   // consider overlapping edges as intersection, but not overlapping corners.
   intersects(
     other: Rect,
-    props: { edgesOnlyIsAnIntersection: boolean }
+    props: { edgesOnlyIsAnIntersection: boolean } = { edgesOnlyIsAnIntersection: false }
   ): boolean {
     const intersection = this.getIntersection(other, true);
 

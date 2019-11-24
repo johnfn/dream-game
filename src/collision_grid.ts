@@ -141,7 +141,7 @@ export class CollisionGrid {
           continue;
         }
 
-        const overlap = rect.intersects(rectInCell, { edgesOnlyIsAnIntersection: false });
+        const overlap = rect.intersects(rectInCell);
 
         if (overlap) {
           return true;
