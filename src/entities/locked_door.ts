@@ -1,8 +1,10 @@
 import { GameState, GameMode } from "../state";
 import { InteractableEntity } from "../library/interactable_entity";
 import { C } from "../constants";
+import { Entity } from "../library/entity";
+import { Dialog } from "../dialog";
 
-export class Door extends InteractableEntity {
+export class LockedDoor extends InteractableEntity {
   activeModes = [GameMode.Normal];
   name = "Locked Door";
   open = false;
@@ -17,11 +19,15 @@ export class Door extends InteractableEntity {
   interactText  = () => "Try door";
   canInteract   = () => !this.open;
 
-  interact = () => {
-    this.open    = true;
-    this.visible = false;
+  interact = (other: Entity, gameState: GameState) => {
+    Dialog.StartDialog(gameState, "%1%This door is locked!");
 
-    this.setCollideable(false);
+    if (false) {
+      this.open    = true;
+      this.visible = false;
+
+      this.setCollideable(false);
+    }
   };
 
   collide = () => {};

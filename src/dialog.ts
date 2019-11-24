@@ -50,8 +50,8 @@ export class Dialog extends InteractableEntity {
   interactText  = () => "Keep Talking";
   canInteract   = () => true;
 
-  static StartDialog(gameState: GameState) {
-    Dialog.Instance.text.start();
+  static StartDialog(gameState: GameState, text: string) {
+    Dialog.Instance.text.start(text);
 
     gameState.mode = GameMode.Dialog;
     gameState.dialog.visible = true;

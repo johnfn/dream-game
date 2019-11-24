@@ -22,7 +22,7 @@ export class BaseNPC extends InteractableEntity {
   }
 
   interact = (player: Character, state: GameState) => {
-    Dialog.StartDialog(state);
+    Dialog.StartDialog(state, "%1%Hello! I am an NPC.");
   };
 
   interactRange = C.INTERACTION_DISTANCE;

@@ -9,6 +9,7 @@ import { Trapdoor } from "./library/trapdoor";
 import { Door } from "./entities/door";
 import { CharacterStart } from "./entities/character_start";
 import { Glass } from "./entities/glass";
+import { LockedDoor } from "./entities/locked_door";
 
 type MapLevel = {
   dreamGroundLayer: Entity | undefined;
@@ -62,9 +63,8 @@ export class DreamMap extends Entity {
 
           names: ["lockedDoorLeft", "lockedDoorRight"],
           getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "door" }),
-          getGroupInstanceType: () => new Door()
+          getGroupInstanceType: () => new LockedDoor()
         },
-
 
         {
           type: "single" as const,

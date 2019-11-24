@@ -237,7 +237,7 @@ export class Game {
     // update HUD (maybe move this code into HUD)
 
     if (targetInteractor) {
-      this.hud.interactText.setText(`%1%e: ${targetInteractor.interactText()}`);
+      this.hud.interactText.setText(`%1%e: ${ targetInteractor.interactText() }`);
     } else {
       this.hud.interactText.setText(`%1%e: Nothing`);
     }

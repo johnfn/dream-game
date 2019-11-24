@@ -1,26 +1,50 @@
 import { GameState, GameMode } from "./state";
 import { TextEntity, TextStyles, TextSegmentState, AdvanceState as AdvanceTextState } from "./library/text_entity";
 
+export enum TypewritingState {
+  Writing,
+  Done,
+}
+
 export class TypewriterText extends TextEntity {
   activeModes = [GameMode.Dialog];
-  finalText: string;
+
+  finalText    : string;
   displayedText: string;
-  tick = 0;
+
+  tick      = 0;
   textState = TextSegmentState.NormalText;
-  started = false;
+  started   = false;
+  state     = TypewritingState.Writing;
 
   constructor(text: string, styles: TextStyles) {
     super("", styles);
 
-    this.finalText = text;
+    this.finalText     = text;
     this.displayedText = "";
     this.setText("");
   }
 
-  start() {
+  setText(newText: string): void {
+    super.setText(newText);
+    this.displayedText = newText;
+
+    if (this.finalText === this.displayedText) {
+      this.state = TypewritingState.Done;
+    } else {
+      this.state = TypewritingState.Writing;
+    }
+  }
+
+  getState(): TypewritingState {
+    return this.state;
+  }
+
+  start(newText: string) {
     this.clear();
 
-    this.displayedText = "";
+    this.setText("");
+    this.finalText = newText;
     this.started = true;
   }
 
