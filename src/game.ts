@@ -30,6 +30,7 @@ import { MyName } from "./my_name";
 import { LightSource } from "./light_source";
 import { Debug } from "./library/debug";
 import { CharacterStart } from "./entities/character_start";
+import { InteractionHandler } from "./interaction_handler";
 
 export class Game {
   uniforms!: {
@@ -59,16 +60,17 @@ export class Game {
     interactable: []
   };
 
-  debugMode      : boolean;
-  player        !: Character;
-  camera        !: FollowCamera;
-  shadedLighting!: Mesh;
+  debugMode          : boolean;
+  player            !: Character;
+  camera            !: FollowCamera;
+  shadedLighting    !: Mesh;
+  interactionHandler : InteractionHandler;
 
   /**
    * The stage of the game. Put everything in-game on here.
    */
-  stage: Container;
-  hud!: HeadsUpDisplay;
+  stage          : Container;
+  hud           !: HeadsUpDisplay;
 
   /**
    * A stage for things in the game that don't move when the camera move and are
@@ -97,6 +99,8 @@ export class Game {
 
     this.fixedCameraStage = new Container();
     this.app.stage.addChild(this.fixedCameraStage);
+
+    this.interactionHandler = new InteractionHandler(this.stage);
 
     // This is insanity:
 
@@ -153,6 +157,7 @@ export class Game {
     this.stage.addChild(npc);
 
     this.hud = new HeadsUpDisplay();
+    this.gameState.hud = this.hud;
     this.fixedCameraStage.addChild(this.hud);
 
     this.gameState.dialog = new Dialog();
@@ -210,39 +215,6 @@ export class Game {
     }
   };
 
-  handleInteractions = (activeEntities: InteractableEntity[]) => {
-    // find potential interactor
-
-    const sortedInteractors = activeEntities
-      .filter(ent => ent.canInteract() && new Vector2(ent.position).diagonalDistance(this.player.positionVector()) < ent.interactRange)
-      .slice()
-      .sort(
-        (a, b) =>
-          new Vector2(a.position).diagonalDistance(
-            new Vector2(this.player.position)
-          ) -
-          new Vector2(b.position).diagonalDistance(
-            new Vector2(this.player.position)
-          )
-      );
-
-    let targetInteractor: InteractableEntity | null = sortedInteractors[0];
-
-    // found it. interact
-
-    if (targetInteractor && this.gameState.keys.justDown.E) {
-      targetInteractor.interact(this.player, this.gameState);
-    }
-
-    // update HUD (maybe move this code into HUD)
-
-    if (targetInteractor) {
-      this.hud.interactText.setText(`%1%e: ${ targetInteractor.interactText() }`);
-    } else {
-      this.hud.interactText.setText(`%1%e: Nothing`);
-    }
-  };
-
   buildCollisionGrid = (): CollisionGrid => {
     const grid = new CollisionGrid({
       game    : this,
@@ -288,7 +260,10 @@ export class Game {
       entity.update(this.gameState);
     }
 
-    this.handleInteractions(activeInteractableEntities);
+    this.interactionHandler.update({
+      activeEntities: activeInteractableEntities,
+      gameState     : this.gameState,
+    });
 
     const grid = this.buildCollisionGrid();
 

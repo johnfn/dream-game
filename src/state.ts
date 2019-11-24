@@ -8,6 +8,7 @@ import { Entity } from "./library/entity";
 import { LightSource } from "./light_source";
 import { Character } from "./character";
 import { FollowCamera } from "./camera";
+import { HeadsUpDisplay } from "./heads_up_display";
 
 export enum GameMode {
   Normal,
@@ -28,6 +29,7 @@ export class GameState {
   objectLayer     !: Entity;
   shader           : PIXI.Graphics;
   dialog          !: Dialog;
+  hud             !: HeadsUpDisplay;
 
   // TODO: Maybe mode should be a stack?
   mode             : GameMode;
@@ -42,7 +44,7 @@ export class GameState {
       .drawRect(0, 0, C.CANVAS_WIDTH, C.CANVAS_HEIGHT);
 
     this.shader.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-    this.shader.width = C.CANVAS_WIDTH;
-    this.shader.height = C.CANVAS_HEIGHT;
+    this.shader.width     = C.CANVAS_WIDTH;
+    this.shader.height    = C.CANVAS_HEIGHT;
   }
 }

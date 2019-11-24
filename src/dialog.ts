@@ -47,6 +47,7 @@ export class Dialog extends InteractableEntity {
   };
 
   interactRange = Number.POSITIVE_INFINITY;
+
   interactText  = () => {
     if (this.text.state === TypewritingState.Writing) {
       return "Jump to End";
@@ -54,6 +55,7 @@ export class Dialog extends InteractableEntity {
       return "Keep Talking"
     }
   };
+
   canInteract   = () => true;
 
   static StartDialog(gameState: GameState, text: string) {
