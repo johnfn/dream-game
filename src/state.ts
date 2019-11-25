@@ -12,6 +12,7 @@ import { HeadsUpDisplay } from "./heads_up_display";
 import { CollisionGrid } from "./collision_grid";
 import { InteractableEntity } from "./library/interactable_entity";
 import { HashSet } from "./library/hash";
+import { BaseLight as BaseLightEntity } from "./entities/base_light";
 
 export enum GameMode {
   Normal,
@@ -76,6 +77,12 @@ export class GameState {
   getInteractableEntities(): HashSet<InteractableEntity> {
     return new HashSet(
       this.entities.values().filter(ent => ent.isInteractable()) as InteractableEntity[]
+    );
+  }
+
+  getLightEntities(): HashSet<BaseLightEntity> {
+    return new HashSet(
+      this.entities.values().filter(ent => ent.isLight()) as BaseLightEntity[]
     );
   }
 }

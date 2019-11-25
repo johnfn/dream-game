@@ -613,7 +613,7 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"brightness",
+                                 "name":"intensity",
                                  "type":"string",
                                  "value":"1"
                                 }],

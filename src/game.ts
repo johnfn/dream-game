@@ -238,6 +238,8 @@ export class Game {
   gameLoop = () => {
     const { entities } = this.gameState;
 
+    this.uniforms.u_time += 0.01;
+
     // console.log(Debug.GetDrawCount());
 
     Debug.Clear();
@@ -252,17 +254,15 @@ export class Game {
       entity.update(this.gameState);
     }
 
-    // remove all entities marked for destruction
-
-    const toBeDestroyed = this.gameState.toBeDestroyed;
-
-    this.gameState.entities = new HashSet(entities.values().filter(ent => !toBeDestroyed.includes(ent)));
+    this.gameState.entities = new HashSet(entities.values().filter(ent => !this.gameState.toBeDestroyed.includes(ent)));
 
     const grid = this.buildCollisionGrid();
 
-    this.resolveCollisions(grid);
+    for (const lightEntity of this.gameState.getLightEntities().values()) {
+      lightEntity.updateLight(this.gameState, grid);
+    }
 
-    this.uniforms.u_time += 0.01;
+    this.resolveCollisions(grid);
 
     this.renderLightingToTexture(this.renderTex, grid);
 
