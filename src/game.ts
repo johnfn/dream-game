@@ -152,7 +152,7 @@ export class Game {
     this.app.ticker.add(() => this.gameLoop());
 
     this.gameState.playerLighting = new LightSource();
-    //this.stage.addChild(this.gameState.playerLighting);
+    this.stage.addChild(this.gameState.playerLighting);
     this.addDreamShader();
 
     this.interactionHandler = new InteractionHandler(this.stage);
