@@ -10,11 +10,27 @@ export abstract class InteractableEntity extends Entity {
   }) {
     super(props);
 
-    Game.Instance.gameState.entities.interactable.push(this);
+    this.startUpdating();
+  }
+
+  startUpdating() {
+    super.startUpdating();
+
+    Game.Instance.gameState.entities.interactable.put(this);
+  }
+
+  stopUpdating() {
+    super.stopUpdating();
+
+    Game.Instance.gameState.entities.interactable.remove(this);
   }
 
   abstract interact(other: Entity, gameState: GameState): void;
   abstract interactRange: number;
   abstract interactText(state: GameState): string;
   abstract canInteract: () => boolean;
+
+  hash(): string {
+    return `[InteractableEntity ${ this.id }]`;
+  }
 }

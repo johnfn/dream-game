@@ -4,6 +4,7 @@ import { Rect } from "./rect";
 import { Sprite, Texture, Container }from "pixi.js";
 import { GameState, GameMode } from "../state";
 import { GetUniqueID } from "./util";
+import { Character } from "../character";
 
 export enum EntityType {
   NormalEntity,
@@ -28,6 +29,8 @@ export abstract class Entity extends Container {
   sprite     : Sprite;
   transparent: boolean;
 
+  protected _collideable: boolean;
+
   constructor(props: {
     texture    ?: Texture;
     transparent?: boolean;
@@ -35,14 +38,10 @@ export abstract class Entity extends Container {
   }) {
     super();
 
-    this.sprite = new Sprite(props.texture);
-    Game.Instance.gameState.entities.all.push(this);
+    this.sprite       = new Sprite(props.texture);
+    this._collideable = props.collidable;
 
-    if (props.collidable) {
-      Game.Instance.gameState.entities.collidable.push(this);
-    } else {
-      Game.Instance.gameState.entities.static.push(this);
-    }
+    this.startUpdating();
 
     this.sprite.anchor.set(0);
     this.addChild(this.sprite);
@@ -50,17 +49,37 @@ export abstract class Entity extends Container {
     this.transparent = props.transparent || false;
   }
 
+  startUpdating() {
+    Game.Instance.gameState.entities.all.put(this);
+
+    if (this._collideable) {
+      Game.Instance.gameState.entities.collidable.put(this);
+    } else {
+      Game.Instance.gameState.entities.static.put(this);
+    }
+  }
+
+  stopUpdating() {
+    Game.Instance.gameState.entities.all.remove(this);
+
+    if (this._collideable) {
+      Game.Instance.gameState.entities.collidable.remove(this);
+    } else {
+      Game.Instance.gameState.entities.static.remove(this);
+    }
+  }
+
   abstract activeModes: GameMode[];
   abstract update: (state: GameState) => void;
   abstract collide: (other: Entity, intersection: Rect) => void;
 
-  setCollideable(newValue: boolean) {
-    if (newValue) {
-      Game.Instance.gameState.entities.static.splice(Game.Instance.gameState.entities.static.indexOf(this), 1);
-      Game.Instance.gameState.entities.collidable.push(this);
+  setCollideable(isCollideable: boolean) {
+    if (isCollideable) {
+      Game.Instance.gameState.entities.static.remove(this);
+      Game.Instance.gameState.entities.collidable.put(this);
     } else {
-      Game.Instance.gameState.entities.collidable.splice(Game.Instance.gameState.entities.collidable.indexOf(this), 1);
-      Game.Instance.gameState.entities.static.push(this);
+      Game.Instance.gameState.entities.collidable.remove(this);
+      Game.Instance.gameState.entities.static.put(this);
     }
   }
 
@@ -105,5 +124,9 @@ export abstract class Entity extends Container {
   // TODO wrap container so we can do this correctly
   betterDestroy(state: GameState) {
     state.toBeDestroyed.push(this);
+  }
+
+  hash(): string {
+    return `[Entity ${ this.id }]`;
   }
 }

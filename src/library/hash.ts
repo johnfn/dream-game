@@ -9,6 +9,10 @@ export class HashSet<K extends { hash(): string }> {
     }
   }
 
+  remove(key: K): void {
+    this._values.remove(key);
+  }
+
   put(key: K): void {
     this._values.put(key, key);
   }
@@ -27,6 +31,10 @@ export class HashMap<K extends { hash(): string }, V> {
 
   put(key: K, value: V) {
     this._values[key.hash()] = value;
+  }
+
+  remove(key: K): void {
+    delete this._values[key.hash()];
   }
 
   get(key: K): V {

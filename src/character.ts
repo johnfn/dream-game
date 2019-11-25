@@ -10,6 +10,7 @@ import { MovingEntity } from "./library/moving_entity";
 
 export class Character extends MovingEntity {
   activeModes = [GameMode.Normal];
+  name = "Character"
 
   private _animFrame = 0; //0 to 60
   private _totalNumFrames = 8; 

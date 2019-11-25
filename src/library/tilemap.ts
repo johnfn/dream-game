@@ -5,35 +5,12 @@ import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
 import { TextureEntity } from '../texture_entity';
 import { Grid } from './grid';
+import { TiledTilemapObjects, TilemapCustomObjects } from './tilemap_objects'
 
 export type MapLayer = {
   layerName: string;
   entity   : Entity;
 };
-
-type TilemapCustomObjectSingle = {
-  type            : "single";
-  name            : string;
-  getInstanceType : (tex: Texture, tileProperties: { [key: string]: unknown }) => Entity;
-};
-
-type TilemapCustomObjectGroup = {
-  type                 : "group";
-  names                : string[];
-  getInstanceType      : (tex: Texture) => Entity;
-  getGroupInstanceType : () => Entity;
-};
-
-type TilemapCustomObjectRect = {
-  type     : "rect";
-  layerName: string;
-  process  : (rect: Rect) => void;
-};
-
-type TilemapCustomObjects = 
-  | TilemapCustomObjectGroup
-  | TilemapCustomObjectSingle
-  | TilemapCustomObjectRect
 
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
 
@@ -44,9 +21,10 @@ export class TiledTilemap {
   private _tilesets: Tileset[];
   private _tileLayers: { [tilesetName: string]: Grid<Tile> };
   private _renderer: Renderer;
-  private _gidHasCollision: { [id: number]: boolean } = {};
-  private _customObjects: TilemapCustomObjects[];
-  private _customObjectEntities: Entity[] = [];
+  private _objects: TiledTilemapObjects;
+
+  // (should be private, but cant be for organization reasons)
+  _gidHasCollision: { [id: number]: boolean } = {};
 
   constructor({ json: data, renderer, pathToTilemap, customObjects }: { 
     // this is required to calculate the relative paths of the tileset images.
@@ -55,15 +33,19 @@ export class TiledTilemap {
     pathToTilemap: string;
     customObjects: TilemapCustomObjects[];
   }) {
-    this._customObjects = customObjects;
     this._data          = data;
     this._renderer      = renderer;
     this._tileWidth     = this._data.tilewidth;
     this._tileHeight    = this._data.tileheight;
-
-    this._tilesets = TiledTilemap.LoadTilesets(pathToTilemap, this._data);
+    this._tilesets        = TiledTilemap.LoadTilesets(pathToTilemap, this._data);
     this._gidHasCollision = this.buildCollisionInfoForTiles()
-    this._tileLayers = this.loadTileLayers();
+    this._tileLayers      = this.loadTileLayers();
+
+    this._objects       = new TiledTilemapObjects({
+      layers       : this.getAllObjectLayers(),
+      customObjects: customObjects,
+      map          : this,
+    });
   }
 
   /**
@@ -160,14 +142,14 @@ export class TiledTilemap {
     return tilesets;
   }
 
-  private gidInfo(gid: number): {
+  gidInfo(gid: number): {
     spritesheet   : SpritesheetTile;
     tileProperties: { [key: string]: unknown };
   } {
     for (const { gidStart, gidEnd, imageUrlRelativeToGame, imagewidth, tilewidth, tileheight, tiles } of this._tilesets) {
       if (gid >= gidStart && gid < gidEnd) {
         const normalizedGid = gid - gidStart;
-        const tilesWide = imagewidth / tilewidth;
+        const tilesWide     = imagewidth / tilewidth;
 
         const x = (normalizedGid % tilesWide);
         const y = Math.floor(normalizedGid / tilesWide);
@@ -221,6 +203,19 @@ export class TiledTilemap {
     return result;
   }
 
+  private getAllObjectLayers(): TiledObjectLayerJSON[] {
+    const allLayers = this.getAllLayers(this._data.layers);
+    const objectLayers: TiledObjectLayerJSON[] = [];
+
+    for (const layer of allLayers) {
+      if (layer.type === "objectgroup") {
+        objectLayers.push(layer);
+      }
+    }
+
+    return objectLayers;
+  }
+
   private loadTileLayers(): { [layerName: string]: Grid<Tile> } {
     const result: { [layerName: string]: Grid<Tile> } = {};
     const layers = this.getAllLayers(this._data.layers);
@@ -234,258 +229,6 @@ export class TiledTilemap {
     }
 
     return result;
-  }
-
-  private loadObjectLayers(region: Rect): { entity: Entity, layerName: string }[] {
-    let objectLayers: { entity: Entity, layerName: string }[] = [];
-
-    for (const layer of this.getAllLayers(this._data.layers)) {
-      if (layer.type === "objectgroup") {
-        objectLayers.push({
-          entity   : this.loadRegionOfObjectLayer(layer, region),
-          layerName: layer.name,
-        });
-      } 
-    }
-
-    return objectLayers;
-  }
-
-  private loadRegionOfObjectLayer(layer: TiledObjectLayerJSON, region: Rect): Entity {
-    const objectLayer = new TextureEntity({ name: "objectLayer" });
-
-    type ObjectInGroup = {
-      name : string;
-      tile : Tile;
-      gridX: number;
-      gridY: number;
-    };
-
-    const objectsToGroup: ObjectInGroup[] = [];
-
-    // Step 0: 
-    // Add all single objects
-
-    processObject:
-    for (const obj of layer.objects) {
-      const objBounds = new Rect({
-        x: obj.x,
-        y: obj.y,
-        w: obj.width,
-        h: obj.height,
-      });
-
-      if (!objBounds.intersects(region)) {
-        continue;
-      }
-
-      if (!obj.gid) {
-        // this is probably a region, so see if we have one of those.
-
-        for (const customObject of this._customObjects) {
-          if (customObject.type === "rect" && customObject.layerName === layer.name) {
-            customObject.process(
-              new Rect({
-                x: obj.x,
-                y: obj.y,
-                w: obj.width,
-                h: obj.height,
-              })
-            );
-
-            continue processObject;
-          }
-        }
-
-        throw new Error("you probably have a rect region in your tilemap that's not being processed in dream_map");
-      }
-
-      const { spritesheet, tileProperties } = this.gidInfo(obj.gid);
-      const objProperties: { [key: string]: unknown } = {};
-
-      for (const { name, value } of (obj.properties || [])) {
-        tileProperties[name] = value;
-      }
-
-      const allProperties = {
-        ...tileProperties,
-        ...objProperties,
-      };
-
-      let newObj: Entity | null = null;
-      const tile = {
-        x             : obj.x,
-
-        // tiled pivot point is (0, 1) so we need to subtract by tile height.
-        y             : obj.y - spritesheet.tileheight,
-        tile          : spritesheet,
-        isCollider    : this._gidHasCollision[obj.gid] || false,
-        gid           : obj.gid,
-        tileProperties: allProperties,
-      };
-
-      const tileType = allProperties.type as string;
-
-      if (tileType === undefined) {
-        throw new Error("Custom object needs a tile type");
-      }
-
-      const associatedObject = this._customObjects.find(obj => {
-        if (obj.type === "single") {
-          return obj.name === tileType;
-        }
-
-        if (obj.type === "group") {
-          return obj.names.includes(tileType);
-        }
-
-        return false;
-      });
-
-      if (associatedObject === undefined) {
-        throw new Error(`Unhandled tile type: ${ tileType }`);
-      }
-
-      if (associatedObject.type === "single") {
-        if (associatedObject.name === tileType) {
-          const spriteTex = TextureCache.GetTextureForTile(tile); 
-
-          newObj = associatedObject.getInstanceType(spriteTex, allProperties);
-        }
-      } else if (associatedObject.type === "group") {
-        // add to the list of grouped objects, which we will process later.
-
-        if (associatedObject.names.includes(tileType)) {
-          objectsToGroup.push({
-            name: tileType,
-            tile: tile,
-            // TODO: We're making an assumption that the size of the objects
-            // are all the same. I think this is safe tho?
-            gridX: tile.x / obj.width,
-            gridY: tile.y / obj.height,
-          });
-        }
-      }
-
-      if (newObj) {
-        newObj.x = tile.x;
-        newObj.y = tile.y;
-
-        objectLayer.addChild(newObj);
-        this._customObjectEntities.push(newObj);
-      }
-    }
-
-    // Find all groups and add them
-    // Step 1: Load all objects into grid
-
-    const grid = new Grid<{ obj: ObjectInGroup, grouped: boolean }>();
-
-    for (const objectToGroup of objectsToGroup) {
-      grid.set(objectToGroup.gridX, objectToGroup.gridY, {
-        obj    : objectToGroup,
-        grouped: false,
-      });
-    }
-
-    // Step 2: BFS from each object to find all neighbors which are part of the
-    // group.
-
-    for (const obj of objectsToGroup) {
-      const result = grid.get(obj.gridX, obj.gridY);
-
-      if (!result) { throw new Error("Wat"); }
-
-      const { grouped } = result;
-
-      if (grouped) {
-        continue;
-      }
-
-      // Step 2a: Find all names of objects in that group
-
-      let customObject: TilemapCustomObjectGroup | null = null;
-
-      for (const candidate of this._customObjects) {
-        if (candidate.type === "group") {
-          if (candidate.names.includes(obj.name)) {
-            customObject = candidate;
-
-            break;
-          }
-        }
-      }
-
-      if (customObject === null) {
-        throw new Error("HUH!?!?");
-      }
-
-      // Step 2: Actually run BFS
-
-      const group: ObjectInGroup[] = [obj];
-      const groupEdge: ObjectInGroup[] = [obj];
-
-      while (groupEdge.length > 0) {
-        const current = groupEdge.pop()!;
-        const dxdy = [
-          [ 1,  0],
-          [-1,  0],
-          [ 0 , 1],
-          [ 0 ,-1],
-        ];
-
-        for (const [dx, dy] of dxdy) {
-          const result = grid.get(current.gridX + dx, current.gridY + dy);
-
-          if (!result) { continue; }
-
-          const { obj: neighbor, grouped } = result;
-
-          if (grouped) { continue; }
-          if (group.includes(neighbor)) { continue; }
-          if (customObject.names.includes(neighbor.name)) {
-            group.push(neighbor);
-            groupEdge.push(neighbor);
-          }
-        }
-      }
-
-      // BFS complete; `group` contains entire group.
-
-      for (const obj of group) {
-        grid.get(obj.gridX, obj.gridY)!.grouped = true;
-      }
-
-      // Find (x, y) of group
-
-      let minTileX = Number.POSITIVE_INFINITY;
-      let minTileY = Number.POSITIVE_INFINITY;
-
-      for (const obj of group) {
-        minTileX = Math.min(minTileX, obj.tile.x);
-        minTileY = Math.min(minTileY, obj.tile.y);
-      }
-
-      const groupEntity = customObject.getGroupInstanceType();
-
-      groupEntity.x = minTileX;
-      groupEntity.y = minTileY;
-
-      for (const obj of group) {
-        const spriteTex = TextureCache.GetTextureForTile(obj.tile);
-        const objEntity = customObject.getInstanceType(spriteTex);
-
-        groupEntity.addChild(objEntity);
-
-        objEntity.x = obj.tile.x - groupEntity.x;
-        objEntity.y = obj.tile.y - groupEntity.y;
-      }
-
-      objectLayer.addChild(groupEntity);
-      this._customObjectEntities.push(groupEntity);
-    }
-
-    return objectLayer;
   }
 
   private loadTiles(layer: TiledTileLayerJSON): Grid<Tile> {
@@ -527,8 +270,6 @@ export class TiledTilemap {
   }
 
   public loadRegion(region: Rect): MapLayer[] {
-    this._customObjectEntities = [];
-
     let layers: MapLayer[] = [];
 
     // Load tile layers
@@ -575,7 +316,7 @@ export class TiledTilemap {
     // Load object layers
     // TODO: only load objects in this region - not the entire layer!!!
 
-    const objectLayers = this.loadObjectLayers(region);
+    const objectLayers = this._objects.loadObjectLayers()
 
     layers = [...layers, ...objectLayers];
 
@@ -634,8 +375,8 @@ export class TiledTilemap {
 
     return colliders;
   }
-
-  getCustomObjectEntities() {
-    return this._customObjectEntities;
+  
+  turnOffAllObjects() {
+    this._objects.turnOffAllObjects();
   }
 }

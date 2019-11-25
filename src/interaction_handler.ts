@@ -3,6 +3,7 @@ import { InteractableEntity } from "./library/interactable_entity";
 import { Vector2 } from "./library/vector2";
 import { GameState } from "./state";
 import { InteractiveText } from "./entities/interactive_text";
+import { HashSet } from "./library/hash";
 
 export class InteractionHandler {
   stage: Container;
@@ -16,7 +17,7 @@ export class InteractionHandler {
   }
 
   update(props: {
-    activeEntities: InteractableEntity[];
+    activeEntities: HashSet<InteractableEntity>;
     gameState     : GameState;
   }) {
     const { activeEntities, gameState } = props;
@@ -25,6 +26,7 @@ export class InteractionHandler {
     // find potential interactor
 
     const sortedInteractors = activeEntities
+      .values()
       .filter(ent => ent.canInteract() && new Vector2(ent.position).diagonalDistance(character.positionVector()) < ent.interactRange)
       .slice()
       .sort(

@@ -140,13 +140,9 @@ export class DreamMap extends Entity {
   };
 
   loadNewRegion = (region: Rect, state: GameState) => {
-    // Step 1: Clear off all old objects from previous region
+    this.map.turnOffAllObjects();
 
-    for (const obj of this.map.getCustomObjectEntities()) {
-      obj.betterDestroy(state);
-    }
-
-    // Step 2: Load next region
+    // Step 1: Load next region
 
     const layers = this.map.loadRegion(region);
 

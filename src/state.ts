@@ -11,6 +11,7 @@ import { FollowCamera } from "./camera";
 import { HeadsUpDisplay } from "./heads_up_display";
 import { CollisionGrid } from "./collision_grid";
 import { InteractableEntity } from "./library/interactable_entity";
+import { HashSet } from "./library/hash";
 
 export enum GameMode {
   Normal,
@@ -33,15 +34,15 @@ export class GameState {
   dialog          !: Dialog;
   hud             !: HeadsUpDisplay;
   entities: {
-    all         : Entity[];
-    collidable  : Entity[];
-    static      : Entity[];
-    interactable: InteractableEntity[];
+    all         : HashSet<Entity>;
+    collidable  : HashSet<Entity>;
+    static      : HashSet<Entity>;
+    interactable: HashSet<InteractableEntity>;
   } = {
-    all: [],
-    collidable: [],
-    static: [],
-    interactable: []
+    all         : new HashSet(),
+    collidable  : new HashSet(),
+    static      : new HashSet(),
+    interactable: new HashSet(),
   };
   toBeDestroyed : Entity[];
 

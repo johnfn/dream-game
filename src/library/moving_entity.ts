@@ -5,13 +5,11 @@ import { Texture } from "pixi.js";
 import { GameState, GameMode } from "../state";
 import { Rect } from "./rect";
 
-// Not currently used anywhere, just for experimenting.
 export class MovingEntity extends Entity {
   activeModes = [GameMode.Normal];
-  entityType = EntityType.MovingEntity;
+  entityType  = EntityType.MovingEntity;
 
-  private _velocity = Vector2.Zero;
-  private _collidable: boolean;
+  private _velocity   = Vector2.Zero;
   protected _maxSpeed = 50;
 
   constructor(props: {
@@ -23,7 +21,7 @@ export class MovingEntity extends Entity {
       ...props,
     });
 
-    this._collidable = props.collidable;
+    this._collideable = props.collidable;
   }
 
   public get velocity(): Vector2 {
