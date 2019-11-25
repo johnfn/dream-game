@@ -37,6 +37,10 @@ export class TiledTilemapObjects {
   private _layers: TiledObjectLayerJSON[];
   private _customObjects: TilemapCustomObjects[];
   private _map: TiledTilemap;
+
+  /**
+   * Every custom object in the game.
+   */
   private _allObjects: ObjectInfo[] = [];
 
   constructor(props: {
@@ -51,9 +55,9 @@ export class TiledTilemapObjects {
     this._map           = map;
 
     for (const layer of this._layers) {
-      const layerObjects = this.loadLayer(layer);
+      const objectsInLayer = this.loadLayer(layer);
 
-      this._allObjects = [...this._allObjects, ...layerObjects];
+      this._allObjects = [...this._allObjects, ...objectsInLayer];
     }
 
     this.turnOffAllObjects();
@@ -61,13 +65,13 @@ export class TiledTilemapObjects {
 
   turnOffAllObjects() {
     for (const customObject of this._allObjects) {
-      console.log(customObject.entity);
-
       customObject.entity.stopUpdating();
     }
   }
 
   loadObjectLayers(): { entity: Entity, layerName: string }[] {
+    this.turnOffAllObjects();
+
     let result: { entity: Entity, layerName: string }[] = [];
 
     for (const layer of this._layers) {
@@ -78,7 +82,7 @@ export class TiledTilemapObjects {
     }
 
     for (const object of this._allObjects) {
-      const associatedLayer = result.find(obj => obj.layerName == object.layerName)!;
+      const associatedLayer = result.find(obj => obj.layerName === object.layerName)!;
 
       associatedLayer.entity.addChild(object.entity);
       object.entity.startUpdating();
@@ -102,7 +106,7 @@ export class TiledTilemapObjects {
     // Step 0: 
     // Add all single objects
 
-    processObject:
+    processNextObject:
     for (const obj of layer.objects) {
       if (!obj.gid) {
         // this is probably a region, so see if we have one of those.
@@ -118,7 +122,7 @@ export class TiledTilemapObjects {
               })
             );
 
-            continue processObject;
+            continue processNextObject;
           }
         }
 

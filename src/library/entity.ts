@@ -4,7 +4,6 @@ import { Rect } from "./rect";
 import { Sprite, Texture, Container }from "pixi.js";
 import { GameState, GameMode } from "../state";
 import { GetUniqueID } from "./util";
-import { Character } from "../character";
 
 export enum EntityType {
   NormalEntity,
@@ -74,6 +73,8 @@ export abstract class Entity extends Container {
   abstract collide: (other: Entity, intersection: Rect) => void;
 
   setCollideable(isCollideable: boolean) {
+    this._collideable = isCollideable;
+
     if (isCollideable) {
       Game.Instance.gameState.entities.static.remove(this);
       Game.Instance.gameState.entities.collidable.put(this);
