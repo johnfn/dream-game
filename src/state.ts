@@ -33,17 +33,7 @@ export class GameState {
   shader           : PIXI.Graphics;
   dialog          !: Dialog;
   hud             !: HeadsUpDisplay;
-  entities: {
-    all         : HashSet<Entity>;
-    collidable  : HashSet<Entity>;
-    static      : HashSet<Entity>;
-    interactable: HashSet<InteractableEntity>;
-  } = {
-    all         : new HashSet(),
-    collidable  : new HashSet(),
-    static      : new HashSet(),
-    interactable: new HashSet(),
-  };
+  entities         = new HashSet<Entity>();
   toBeDestroyed : Entity[];
 
   lightingGrid    !: CollisionGrid;
@@ -69,5 +59,23 @@ export class GameState {
     this.shader.blendMode = PIXI.BLEND_MODES.MULTIPLY;
     this.shader.width     = C.CANVAS_WIDTH;
     this.shader.height    = C.CANVAS_HEIGHT;
+  }
+
+  getCollideableEntities(): HashSet<Entity> {
+    return new HashSet(
+      this.entities.values().filter(ent => ent.isCollideable())
+    );
+  }
+
+  getStaticEntities(): HashSet<Entity> {
+    return new HashSet(
+      this.entities.values().filter(ent => !ent.isCollideable())
+    );
+  }
+
+  getInteractableEntities(): HashSet<InteractableEntity> {
+    return new HashSet(
+      this.entities.values().filter(ent => ent.isInteractable()) as InteractableEntity[]
+    );
   }
 }

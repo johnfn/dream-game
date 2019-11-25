@@ -30,7 +30,7 @@ import { LightSource } from "./light_source";
 import { Debug } from "./library/debug";
 import { CharacterStart } from "./entities/character_start";
 import { InteractionHandler } from "./interaction_handler";
-import { HashMap, HashSet } from "./library/hash";
+import { HashSet } from "./library/hash";
 
 export class Game {
   uniforms!: {
@@ -173,9 +173,9 @@ export class Game {
   };
 
   private resolveCollisions = (grid: CollisionGrid) => {
-    const entities = this.gameState.entities;
+    const collideableEntities = this.gameState.getCollideableEntities();
 
-    const movingEntities: MovingEntity[] = entities.collidable.values().filter(
+    const movingEntities: MovingEntity[] = collideableEntities.values().filter(
       ent => ent.entityType === EntityType.MovingEntity && ent.activeModes.includes(this.gameState.mode)
     ) as MovingEntity[];
 
@@ -208,7 +208,8 @@ export class Game {
   };
 
   buildCollisionGrid = (): CollisionGrid => {
-    const { entities } = this.gameState;
+    const collideableEntities = this.gameState.getCollideableEntities();
+
     const grid = new CollisionGrid({
       game    : this,
       width   : 2 * C.CANVAS_WIDTH,
@@ -217,7 +218,7 @@ export class Game {
       debug   : false,
     });
 
-    for (const entity of entities.collidable.values()) {
+    for (const entity of collideableEntities.values()) {
       if (this.camera.bounds().intersects(entity.bounds)) {
         grid.add(entity.myGetBounds(), entity);
       }
@@ -243,7 +244,7 @@ export class Game {
 
     this.gameState.keys.update();
 
-    const activeEntities = entities.all.values().filter(entity =>
+    const activeEntities = entities.values().filter(entity =>
       entity.activeModes.includes(this.gameState.mode)
     );
 
@@ -255,10 +256,7 @@ export class Game {
 
     const toBeDestroyed = this.gameState.toBeDestroyed;
 
-    entities.all          = new HashSet(entities.all.values().filter(ent => !toBeDestroyed.includes(ent)));
-    entities.collidable   = new HashSet(entities.collidable.values().filter(ent => !toBeDestroyed.includes(ent)));
-    entities.interactable = new HashSet(entities.interactable.values().filter(ent => !toBeDestroyed.includes(ent)));
-    entities.static       = new HashSet(entities.static.values().filter(ent => !toBeDestroyed.includes(ent)));
+    this.gameState.entities = new HashSet(entities.values().filter(ent => !toBeDestroyed.includes(ent)));
 
     const grid = this.buildCollisionGrid();
 
@@ -271,7 +269,7 @@ export class Game {
     this.camera.update(this.gameState);
 
     this.interactionHandler.update({
-      activeEntities: entities.interactable,
+      activeEntities: this.gameState.getInteractableEntities(),
       gameState     : this.gameState,
     });
 

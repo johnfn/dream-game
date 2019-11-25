@@ -29,16 +29,19 @@ export abstract class Entity extends Container {
   transparent: boolean;
 
   protected _collideable: boolean;
+  protected _interactable: boolean;
 
   constructor(props: {
-    texture    ?: Texture;
-    transparent?: boolean;
-    collidable  : boolean;
+    texture     ?: Texture;
+    transparent ?: boolean;
+    interactable?: boolean;
+    collidable   : boolean;
   }) {
     super();
 
-    this.sprite       = new Sprite(props.texture);
-    this._collideable = props.collidable;
+    this.sprite        = new Sprite(props.texture);
+    this._collideable  = props.collidable;
+    this._interactable = props.interactable || false;
 
     this.startUpdating();
 
@@ -49,23 +52,11 @@ export abstract class Entity extends Container {
   }
 
   startUpdating() {
-    Game.Instance.gameState.entities.all.put(this);
-
-    if (this._collideable) {
-      Game.Instance.gameState.entities.collidable.put(this);
-    } else {
-      Game.Instance.gameState.entities.static.put(this);
-    }
+    Game.Instance.gameState.entities.put(this);
   }
 
   stopUpdating() {
-    Game.Instance.gameState.entities.all.remove(this);
-
-    if (this._collideable) {
-      Game.Instance.gameState.entities.collidable.remove(this);
-    } else {
-      Game.Instance.gameState.entities.static.remove(this);
-    }
+    Game.Instance.gameState.entities.remove(this);
   }
 
   abstract activeModes: GameMode[];
@@ -74,14 +65,6 @@ export abstract class Entity extends Container {
 
   setCollideable(isCollideable: boolean) {
     this._collideable = isCollideable;
-
-    if (isCollideable) {
-      Game.Instance.gameState.entities.static.remove(this);
-      Game.Instance.gameState.entities.collidable.put(this);
-    } else {
-      Game.Instance.gameState.entities.collidable.remove(this);
-      Game.Instance.gameState.entities.static.put(this);
-    }
   }
 
   setTexture(newTexture: Texture) {
@@ -129,5 +112,13 @@ export abstract class Entity extends Container {
 
   hash(): string {
     return `[Entity ${ this.id }]`;
+  }
+
+  isCollideable(): boolean {
+    return this._collideable;
+  }
+
+  isInteractable(): boolean {
+    return this._interactable;
   }
 }

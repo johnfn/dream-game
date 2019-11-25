@@ -1,4 +1,4 @@
-import { Sprite, Renderer, RenderTexture, Texture } from 'pixi.js'
+import { Sprite, Renderer, RenderTexture } from 'pixi.js'
 import { Rect } from './rect'
 import { TiledJSON, Tileset, Tile, SpritesheetTile, TiledObjectLayerJSON, TiledTileLayerJSON, TiledLayerTypes } from './tilemap_types';
 import { TextureCache } from './texture_cache';

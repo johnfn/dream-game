@@ -1,5 +1,4 @@
 import { Entity } from "./entity";
-import { Game } from "../game";
 import { GameState } from "../state";
 import { Texture } from "pixi.js";
 
@@ -8,21 +7,20 @@ export abstract class InteractableEntity extends Entity {
     texture   ?: Texture;
     collidable : boolean;
   }) {
-    super(props);
+    super({
+      ...props,
+      interactable: true,
+    });
 
     this.startUpdating();
   }
 
   startUpdating() {
     super.startUpdating();
-
-    Game.Instance.gameState.entities.interactable.put(this);
   }
 
   stopUpdating() {
     super.stopUpdating();
-
-    Game.Instance.gameState.entities.interactable.remove(this);
   }
 
   abstract interact(other: Entity, gameState: GameState): void;
