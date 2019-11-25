@@ -1,5 +1,4 @@
 import { Entity } from "./library/entity";
-import { Game } from "./game";
 import { Point } from "pixi.js";
 import { Rect } from "./library/rect";
 import { C } from "./constants";
@@ -20,8 +19,6 @@ export class DreamShard extends InteractableEntity {
       texture   : C.Loader.getResource("art/temp.png").texture,
       collidable: false,
     });
-
-    Game.Instance.entities.interactable.push(this);
 
     this._startPos = new Vector2(this.position);
     this._endPos = this._startPos.add({x: 0, y: 10});

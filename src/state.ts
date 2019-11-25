@@ -9,6 +9,8 @@ import { LightSource } from "./light_source";
 import { Character } from "./character";
 import { FollowCamera } from "./camera";
 import { HeadsUpDisplay } from "./heads_up_display";
+import { CollisionGrid } from "./collision_grid";
+import { InteractableEntity } from "./library/interactable_entity";
 
 export enum GameMode {
   Normal,
@@ -30,6 +32,20 @@ export class GameState {
   shader           : PIXI.Graphics;
   dialog          !: Dialog;
   hud             !: HeadsUpDisplay;
+  entities: {
+    all         : Entity[];
+    collidable  : Entity[];
+    static      : Entity[];
+    interactable: InteractableEntity[];
+  } = {
+    all: [],
+    collidable: [],
+    static: [],
+    interactable: []
+  };
+  toBeDestroyed : Entity[];
+
+  lightingGrid    !: CollisionGrid;
 
   // TODO: Maybe mode should be a stack?
   mode             : GameMode;
@@ -40,9 +56,10 @@ export class GameState {
   keyCount         = 1;
   
   constructor() {
-    this.mode  = GameMode.Normal
-    this.level = 1;
-    this.keys  = new KeyboardState();
+    this.mode          = GameMode.Normal
+    this.level         = 1;
+    this.keys          = new KeyboardState();
+    this.toBeDestroyed = [];
 
     this.shader = new PIXI.Graphics()
       .beginFill(0xffffff)

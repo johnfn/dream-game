@@ -38,15 +38,15 @@ type TilemapCustomObjects =
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
 
 export class TiledTilemap {
-  private tileWidth: number;
-  private tileHeight: number;
-  private data: TiledJSON;
-  private tilesets: Tileset[];
-  private tileLayers: { [tilesetName: string]: Grid<Tile> };
-  private renderer: Renderer;
-  private gidHasCollision: { [id: number]: boolean } = {};
-  // private buildCustomObject: (obj: TiledObjectJSON, tile: Tile) => Entity | null;
-  private customObjects: TilemapCustomObjects[];
+  private _tileWidth: number;
+  private _tileHeight: number;
+  private _data: TiledJSON;
+  private _tilesets: Tileset[];
+  private _tileLayers: { [tilesetName: string]: Grid<Tile> };
+  private _renderer: Renderer;
+  private _gidHasCollision: { [id: number]: boolean } = {};
+  private _customObjects: TilemapCustomObjects[];
+  private _customObjectEntities: Entity[] = [];
 
   constructor({ json: data, renderer, pathToTilemap, customObjects }: { 
     // this is required to calculate the relative paths of the tileset images.
@@ -55,15 +55,48 @@ export class TiledTilemap {
     pathToTilemap: string;
     customObjects: TilemapCustomObjects[];
   }) {
-    this.customObjects = customObjects;
-    this.data = data;
-    this.renderer = renderer;
-    this.tileWidth = this.data.tilewidth;
-    this.tileHeight = this.data.tileheight;
+    this._customObjects = customObjects;
+    this._data          = data;
+    this._renderer      = renderer;
+    this._tileWidth     = this._data.tilewidth;
+    this._tileHeight    = this._data.tileheight;
 
-    this.tilesets = TiledTilemap.LoadTilesets(pathToTilemap, this.data);
-    this.gidHasCollision = this.buildCollisionInfoForTiles()
-    this.tileLayers = this.loadTileLayers();
+    this._tilesets = TiledTilemap.LoadTilesets(pathToTilemap, this._data);
+    this._gidHasCollision = this.buildCollisionInfoForTiles()
+    this._tileLayers = this.loadTileLayers();
+  }
+
+  /**
+   * Load all the regions on a specified layer.
+   */
+  loadRegionLayer(layerName: string): Rect[] {
+    const layers = this.getAllLayers(this._data.layers);
+
+    const layer = layers.find(layer => layer.name = layerName);
+
+    if (!layer) {
+      throw new Error(`Cant find a layer named ${ layerName }`);
+    }
+
+    if (layer.type !== "objectgroup") {
+      throw new Error(`Layer ${ layerName } is not an object group as I expected!`);
+    }
+
+    const objects = layer.objects;
+    const result: Rect[] = [];
+
+    for (const obj of objects) {
+      if (!obj.gid) {
+        result.push(new Rect({
+          x: obj.x,
+          y: obj.y,
+          w: obj.width,
+          h: obj.height,
+        }));
+      }
+    }
+
+    return result; 
   }
 
   private buildCollisionInfoForTiles(): { [key: number]: boolean } {
@@ -75,7 +108,7 @@ export class TiledTilemap {
 
     const gidHasCollision: { [id: number]: boolean } = {};
 
-    for (const tileset of this.data.tilesets) {
+    for (const tileset of this._data.tilesets) {
       if (tileset.tiles) {
         for (const tileAndCollisionObjects of tileset.tiles) {
           if (!tileAndCollisionObjects.objectgroup) {
@@ -131,7 +164,7 @@ export class TiledTilemap {
     spritesheet   : SpritesheetTile;
     tileProperties: { [key: string]: unknown };
   } {
-    for (const { gidStart, gidEnd, imageUrlRelativeToGame, imagewidth, tilewidth, tileheight, tiles } of this.tilesets) {
+    for (const { gidStart, gidEnd, imageUrlRelativeToGame, imagewidth, tilewidth, tileheight, tiles } of this._tilesets) {
       if (gid >= gidStart && gid < gidEnd) {
         const normalizedGid = gid - gidStart;
         const tilesWide = imagewidth / tilewidth;
@@ -190,7 +223,7 @@ export class TiledTilemap {
 
   private loadTileLayers(): { [layerName: string]: Grid<Tile> } {
     const result: { [layerName: string]: Grid<Tile> } = {};
-    const layers = this.getAllLayers(this.data.layers);
+    const layers = this.getAllLayers(this._data.layers);
 
     for (const layer of layers) {
       if (layer.type === "tilelayer") {
@@ -203,13 +236,13 @@ export class TiledTilemap {
     return result;
   }
 
-  private loadObjectLayers(): { entity: Entity, layerName: string }[] {
+  private loadObjectLayers(region: Rect): { entity: Entity, layerName: string }[] {
     let objectLayers: { entity: Entity, layerName: string }[] = [];
 
-    for (const layer of this.getAllLayers(this.data.layers)) {
+    for (const layer of this.getAllLayers(this._data.layers)) {
       if (layer.type === "objectgroup") {
         objectLayers.push({
-          entity   : this.loadObjectLayer(layer),
+          entity   : this.loadRegionOfObjectLayer(layer, region),
           layerName: layer.name,
         });
       } 
@@ -218,7 +251,7 @@ export class TiledTilemap {
     return objectLayers;
   }
 
-  private loadObjectLayer(layer: TiledObjectLayerJSON): Entity {
+  private loadRegionOfObjectLayer(layer: TiledObjectLayerJSON, region: Rect): Entity {
     const objectLayer = new TextureEntity({ name: "objectLayer" });
 
     type ObjectInGroup = {
@@ -235,10 +268,21 @@ export class TiledTilemap {
 
     processObject:
     for (const obj of layer.objects) {
+      const objBounds = new Rect({
+        x: obj.x,
+        y: obj.y,
+        w: obj.width,
+        h: obj.height,
+      });
+
+      if (!objBounds.intersects(region)) {
+        continue;
+      }
+
       if (!obj.gid) {
         // this is probably a region, so see if we have one of those.
 
-        for (const customObject of this.customObjects) {
+        for (const customObject of this._customObjects) {
           if (customObject.type === "rect" && customObject.layerName === layer.name) {
             customObject.process(
               new Rect({
@@ -275,7 +319,7 @@ export class TiledTilemap {
         // tiled pivot point is (0, 1) so we need to subtract by tile height.
         y             : obj.y - spritesheet.tileheight,
         tile          : spritesheet,
-        isCollider    : this.gidHasCollision[obj.gid] || false,
+        isCollider    : this._gidHasCollision[obj.gid] || false,
         gid           : obj.gid,
         tileProperties: allProperties,
       };
@@ -286,7 +330,7 @@ export class TiledTilemap {
         throw new Error("Custom object needs a tile type");
       }
 
-      const associatedObject = this.customObjects.find(obj => {
+      const associatedObject = this._customObjects.find(obj => {
         if (obj.type === "single") {
           return obj.name === tileType;
         }
@@ -328,6 +372,7 @@ export class TiledTilemap {
         newObj.y = tile.y;
 
         objectLayer.addChild(newObj);
+        this._customObjectEntities.push(newObj);
       }
     }
 
@@ -361,7 +406,7 @@ export class TiledTilemap {
 
       let customObject: TilemapCustomObjectGroup | null = null;
 
-      for (const candidate of this.customObjects) {
+      for (const candidate of this._customObjects) {
         if (candidate.type === "group") {
           if (candidate.names.includes(obj.name)) {
             customObject = candidate;
@@ -437,6 +482,7 @@ export class TiledTilemap {
       }
 
       objectLayer.addChild(groupEntity);
+      this._customObjectEntities.push(groupEntity);
     }
 
     return objectLayer;
@@ -467,10 +513,10 @@ export class TiledTilemap {
         // TODO: Merge instance properties and tileset properties...
 
         result.set(absTileX, absTileY, {
-          x             : absTileX * this.data.tilewidth,
-          y             : absTileY * this.data.tileheight,
+          x             : absTileX * this._data.tilewidth,
+          y             : absTileY * this._data.tileheight,
           tile          : spritesheet,
-          isCollider    : this.gidHasCollision[gid] || false,
+          isCollider    : this._gidHasCollision[gid] || false,
           tileProperties: tileProperties,
           gid           : gid,
         });
@@ -480,19 +526,21 @@ export class TiledTilemap {
     return result;
   }
 
-  public loadRegionLayers(region: Rect): MapLayer[] {
+  public loadRegion(region: Rect): MapLayer[] {
+    this._customObjectEntities = [];
+
     let layers: MapLayer[] = [];
 
     // Load tile layers
 
-    for (const layerName of Object.keys(this.tileLayers)) {
-      const layer = this.tileLayers[layerName];
+    for (const layerName of Object.keys(this._tileLayers)) {
+      const layer = this._tileLayers[layerName];
       const renderTexture = RenderTexture.create({
         width : region.w,
         height: region.h,
       });
-      const tileWidth  = this.data.tilewidth;
-      const tileHeight = this.data.tileheight;
+      const tileWidth  = this._data.tilewidth;
+      const tileHeight = this._data.tileheight;
 
       for (let i = region.x / tileWidth; i < region.right / tileWidth; i++) {
         for (let j = region.y / tileHeight; j < region.bottom / tileHeight; j++) {
@@ -509,7 +557,7 @@ export class TiledTilemap {
           sprite.x = tile.x - region.x;
           sprite.y = tile.y - region.y;
 
-          this.renderer.render(sprite, renderTexture, false);
+          this._renderer.render(sprite, renderTexture, false);
         }
       }
 
@@ -527,7 +575,7 @@ export class TiledTilemap {
     // Load object layers
     // TODO: only load objects in this region - not the entire layer!!!
 
-    const objectLayers = this.loadObjectLayers();
+    const objectLayers = this.loadObjectLayers(region);
 
     layers = [...layers, ...objectLayers];
 
@@ -535,13 +583,13 @@ export class TiledTilemap {
   }
 
   public getTilesAtAbs(x: number, y: number): Tile[] {
-    const tileWidth  = this.data.tilewidth;
-    const tileHeight = this.data.tileheight;
+    const tileWidth  = this._data.tilewidth;
+    const tileHeight = this._data.tileheight;
 
     const tiles: Tile[] = [];
 
-    for (const layerName of Object.keys(this.tileLayers)) {
-      const tile = this.tileLayers[layerName].get(
+    for (const layerName of Object.keys(this._tileLayers)) {
+      const tile = this._tileLayers[layerName].get(
         Math.floor(x / tileWidth),
         Math.floor(y / tileHeight)
       );
@@ -555,11 +603,11 @@ export class TiledTilemap {
   }
 
   getCollidersInRegion(region: Rect): Rect[] {
-    const lowX = Math.floor(region.x / this.tileWidth);
-    const lowY = Math.floor(region.y / this.tileHeight);
+    const lowX = Math.floor(region.x / this._tileWidth);
+    const lowY = Math.floor(region.y / this._tileHeight);
 
-    const highX = Math.ceil(region.right  / this.tileWidth);
-    const highY = Math.ceil(region.bottom / this.tileHeight);
+    const highX = Math.ceil(region.right  / this._tileWidth);
+    const highY = Math.ceil(region.bottom / this._tileHeight);
 
     const colliders: Rect[] = [];
 
@@ -567,15 +615,15 @@ export class TiledTilemap {
 
       outer:
       for (let y = lowY; y <= highY; y++) {
-        const tiles = this.getTilesAtAbs(x * this.tileWidth, y * this.tileHeight);
+        const tiles = this.getTilesAtAbs(x * this._tileWidth, y * this._tileHeight);
         
         for (const tile of tiles) {
           if (tile.isCollider) {
             colliders.push(new Rect({
-              x: x * this.tileWidth,
-              y: y * this.tileHeight,
-              w: this.tileWidth,
-              h: this.tileHeight,
+              x: x * this._tileWidth,
+              y: y * this._tileHeight,
+              w: this._tileWidth,
+              h: this._tileHeight,
             }));
 
             continue outer;
@@ -585,5 +633,9 @@ export class TiledTilemap {
     }
 
     return colliders;
+  }
+
+  getCustomObjectEntities() {
+    return this._customObjectEntities;
   }
 }

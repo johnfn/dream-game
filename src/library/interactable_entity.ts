@@ -10,7 +10,7 @@ export abstract class InteractableEntity extends Entity {
   }) {
     super(props);
 
-    Game.Instance.entities.interactable.push(this);
+    Game.Instance.gameState.entities.interactable.push(this);
   }
 
   abstract interact(other: Entity, gameState: GameState): void;

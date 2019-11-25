@@ -334,7 +334,7 @@ export class Rect {
     });
   }
 
-  equals(o: Rect | undefined): boolean {
+  equals(o: Rect | undefined | null): boolean {
     if (!o) {
       return false;
     }

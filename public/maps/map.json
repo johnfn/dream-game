@@ -605,6 +605,24 @@
                          "width":64,
                          "x":64,
                          "y":448
+                        }, 
+                        {
+                         "gid":47,
+                         "height":64,
+                         "id":47,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"brightness",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":64,
+                         "y":832
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -652,7 +670,7 @@
          "y":0
         }],
  "nextlayerid":21,
- "nextobjectid":47,
+ "nextobjectid":48,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.2.3",
@@ -783,6 +801,15 @@
                          "name":"type",
                          "type":"string",
                          "value":"treasureChest"
+                        }]
+                }, 
+                {
+                 "id":46,
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"light"
                         }]
                 }],
          "tilewidth":64

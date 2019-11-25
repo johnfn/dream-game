@@ -12,11 +12,11 @@ export class CharacterStart extends Entity {
       collidable: false,
     });
 
-    if (CharacterStart.Instance) {
-      throw new Error("more than one character start")
-    }
+    // if (CharacterStart.Instance) {
+    //   throw new Error("more than one character start")
+    // }
 
-    CharacterStart.Instance = this;
+    // CharacterStart.Instance = this;
   }
 
   collide = () => {};

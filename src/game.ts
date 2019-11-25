@@ -13,7 +13,7 @@ import {
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
-import { Entity, EntityType } from "./library/entity";
+import { EntityType } from "./library/entity";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
 import { FollowCamera } from "./camera";
@@ -21,7 +21,6 @@ import { GameState } from "./state";
 import { MovingEntity } from "./library/moving_entity";
 import { Vector2 } from "./library/vector2";
 import { DreamShard } from "./dream_shard";
-import { InteractableEntity } from "./library/interactable_entity";
 import { BaseNPC } from "./base_npc";
 import { HeadsUpDisplay } from "./heads_up_display";
 import { Dialog } from "./dialog";
@@ -48,18 +47,6 @@ export class Game {
   app: PIXI.Application;
   gameState: GameState;
 
-  entities: {
-    all: Entity[];
-    collidable: Entity[];
-    static: Entity[];
-    interactable: InteractableEntity[];
-  } = {
-    all: [],
-    collidable: [],
-    static: [],
-    interactable: []
-  };
-
   debugMode          : boolean;
   player            !: Character;
   camera            !: FollowCamera;
@@ -85,12 +72,12 @@ export class Game {
     this.gameState = new GameState();
 
     this.app = new Application({
-      width: C.CANVAS_WIDTH,
-      height: C.CANVAS_HEIGHT,
-      antialias: true,
-      transparent: false,
-      resolution: window.devicePixelRatio,
-      autoDensity : true,
+      width          : C.CANVAS_WIDTH,
+      height         : C.CANVAS_HEIGHT,
+      antialias      : true,
+      transparent    : false,
+      resolution     : window.devicePixelRatio,
+      autoDensity    : true,
       backgroundColor: 0x666666
     });
 
@@ -185,7 +172,9 @@ export class Game {
   };
 
   private resolveCollisions = (grid: CollisionGrid) => {
-    const movingEntities: MovingEntity[] = this.entities.collidable.filter(
+    const entities = this.gameState.entities;
+
+    const movingEntities: MovingEntity[] = entities.collidable.filter(
       ent => ent.entityType === EntityType.MovingEntity && ent.activeModes.includes(this.gameState.mode)
     ) as MovingEntity[];
 
@@ -216,6 +205,7 @@ export class Game {
   };
 
   buildCollisionGrid = (): CollisionGrid => {
+    const { entities } = this.gameState;
     const grid = new CollisionGrid({
       game    : this,
       width   : 2 * C.CANVAS_WIDTH,
@@ -224,7 +214,7 @@ export class Game {
       debug   : false,
     });
 
-    for (const entity of this.entities.collidable) {
+    for (const entity of entities.collidable) {
       if (this.camera.bounds().intersects(entity.bounds)) {
         grid.add(entity.myGetBounds(), entity);
       }
@@ -242,19 +232,30 @@ export class Game {
   };
 
   gameLoop = () => {
+    const { entities } = this.gameState;
+
     // console.log(Debug.GetDrawCount());
 
     Debug.Clear();
 
     this.gameState.keys.update();
 
-    const activeEntities = this.entities.all.filter(entity =>
+    const activeEntities = entities.all.filter(entity =>
       entity.activeModes.includes(this.gameState.mode)
     );
 
     for (const entity of activeEntities) {
       entity.update(this.gameState);
     }
+
+    // remove all entities marked for destruction
+
+    const toBeDestroyed = this.gameState.toBeDestroyed;
+
+    entities.all          = entities.all.filter(ent => !toBeDestroyed.includes(ent));
+    entities.collidable   = entities.collidable.filter(ent => !toBeDestroyed.includes(ent));
+    entities.interactable = entities.interactable.filter(ent => !toBeDestroyed.includes(ent));
+    entities.static       = entities.static.filter(ent => !toBeDestroyed.includes(ent));
 
     const grid = this.buildCollisionGrid();
 
@@ -267,7 +268,7 @@ export class Game {
     this.camera.update(this.gameState);
 
     this.interactionHandler.update({
-      activeEntities: this.entities.interactable,
+      activeEntities: entities.interactable,
       gameState     : this.gameState,
     });
 
@@ -275,16 +276,22 @@ export class Game {
   };
 
   renderLightingToTexture = (renderTexture: RenderTexture, grid: CollisionGrid) => {
-    const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid);
+    if (this.gameState.inDreamWorld) {
+      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid);
 
-    // Note: we need to be careful not to render to negative coordinates on the
-    // render texture because anything rendered at a negative coordinate is
-    // clipped immediately. That's why lighting always renders to (0, 0) and
-    // passes back an offset.
-    C.Renderer.render(graphics, renderTexture);
+      // Note: we need to be careful not to render to negative coordinates on the
+      // render texture because anything rendered at a negative coordinate is
+      // clipped immediately. That's why lighting always renders to (0, 0) and
+      // passes back an offset.
+      C.Renderer.render(graphics, renderTexture);
 
-    this.shadedLighting.x = offsetX;
-    this.shadedLighting.y = offsetY;
+      this.shadedLighting.x = offsetX;
+      this.shadedLighting.y = offsetY;
+
+      this.shadedLighting.visible = true;
+    } else {
+      this.shadedLighting.visible = false;
+    }
   };
 
   addDreamShader = () => {

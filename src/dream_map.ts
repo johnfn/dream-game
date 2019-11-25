@@ -11,19 +11,21 @@ import { CharacterStart } from "./entities/character_start";
 import { Glass } from "./entities/glass";
 import { LockedDoor } from "./entities/locked_door";
 import { TreasureChest } from "./entities/treasure_chest";
+import { Light } from "./entities/light";
 
 type MapLevel = {
-  dreamGroundLayer: Entity | undefined;
+  dreamGroundLayer  : Entity | undefined;
   realityGroundLayer: Entity | undefined;
-  dreamObjectLayer: Entity | undefined;
+  dreamObjectLayer  : Entity | undefined;
   realityObjectLayer: Entity | undefined;
 };
 
 export class DreamMap extends Entity {
-  activeModes  = [GameMode.Normal];
-  map          : TiledTilemap;
-  levels       : { [key: number]: MapLevel } = [];
-  _cameraBounds: Rect[] = [];
+  activeModes   = [GameMode.Normal];
+  map           : TiledTilemap;
+  levels        : { [key: number]: MapLevel } = [];
+  activeRegion  : Rect | null;
+  _cameraRegions: Rect[] = [];
 
   constructor(gameState: GameState) {
     super({
@@ -80,7 +82,14 @@ export class DreamMap extends Entity {
           name: "treasureChest",
           getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new TreasureChest(tex, props),
         },
-        
+
+        {
+          type: "single" as const,
+
+          name: "light",
+          getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new Light(tex, props),
+        },
+
         {
           type: "single" as const,
 
@@ -91,28 +100,18 @@ export class DreamMap extends Entity {
         {
           type     : "rect" as const,
           layerName: "Camera Bounds",
-          process  : (cameraBound) => this._cameraBounds.push(cameraBound),
-        }
+          process  : (cameraBound) => this._cameraRegions.push(cameraBound),
+        },
       ]
     });
 
-    this.map = tilemap;
-
-    const layers = this.map.loadRegionLayers(
-      new Rect({
-        x: -2048,
-        y: -2048,
-        w: 4096,
-        h: 4096
-      })
-    );
-
-    this.loadAllLayers(layers);
-    this.updateLevel(gameState.level, gameState);
+    this.map            = tilemap;
+    this._cameraRegions = this.map.loadRegionLayer("Camera Bounds");
+    this.activeRegion   = null;
   }
 
-  getCameraBounds(): Rect[] {
-    return this._cameraBounds;
+  getCameraRegions(): Rect[] {
+    return this._cameraRegions;
   }
 
   updateLevel = (level: number, gameState: GameState) => {
@@ -140,7 +139,17 @@ export class DreamMap extends Entity {
     );
   };
 
-  loadAllLayers = (layers: { layerName: string; entity: Entity }[]) => {
+  loadNewRegion = (region: Rect, state: GameState) => {
+    // Step 1: Clear off all old objects from previous region
+
+    for (const obj of this.map.getCustomObjectEntities()) {
+      obj.betterDestroy(state);
+    }
+
+    // Step 2: Load next region
+
+    const layers = this.map.loadRegion(region);
+
     for (let { layerName, entity } of layers) {
       const s = layerName.split(" ");
 
@@ -149,9 +158,9 @@ export class DreamMap extends Entity {
 
       if (!(layerLevel in this.levels)) {
         this.levels[layerLevel] = {
-          dreamGroundLayer: undefined,
+          dreamGroundLayer  : undefined,
           realityGroundLayer: undefined,
-          dreamObjectLayer: undefined,
+          dreamObjectLayer  : undefined,
           realityObjectLayer: undefined
         };
       }
@@ -166,46 +175,25 @@ export class DreamMap extends Entity {
         this.levels[layerLevel].realityObjectLayer = entity;
       }
     }
+
+    this.updateLevel(state.level, state);
+
+    this.activeRegion = region;
   };
 
   collide = (other: Entity, intersection: Rect) => {
     return null;
   };
 
-  update = (gameState: GameState) => {}; 
+  update = (state: GameState) => {
+    const character        = state.character;
+    const regions          = this._cameraRegions;
+    const nextActiveRegion = regions.find(region => region.contains(character.positionVector()));
 
-  // TODO: Have to ignore invisible layers. Somehow?!?
-
-  doesMapHaveCollisionAtTile(x: number, y: number): boolean {
-    const tiles = this.map.getTilesAtAbs(x, y);
-
-    for (const tile of tiles) {
-      if (tile.isCollider) {
-        return true;
-      }
+    if (nextActiveRegion && !nextActiveRegion.equals(this.activeRegion)) {
+      this.loadNewRegion(nextActiveRegion, state);
     }
-
-    return false;
-  }
-
-  doesRectCollideMap(rect: Rect): boolean {
-    const tiles = [
-      ...this.map.getTilesAtAbs(rect.x, rect.y),
-      ...this.map.getTilesAtAbs(rect.x + rect.w, rect.y),
-      ...this.map.getTilesAtAbs(rect.x, rect.y + rect.h),
-      ...this.map.getTilesAtAbs(rect.x + rect.w, rect.y + rect.h)
-    ];
-
-    for (const tile of tiles) {
-      if (tile !== null) {
-        if (tile.isCollider) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
+  }; 
 
   getCollidersInRegion(region: Rect): Rect[] {
     return this.map.getCollidersInRegion(region);

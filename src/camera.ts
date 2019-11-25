@@ -60,35 +60,35 @@ export class FollowCamera {
       desiredPosition = this._target.center.subtract(this.halfDimensions());
     }
 
-    const mapBounds    = state.map.getCameraBounds();
-    const currentBound = mapBounds.find(bound => bound.contains(this._target.positionVector()));
+    const mapRegions    = state.map.getCameraRegions();
+    const currentRegion = mapRegions.find(region => region.contains(this._target.positionVector()));
 
-    if (!currentBound) {
-      console.error("no bound for camera!");
+    if (!currentRegion) {
+      console.error("no region for camera!");
 
       return desiredPosition;
     }
 
-    if (currentBound.w < C.CANVAS_WIDTH || currentBound.h < C.CANVAS_HEIGHT) {
-      throw new Error("There is a bound on the map which is too small for the camera.");
+    if (currentRegion.w < C.CANVAS_WIDTH || currentRegion.h < C.CANVAS_HEIGHT) {
+      throw new Error("There is a region on the map which is too small for the camera.");
     }
 
-    // fit the camera rect into the bounds rect
+    // fit the camera rect into the regions rect
 
-    if (desiredPosition.x < currentBound.left) {
-      desiredPosition = desiredPosition.withX(currentBound.left);
+    if (desiredPosition.x < currentRegion.left) {
+      desiredPosition = desiredPosition.withX(currentRegion.left);
     }
 
-    if (desiredPosition.x + this.bounds().w > currentBound.right) {
-      desiredPosition = desiredPosition.withX(currentBound.right - this._width);
+    if (desiredPosition.x + this.bounds().w > currentRegion.right) {
+      desiredPosition = desiredPosition.withX(currentRegion.right - this._width);
     }
 
-    if (desiredPosition.y < currentBound.top) {
-      desiredPosition = desiredPosition.withY(currentBound.top);
+    if (desiredPosition.y < currentRegion.top) {
+      desiredPosition = desiredPosition.withY(currentRegion.top);
     }
 
-    if (desiredPosition.y + this.bounds().h > currentBound.bottom) {
-      desiredPosition = desiredPosition.withY(currentBound.bottom - this._height);
+    if (desiredPosition.y + this.bounds().h > currentRegion.bottom) {
+      desiredPosition = desiredPosition.withY(currentRegion.bottom - this._height);
     }
 
     return desiredPosition;

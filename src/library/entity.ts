@@ -3,6 +3,7 @@ import { Vector2 } from "./vector2";
 import { Rect } from "./rect";
 import { Sprite, Texture, Container }from "pixi.js";
 import { GameState, GameMode } from "../state";
+import { GetUniqueID } from "./util";
 
 export enum EntityType {
   NormalEntity,
@@ -21,10 +22,10 @@ export enum EntityType {
 // TODO: probably make less of these methods abstract?
 export abstract class Entity extends Container {
   // just for debugging
-  name = "i should really give this entity a name!";
-
+  name       = "i should really give this entity a name!";
+  id         = GetUniqueID();
   entityType = EntityType.NormalEntity;
-  sprite: Sprite;
+  sprite     : Sprite;
   transparent: boolean;
 
   constructor(props: {
@@ -35,12 +36,12 @@ export abstract class Entity extends Container {
     super();
 
     this.sprite = new Sprite(props.texture);
-    Game.Instance.entities.all.push(this);
+    Game.Instance.gameState.entities.all.push(this);
 
     if (props.collidable) {
-      Game.Instance.entities.collidable.push(this);
+      Game.Instance.gameState.entities.collidable.push(this);
     } else {
-      Game.Instance.entities.static.push(this);
+      Game.Instance.gameState.entities.static.push(this);
     }
 
     this.sprite.anchor.set(0);
@@ -55,11 +56,11 @@ export abstract class Entity extends Container {
 
   setCollideable(newValue: boolean) {
     if (newValue) {
-      Game.Instance.entities.static.splice(Game.Instance.entities.static.indexOf(this), 1);
-      Game.Instance.entities.collidable.push(this);
+      Game.Instance.gameState.entities.static.splice(Game.Instance.gameState.entities.static.indexOf(this), 1);
+      Game.Instance.gameState.entities.collidable.push(this);
     } else {
-      Game.Instance.entities.collidable.splice(Game.Instance.entities.collidable.indexOf(this), 1);
-      Game.Instance.entities.static.push(this);
+      Game.Instance.gameState.entities.collidable.splice(Game.Instance.gameState.entities.collidable.indexOf(this), 1);
+      Game.Instance.gameState.entities.static.push(this);
     }
   }
 
@@ -98,5 +99,11 @@ export abstract class Entity extends Container {
       x: this.x,
       y: this.y,
     });
+  }
+
+  // Use this instead of destroy
+  // TODO wrap container so we can do this correctly
+  betterDestroy(state: GameState) {
+    state.toBeDestroyed.push(this);
   }
 }
