@@ -19,9 +19,9 @@ export class Character extends MovingEntity {
 
   constructor(props: { game: Game; spritesheet: PIXI.Spritesheet }) {
     super({
-      game      : props.game,
-      texture   : props.spritesheet.textures[`char_idle-0.png`],
-      collidable: true,
+      game       : props.game,
+      texture    : props.spritesheet.textures[`char_idle-0.png`],
+      collidable : true,
     });
 
     this._textures = props.spritesheet.textures;

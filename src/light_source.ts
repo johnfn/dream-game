@@ -1,16 +1,13 @@
 import { Graphics } from "pixi.js";
 import { Entity } from "./library/entity";
 import { GameState, GameMode } from "./state";
-import { C } from "./constants";
 import { Line } from "./library/line";
 import { Vector2 } from "./library/vector2";
-import { DefaultHashMap, HashSet } from "./library/hash";
-import { Grid } from "./library/grid";
+import { HashSet } from "./library/hash";
 import { CollisionGrid } from "./collision_grid";
-import { Rect } from "./library/rect";
 import { Pair } from "./library/pair";
 import { ArbitrarySelection } from './library/arbitrary_selection'
-import { Debug } from "./library/debug";
+import { Rect } from "./library/rect";
 
 export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
@@ -26,7 +23,14 @@ export class LightSource extends Entity {
     this.addChild(this.graphics);
   }
 
-  buildLighting(state: GameState, collisionGrid: CollisionGrid, source: Entity): {
+  buildLighting(
+    state        : GameState, 
+    collisionGrid: CollisionGrid, 
+    source       : Entity,
+
+    // The furthest the light will go
+    lightBounds  : Rect
+  ): {
     graphics: Graphics;
     offsetX : number;
     offsetY : number;
@@ -37,12 +41,6 @@ export class LightSource extends Entity {
 
     // Step 0: Get useful variables!
 
-    const camera       = state.camera;
-    const cameraBounds = camera.bounds();
-
-    // The furthest the light will go
-    const lightBounds  = cameraBounds.expand(100);
-
     const rects = new ArbitrarySelection();
 
     rects.addRect(lightBounds)
@@ -50,18 +48,20 @@ export class LightSource extends Entity {
     const colliders = collisionGrid.getRectCollisions(lightBounds);
 
     for (const rect of colliders) {
+      if (rect.firstEntity === source) { continue; }
+
       rects.subtractRect(rect.firstRect);
     }
 
     const allCollideableRects = rects.getOutlines();
 
-    for (const c of allCollideableRects) {
-      for (const l of c) {
-        Debug.DrawLine(l, 0xff0000);
-        Debug.DrawPoint(l.start, 0xff0000);
-        Debug.DrawPoint(l.end, 0xff0000);
-      }
-    }
+    // for (const c of allCollideableRects) {
+    //   for (const l of c) {
+    //     Debug.DrawLine(l, 0xff0000);
+    //     Debug.DrawPoint(l.start, 0xff0000);
+    //     Debug.DrawPoint(l.end, 0xff0000);
+    //   }
+    // }
 
     // Step 3: We have all vertices, but that's actually too many. We should
     // only be considering all vertices that we have direct line of sight to.
@@ -123,7 +123,7 @@ export class LightSource extends Entity {
       const nudgedVertex = ray.add(ray.normalize().multiply(3)).add(source.positionVector());
 
       const allHits = collisionGrid.collidesPoint(nudgedVertex);
-      const hasObscuringHit = allHits.find(hit => !hit.firstEntity || (hit.firstEntity && !hit.firstEntity.transparent));
+      const hasObscuringHit = allHits.find(hit => !hit.firstEntity || (hit.firstEntity && !hit.firstEntity.transparent && hit.firstEntity !== source));
 
       if (!hasObscuringHit) {
         const veryLongV1 = ray.add(ray.normalize().multiply(1000));

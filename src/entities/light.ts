@@ -3,6 +3,8 @@ import { Texture } from "pixi.js";
 import { LightSource } from "../light_source";
 import { BaseLight } from "./base_light";
 import { CollisionGrid } from "../collision_grid";
+import { Vector2 } from "../library/vector2";
+import { Rect } from "../library/rect";
 
 export class Light extends BaseLight {
   activeModes  = [GameMode.Normal];
@@ -13,8 +15,9 @@ export class Light extends BaseLight {
 
   constructor(texture: Texture, state: GameState, props: { [key: string]: unknown }) {
     super({
-      collidable: false,
-      texture   ,
+      collidable : false,
+      texture    ,
+      transparent: true,
     });
 
     const intensity = props.intensity as number | undefined;
@@ -38,7 +41,15 @@ export class Light extends BaseLight {
   };
 
   renderLight(state: GameState, grid: CollisionGrid): void {
-    const { graphics, offsetX, offsetY } = this.lightSource.buildLighting(state, grid, this);
+    const w = 1500;
+    const h = 1500;
+    const boundary = new Rect({
+      x: this.x - w / 2,
+      y: this.y - h / 2,
+      w: w,
+      h: h,
+    });
+    const { graphics, offsetX, offsetY } = this.lightSource.buildLighting(state, grid, this, boundary);
 
     // sort to top lol
     state.stage.removeChild(this.lightSource);
@@ -54,8 +65,6 @@ export class Light extends BaseLight {
 
       this.renderLight(state, grid);
     }
-
-    this.renderLight(state, grid);
 
     // TODO: Check if visible
     // TODO: Check if moved

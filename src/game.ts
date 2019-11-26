@@ -112,9 +112,6 @@ export class Game {
   }
 
   startGame = async () => {
-    this.gameState.map = new DreamMap(this.gameState);
-    this.stage.addChild(this.gameState.map);
-
     this.player = new Character({
       game: this,
       spritesheet: C.Loader.getResource("art/char_spritesheet.json")
@@ -122,6 +119,9 @@ export class Game {
     });
 
     this.gameState.character = this.player;
+
+    this.gameState.map = new DreamMap(this.gameState);
+    this.stage.addChild(this.gameState.map);
 
     this.stage.addChild(this.player);
 
@@ -172,9 +172,6 @@ export class Game {
       while (grid.getRectCollisions(this.player.myGetBounds(), this.player).length > 0) {
         this.player.y += 5;
       }
-
-      this.player.x = 400;
-      this.player.y = 400;
     } else {
       this.player.x = 950;
       this.player.y = 1595;
@@ -287,7 +284,7 @@ export class Game {
 
   renderLightingToTexture = (renderTexture: RenderTexture, grid: CollisionGrid) => {
     if (this.gameState.inDreamWorld) {
-      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid, this.player);
+      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid, this.player, this.camera.bounds().expand(100));
 
       // Note: we need to be careful not to render to negative coordinates on the
       // render texture because anything rendered at a negative coordinate is

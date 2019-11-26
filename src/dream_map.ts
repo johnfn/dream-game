@@ -27,15 +27,15 @@ export class DreamMap extends Entity {
   activeRegion  : Rect | null;
   _cameraRegions: Rect[] = [];
 
-  constructor(gameState: GameState) {
+  constructor(state: GameState) {
     super({
       collidable: false,
     });
 
     const tilemap = new TiledTilemap({
       pathToTilemap: "maps",
-      json: C.Loader.getResource("maps/map.json").data,
-      renderer: C.Renderer,
+      json         : C.Loader.getResource("maps/map.json").data,
+      renderer     : C.Renderer,
       customObjects: [
         {
           type: "group" as const,
@@ -87,7 +87,7 @@ export class DreamMap extends Entity {
           type: "single" as const,
 
           name: "light",
-          getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new Light(tex, gameState, props),
+          getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new Light(tex, state, props),
         },
 
         {
@@ -108,6 +108,8 @@ export class DreamMap extends Entity {
     this.map            = tilemap;
     this._cameraRegions = this.map.loadRegionLayer("Camera Bounds");
     this.activeRegion   = null;
+
+    this.loadNextRegionIfNecessary(state);
   }
 
   getCameraRegions(): Rect[] {
@@ -179,7 +181,7 @@ export class DreamMap extends Entity {
     return null;
   };
 
-  update = (state: GameState) => {
+  loadNextRegionIfNecessary = (state: GameState) => {
     const character        = state.character;
     const regions          = this._cameraRegions;
     const nextActiveRegion = regions.find(region => region.contains(character.positionVector()));
@@ -187,6 +189,10 @@ export class DreamMap extends Entity {
     if (nextActiveRegion && !nextActiveRegion.equals(this.activeRegion)) {
       this.loadNewRegion(nextActiveRegion, state);
     }
+  }
+
+  update = (state: GameState) => {
+    this.loadNextRegionIfNecessary(state);
   }; 
 
   getCollidersInRegion(region: Rect): Rect[] {
