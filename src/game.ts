@@ -9,8 +9,6 @@ import {
   Sprite,
   RenderTexture,
   WRAP_MODES,
-  Graphics,
-  Point,
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -165,12 +163,17 @@ export class Game {
     this.interactionHandler = new InteractionHandler(this.stage);
 
     if (MyName === "grant") {
-      this.player.x = Number(window.localStorage.getItem("characterx")) || CharacterStart.Instance.x;
-      this.player.y = Number(window.localStorage.getItem("charactery")) || CharacterStart.Instance.y;
+      // this.player.x = Number(window.localStorage.getItem("characterx")) || CharacterStart.Instance.x;
+      // this.player.y = Number(window.localStorage.getItem("charactery")) || CharacterStart.Instance.y;
+
+      this.player.x = 600;
+      this.player.y = 600;
 
       const grid = this.buildCollisionGrid();
 
-      while (grid.getRectCollisions(this.player.myGetBounds(), this.player).length > 0) {
+      while (
+        grid.getRectGroupCollisions(this.player.myGetBounds()).length > 0
+      ) {
         this.player.y += 5;
       }
     } else {
@@ -194,23 +197,29 @@ export class Game {
       const xVelocity = new Vector2({ x: entity.velocity.x, y: 0 });
       const yVelocity = new Vector2({ x: 0, y: entity.velocity.y });
 
+      let delta = Vector2.Zero;
+
       // resolve x-axis
 
+      delta = delta.add(xVelocity);
       updatedBounds = updatedBounds.add(xVelocity);
 
-      if (grid.getRectCollisions(updatedBounds, entity).length > 0) {
+      if (grid.getRectGroupCollisions(updatedBounds, entity).length > 0) {
+        delta = delta.subtract(xVelocity);
         updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
       // resolve y-axis
 
+      delta = delta.add(yVelocity);
       updatedBounds = updatedBounds.add(yVelocity);
 
-      if (grid.getRectCollisions(updatedBounds, entity).length > 0) {
+      if (grid.getRectGroupCollisions(updatedBounds, entity).length > 0) {
+        delta = delta.subtract(yVelocity);
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
-      entity.position.set(updatedBounds.x, updatedBounds.y);
+      entity.position.set(entity.position.x + delta.x, entity.position.y + delta.y);
     }
   };
 
@@ -226,8 +235,8 @@ export class Game {
     });
 
     for (const entity of collideableEntities.values()) {
-      if (this.camera.bounds().intersects(entity.bounds)) {
-        grid.add(entity.myGetBounds(), entity);
+      if (entity.myGetBounds().intersects(this.camera.bounds())) {
+        grid.addRectGroup(entity.myGetBounds(), entity);
       }
     }
 

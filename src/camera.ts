@@ -1,9 +1,9 @@
+import * as PIXI from "pixi.js";
+
 import { Vector2 } from "./library/vector2";
 import { Entity } from "./library/entity";
-import * as PIXI from "pixi.js";
 import { Rect } from "./library/rect";
 import { GameState } from "./state";
-import { C } from "./constants";
 
 export class FollowCamera {
   private static LERP_SPEED = 0.09;

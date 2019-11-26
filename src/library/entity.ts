@@ -4,6 +4,7 @@ import { Rect } from "./rect";
 import { Sprite, Texture, Container }from "pixi.js";
 import { GameState, GameMode } from "../state";
 import { GetUniqueID } from "./util";
+import { RectGroup } from "./rect_group";
 
 export enum EntityType {
   NormalEntity,
@@ -75,13 +76,15 @@ export abstract class Entity extends Container {
   }
 
   // TODO: rename once this isnt a name collision with superclass
-  public myGetBounds(): Rect {
-    return new Rect({
-      x: this.x,
-      y: this.y,
-      w: this.width,
-      h: this.height
-    });
+  public myGetBounds(): RectGroup {
+    return new RectGroup([
+      new Rect({
+        x: this.x,
+        y: this.y,
+        w: this.width,
+        h: this.height
+      })
+    ]);
   }
 
   public get bounds(): Rect {

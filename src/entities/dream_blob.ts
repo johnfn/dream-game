@@ -58,7 +58,7 @@ export class DreamBlob extends Entity {
   update = (state: GameState) => {
     const activeCameraRegion = state.camera.currentRegion();
 
-    if (activeCameraRegion && activeCameraRegion.intersects(this.myGetBounds())) {
+    if (activeCameraRegion && this.myGetBounds().intersects(activeCameraRegion)) {
       if (this.needsToRender) {
         this.renderBlob(state, activeCameraRegion);
 
