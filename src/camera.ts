@@ -69,9 +69,9 @@ export class FollowCamera {
       return desiredPosition;
     }
 
-    if (currentRegion.w < C.CANVAS_WIDTH || currentRegion.h < C.CANVAS_HEIGHT) {
-      throw new Error("There is a region on the map which is too small for the camera.");
-    }
+    // if (currentRegion.w < C.CANVAS_WIDTH || currentRegion.h < C.CANVAS_HEIGHT) {
+    //   throw new Error("There is a region on the map which is too small for the camera.");
+    // }
 
     // fit the camera rect into the regions rect
 
