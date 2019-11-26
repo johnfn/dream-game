@@ -87,7 +87,7 @@ export class DreamMap extends Entity {
           type: "single" as const,
 
           name: "light",
-          getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new Light(tex, props),
+          getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new Light(tex, gameState, props),
         },
 
         {

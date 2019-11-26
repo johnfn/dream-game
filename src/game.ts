@@ -10,6 +10,7 @@ import {
   RenderTexture,
   WRAP_MODES,
   Graphics,
+  Point,
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -84,6 +85,10 @@ export class Game {
     });
 
     this.stage = new Container();
+    this.gameState.stage = this.stage;
+
+    // this.stage.scale = new Point(0.4, 0.4)
+
     this.app.stage.addChild(this.stage);
 
     this.fixedCameraStage = new Container();
@@ -164,9 +169,12 @@ export class Game {
 
       const grid = this.buildCollisionGrid();
 
-      while (grid.collidesRect(this.player.myGetBounds(), this.player).length > 0) {
+      while (grid.getRectCollisions(this.player.myGetBounds(), this.player).length > 0) {
         this.player.y += 5;
       }
+
+      this.player.x = 400;
+      this.player.y = 400;
     } else {
       this.player.x = 950;
       this.player.y = 1595;
@@ -192,7 +200,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(xVelocity);
 
-      if (grid.collidesRect(updatedBounds, entity).length > 0) {
+      if (grid.getRectCollisions(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
@@ -200,7 +208,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(yVelocity);
 
-      if (grid.collidesRect(updatedBounds, entity).length > 0) {
+      if (grid.getRectCollisions(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
@@ -279,7 +287,7 @@ export class Game {
 
   renderLightingToTexture = (renderTexture: RenderTexture, grid: CollisionGrid) => {
     if (this.gameState.inDreamWorld) {
-      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid);
+      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid, this.player);
 
       // Note: we need to be careful not to render to negative coordinates on the
       // render texture because anything rendered at a negative coordinate is
