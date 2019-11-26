@@ -126,10 +126,11 @@ export class Game {
     this.stage.addChild(this.player);
 
     this.camera = new FollowCamera({
-      stage: this.stage,
+      stage       : this.stage,
+      state       : this.gameState,
       followTarget: this.player,
-      width: C.CANVAS_WIDTH,
-      height: C.CANVAS_HEIGHT
+      width       : C.CANVAS_WIDTH,
+      height      : C.CANVAS_HEIGHT
     });
     this.gameState.camera = this.camera;
 

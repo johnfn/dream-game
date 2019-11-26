@@ -13,6 +13,7 @@ import { LockedDoor } from "./entities/locked_door";
 import { TreasureChest } from "./entities/treasure_chest";
 import { Light } from "./entities/light";
 import { Sign } from "./entities/sign";
+import { DreamBlob } from "./entities/dream_blob";
 
 type MapLevel = {
   dreamGroundLayer  : Entity | undefined;
@@ -21,12 +22,20 @@ type MapLevel = {
   realityObjectLayer: Entity | undefined;
 };
 
+type DreamMapLayer = {
+  entity   : Entity;
+  layerName: string;
+  region   : Rect;
+  active   : boolean;
+};
+
 export class DreamMap extends Entity {
   activeModes   = [GameMode.Normal];
   map           : TiledTilemap;
   levels        : { [key: number]: MapLevel } = [];
   activeRegion  : Rect | null;
   _cameraRegions: Rect[] = [];
+  mapLayers     : DreamMapLayer[] = [];
 
   constructor(state: GameState) {
     super({
@@ -106,6 +115,13 @@ export class DreamMap extends Entity {
         },
 
         {
+          type: "single" as const,
+
+          name: "dreamBlob",
+          getInstanceType: (tex: Texture) => new DreamBlob(tex),
+        },
+
+        {
           type     : "rect" as const,
           layerName: "Camera Bounds",
           process  : (cameraBound) => this._cameraRegions.push(cameraBound),
@@ -149,10 +165,36 @@ export class DreamMap extends Entity {
     );
   };
 
+  getActiveLayers = (): DreamMapLayer[] => {
+    return this.mapLayers.filter(layer => layer.active);
+  }
+
+  getActiveDreamLayers = (): DreamMapLayer[] => {
+    return this.mapLayers.filter(layer => layer.active && layer.layerName.includes("Dream"));
+  }
+
   loadNewRegion = (region: Rect, state: GameState) => {
-    // Step 1: Load next region
+    // Step 1: Clear out old region
+
+    // TODO: There's like no way this will work. How does this work?
 
     const layers = this.map.loadRegion(region);
+
+    for (const oldLayer of this.mapLayers) {
+      oldLayer.entity.alpha = 0.15;
+      oldLayer.active = false;
+    }
+
+    for (const layer of layers) {
+      this.mapLayers.push({
+        entity   : layer.entity,
+        layerName: layer.layerName,
+        region   : region,
+        active   : true,
+      });
+    }
+
+    // Step 2: Load next region
 
     for (let { layerName, entity } of layers) {
       const s = layerName.split(" ");

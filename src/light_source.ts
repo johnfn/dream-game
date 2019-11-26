@@ -55,13 +55,13 @@ export class LightSource extends Entity {
 
     const allCollideableRects = rects.getOutlines();
 
-    for (const c of allCollideableRects) {
-      for (const l of c) {
-        Debug.DrawLine(l, 0xff0000);
-        Debug.DrawPoint(l.start, 0xff0000);
-        Debug.DrawPoint(l.end, 0xff0000);
-      }
-    }
+    // for (const c of allCollideableRects) {
+    //   for (const l of c) {
+    //     Debug.DrawLine(l, 0xff0000);
+    //     Debug.DrawPoint(l.start, 0xff0000);
+    //     Debug.DrawPoint(l.end, 0xff0000);
+    //   }
+    // }
 
     // Step 3: We have all vertices, but that's actually too many. We should
     // only be considering all vertices that we have direct line of sight to.
