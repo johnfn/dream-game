@@ -57,7 +57,11 @@ export class DreamBlob extends Entity {
     this.addChild(this.dreamBlobMask);
   }
 
+  tick = 0;
+
   update = (state: GameState) => {
+    ++this.tick;
+
     const activeCameraRegion = state.camera.currentRegion();
 
     if (activeCameraRegion && this.collisionBounds(state).intersects(activeCameraRegion)) {
@@ -68,7 +72,7 @@ export class DreamBlob extends Entity {
       }
     }
 
-    this.dreamBlobMask.width  += (Math.random() - 0.5) * 1;
+    this.dreamBlobMask.width   = 300 + Math.sin(this.tick / 300) * 300;
     this.dreamBlobMask.height += (Math.random() - 0.5) * 1;
   };
 
