@@ -12,6 +12,7 @@ export class Light extends BaseLight {
   rendered     = false;
   tick         = 0;
   intensity    : number;
+  flickering   : boolean;
 
   constructor(texture: Texture, state: GameState, props: { [key: string]: unknown }) {
     super({
@@ -21,6 +22,7 @@ export class Light extends BaseLight {
     });
 
     const intensity = props.intensity as number | undefined;
+    const flickering = props.flickering as boolean | undefined;
 
     if (!intensity) {
       throw new Error("Intensity not defined for a light in the tilemap!");
@@ -31,7 +33,8 @@ export class Light extends BaseLight {
     this.lightSource.y = 0;
     this.lightSource.alpha = Number(intensity);
 
-    this.intensity = intensity;
+    this.intensity  = intensity;
+    this.flickering = flickering || false;
 
     state.stage.addChild(this.lightSource);
   }
@@ -63,17 +66,7 @@ export class Light extends BaseLight {
 
   duration = 0;
 
-  updateLight(state: GameState, grid: CollisionGrid): void {
-    ++this.tick;
-
-    if (!this.rendered) {
-      this.rendered = true;
-
-      this.renderLight(state, grid);
-    }
-
-    console.log(this.duration);
-
+  flicker() {
     if (--this.duration <= 0) {
       this.duration = Math.random() * 80 + 10;
 
@@ -82,6 +75,18 @@ export class Light extends BaseLight {
       } else {
         this.lightSource.alpha = 0;
       }
+    }
+  }
+
+  updateLight(state: GameState, grid: CollisionGrid): void {
+    if (!this.rendered) {
+      this.rendered = true;
+
+      this.renderLight(state, grid);
+    }
+
+    if (this.flickering) {
+      this.flicker();
     }
 
     // this.renderLight(state, grid);

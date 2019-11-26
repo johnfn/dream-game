@@ -613,6 +613,11 @@
                          "name":"",
                          "properties":[
                                 {
+                                 "name":"flickering",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
                                  "name":"intensity",
                                  "type":"string",
                                  "value":"0.1"
