@@ -152,7 +152,6 @@ export class CollisionGrid {
     return false;
   };
 
-  // NOTE: I haven't actually tested this
   collidesPoint = (point: Vector2, entity?: Entity): CollisionResultPoint[] => {
     const cell = this._cells.get(
       Math.floor(point.x / this._cellSize),

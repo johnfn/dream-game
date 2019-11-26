@@ -308,7 +308,10 @@ export class LightSource extends Entity {
       const ray = new Vector2({ x: vertex.x - player.x, y: vertex.y - player.y });
       const nudgedVertex = ray.add(ray.normalize().multiply(3)).add(player.positionVector());
 
-      if (collisionGrid.collidesPoint(nudgedVertex).length === 0) {
+      const allHits = collisionGrid.collidesPoint(nudgedVertex);
+      const hasObscuringHit = allHits.find(hit => !hit.firstEntity || (hit.firstEntity && !hit.firstEntity.transparent));
+
+      if (!hasObscuringHit) {
         const veryLongV1 = ray.add(ray.normalize().multiply(1000));
         const longRaycast = new Line({
           one: player.positionVector(),
