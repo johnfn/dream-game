@@ -6,6 +6,7 @@ import { Entity } from './entity';
 import { TextureEntity } from '../texture_entity';
 import { Grid } from './grid';
 import { TiledTilemapObjects, TilemapCustomObjects } from './tilemap_objects'
+import { RectGroup } from './rect_group';
 
 export type MapLayer = {
   layerName: string;
@@ -349,7 +350,7 @@ export class TiledTilemap {
       .flat();
   }
 
-  getCollidersInRegionForLayer(region: Rect, layerName: string): Rect[] {
+  getCollidersInRegionForLayer(region: Rect, layerName: string): RectGroup {
     const lowX = Math.floor(region.x / this._tileWidth);
     const lowY = Math.floor(region.y / this._tileHeight);
 
@@ -377,7 +378,7 @@ export class TiledTilemap {
       }
     }
 
-    return colliders;
+    return new RectGroup(colliders);
   }
   
   turnOffAllObjects() {

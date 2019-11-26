@@ -114,11 +114,6 @@ export class Game {
 
     this.state.character = this.player;
 
-    this.state.map = new DreamMap(this.state);
-    this.stage.addChild(this.state.map);
-
-    this.stage.addChild(this.player);
-
     this.camera = new FollowCamera({
       stage       : this.stage,
       state       : this.state,
@@ -127,6 +122,11 @@ export class Game {
       height      : C.CANVAS_HEIGHT
     });
     this.state.camera = this.camera;
+
+    this.state.map = new DreamMap(this.state);
+    this.stage.addChild(this.state.map);
+
+    this.stage.addChild(this.player);
 
     const testShard = new DreamShard();
     testShard.position.set(5, 5);

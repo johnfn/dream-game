@@ -5,6 +5,7 @@ import { TiledTilemap } from "../library/tilemap";
 import { C } from "../constants";
 import { CustomMapObjects } from "./custom_map_objects";
 import { RectGroup } from "../library/rect_group";
+import { FollowCamera } from "../camera";
 
 type MapLevel = {
   dreamGroundLayer  : Entity | undefined;
@@ -21,12 +22,14 @@ type DreamMapLayer = {
 };
 
 export class DreamMap extends Entity {
-  activeModes   = [GameMode.Normal];
-  map           : TiledTilemap;
-  levels        : { [key: number]: MapLevel } = [];
-  activeRegion  : Rect | null;
-  _cameraRegions: Rect[] = [];
-  mapLayers     : DreamMapLayer[] = [];
+  activeModes           = [GameMode.Normal];
+  map                   : TiledTilemap;
+  levels                : { [key: number]: MapLevel } = [];
+  activeRegion          : Rect | null;
+  mapLayers             : DreamMapLayer[] = [];
+
+  private _cameraRegions: Rect[] = [];
+  private _camera       : FollowCamera;
 
   constructor(state: GameState) {
     super({
@@ -43,6 +46,7 @@ export class DreamMap extends Entity {
     this.map            = tilemap;
     this._cameraRegions = this.map.loadRegionLayer("Camera Bounds");
     this.activeRegion   = null;
+    this._camera        = state.camera;
 
     this.loadNextRegionIfNecessary(state);
   }
@@ -156,9 +160,12 @@ export class DreamMap extends Entity {
     this.loadNextRegionIfNecessary(state);
   }; 
 
-  // collisionBounds(): RectGroup {
-
-  // }
+  collisionBounds(): RectGroup {
+    return this.map.getCollidersInRegionForLayer(
+      this._camera.bounds().expand(1000),
+      "Reality Ground Layer 1"
+    )
+  }
 
   getCollidersInRegion(region: Rect): Rect[] {
     return this.map.getCollidersInRegion(region);

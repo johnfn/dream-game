@@ -24,11 +24,9 @@ export class CollisionHandler {
       }
     }
 
-    const mapColliders = state.map.getCollidersInRegion(
-      camera.bounds().expand(1000)
-    );
-
-    for (const mapCollider of mapColliders) {
+    const mapColliders = state.map.collisionBounds()
+    
+    for (const mapCollider of mapColliders.getRects()) {
       grid.add(mapCollider, state.map);
     }
 
