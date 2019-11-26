@@ -3,7 +3,7 @@ import { C } from "./constants";
 
 import * as PIXI from "pixi.js";
 import { Dialog } from "./dialog";
-import { DreamMap } from "./dream_map";
+import { DreamMap } from "./map/dream_map";
 import { Entity } from "./library/entity";
 import { LightSource } from "./light_source";
 import { Character } from "./character";

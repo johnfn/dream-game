@@ -8,35 +8,28 @@ import { Rect } from "../library/rect";
 export class Light extends BaseLight {
   activeModes  = [GameMode.Normal];
   name         = "Light";
-  lightSource  : LightSource;
+  lightSource !: LightSource;
   rendered     = false;
   tick         = 0;
   intensity    : number;
   flickering   : boolean;
 
-  constructor(texture: Texture, state: GameState, props: { [key: string]: unknown }) {
+  constructor(texture: Texture, props: { [key: string]: unknown }) {
     super({
       collidable : false,
       texture    ,
       transparent: true,
     });
 
-    const intensity = props.intensity as number | undefined;
+    const intensity  = props.intensity as number | undefined;
     const flickering = props.flickering as boolean | undefined;
 
     if (!intensity) {
       throw new Error("Intensity not defined for a light in the tilemap!");
     }
 
-    this.lightSource = new LightSource();
-    this.lightSource.x = 0;
-    this.lightSource.y = 0;
-    this.lightSource.alpha = Number(intensity);
-
     this.intensity  = intensity;
     this.flickering = flickering || false;
-
-    state.stage.addChild(this.lightSource);
   }
 
   collide = () => {};
@@ -46,6 +39,13 @@ export class Light extends BaseLight {
   };
 
   renderLight(state: GameState, grid: CollisionGrid): void {
+    this.lightSource = new LightSource();
+    this.lightSource.x = 0;
+    this.lightSource.y = 0;
+    this.lightSource.alpha = Number(this.intensity);
+
+    this.parent.addChild(this.lightSource);
+
     const w = 1500;
     const h = 1500;
     const boundary = new Rect({

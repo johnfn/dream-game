@@ -20,7 +20,7 @@ import { GameState } from "./state";
 import { DreamShard } from "./dream_shard";
 import { HeadsUpDisplay } from "./heads_up_display";
 import { Dialog } from "./dialog";
-import { DreamMap } from "./dream_map";
+import { DreamMap } from "./map/dream_map";
 import { MyName } from "./my_name";
 import { LightSource } from "./light_source";
 import { Debug } from "./library/debug";
