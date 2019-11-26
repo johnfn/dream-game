@@ -25,7 +25,7 @@ export class Sign extends InteractableEntity {
 
   canInteract = () => true;
   interact = (player: Character, state: GameState) => {
-    Dialog.StartDialog(state, "%1% 3F<br /> 2F<br /> 1F (you are here)<br /> 0F<br />-1F");
+    Dialog.StartDialog(state, "%1% 3F<br /> 2F<br />%%2%1F (you are here)%%1% 0F<br />-1F");
   };
   interactRange = C.INTERACTION_RANGE;
   interactText = () => "Read sign";
