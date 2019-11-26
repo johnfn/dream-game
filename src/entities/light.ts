@@ -49,7 +49,7 @@ export class Light extends BaseLight {
       w: w,
       h: h,
     });
-    const { graphics, offsetX, offsetY } = this.lightSource.buildLighting(state, grid, this, boundary);
+    const { graphics, offsetX, offsetY } = this.lightSource.buildLighting(grid, this, boundary);
 
     // sort to top lol
     state.stage.removeChild(this.lightSource);
@@ -65,6 +65,8 @@ export class Light extends BaseLight {
 
       this.renderLight(state, grid);
     }
+
+    // this.renderLight(state, grid);
 
     // TODO: Check if visible
     // TODO: Check if moved

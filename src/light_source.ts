@@ -8,6 +8,7 @@ import { CollisionGrid } from "./collision_grid";
 import { Pair } from "./library/pair";
 import { ArbitrarySelection } from './library/arbitrary_selection'
 import { Rect } from "./library/rect";
+import { Debug } from "./library/debug";
 
 export class LightSource extends Entity {
   activeModes = [GameMode.Normal];
@@ -24,7 +25,6 @@ export class LightSource extends Entity {
   }
 
   buildLighting(
-    state        : GameState, 
     collisionGrid: CollisionGrid, 
     source       : Entity,
 
@@ -43,7 +43,7 @@ export class LightSource extends Entity {
 
     const rects = new ArbitrarySelection();
 
-    rects.addRect(lightBounds)
+    rects.addRect(lightBounds);
 
     const colliders = collisionGrid.getRectCollisions(lightBounds);
 
@@ -55,13 +55,13 @@ export class LightSource extends Entity {
 
     const allCollideableRects = rects.getOutlines();
 
-    // for (const c of allCollideableRects) {
-    //   for (const l of c) {
-    //     Debug.DrawLine(l, 0xff0000);
-    //     Debug.DrawPoint(l.start, 0xff0000);
-    //     Debug.DrawPoint(l.end, 0xff0000);
-    //   }
-    // }
+    for (const c of allCollideableRects) {
+      for (const l of c) {
+        Debug.DrawLine(l, 0xff0000);
+        Debug.DrawPoint(l.start, 0xff0000);
+        Debug.DrawPoint(l.end, 0xff0000);
+      }
+    }
 
     // Step 3: We have all vertices, but that's actually too many. We should
     // only be considering all vertices that we have direct line of sight to.

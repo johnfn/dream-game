@@ -284,7 +284,7 @@ export class Game {
 
   renderLightingToTexture = (renderTexture: RenderTexture, grid: CollisionGrid) => {
     if (this.gameState.inDreamWorld) {
-      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid, this.player, this.camera.bounds().expand(100));
+      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(grid, this.player, this.camera.bounds().expand(100));
 
       // Note: we need to be careful not to render to negative coordinates on the
       // render texture because anything rendered at a negative coordinate is
