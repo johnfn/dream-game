@@ -25,15 +25,15 @@ export class Character extends MovingEntity {
 
   constructor(props: { game: Game }) {
     super({
-      game: props.game,
-      texture: C.Loader.getResource("art/temp.png").texture,
+      game      : props.game,
+      texture   : C.Loader.getResource("art/temp.png").texture,
       collidable: true
     });
 
-    const cellDim = new Vector2({ x: 64, y: 110 });
+    const cellDim  = new Vector2({ x: 64, y: 110 });
     const sheetDim = new Vector2({ x: 512, y: 880 });
-    const numRows = sheetDim.y / cellDim.y;
-    const numCols = sheetDim.x / cellDim.x;
+    const numRows  = sheetDim.y / cellDim.y;
+    const numCols  = sheetDim.x / cellDim.x;
     const frames: { [key: string]: {} } = {};
     const frameNames: { [key: number]: string } = {
       0: "char_idle_d",
@@ -72,7 +72,7 @@ export class Character extends MovingEntity {
         version: "1.0",
         image: "char_spritesheet.png",
         format: "RGBA8888",
-        size: { w: 512, h: 1024 },
+        size: { w: 512, h: 880 },
         scale: "1"
       }
     };

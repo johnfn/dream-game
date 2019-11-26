@@ -9,6 +9,8 @@ import {
   Sprite,
   RenderTexture,
   WRAP_MODES,
+  Graphics,
+  Point,
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -83,6 +85,10 @@ export class Game {
     });
 
     this.stage = new Container();
+    this.gameState.stage = this.stage;
+
+    // this.stage.scale = new Point(0.4, 0.4)
+
     this.app.stage.addChild(this.stage);
 
     this.fixedCameraStage = new Container();
@@ -106,14 +112,14 @@ export class Game {
   }
 
   startGame = async () => {
-    this.gameState.map = new DreamMap(this.gameState);
-    this.stage.addChild(this.gameState.map);
-
     this.player = new Character({
       game: this,
     });
 
     this.gameState.character = this.player;
+
+    this.gameState.map = new DreamMap(this.gameState);
+    this.stage.addChild(this.gameState.map);
 
     this.stage.addChild(this.player);
 
@@ -150,7 +156,7 @@ export class Game {
     this.app.ticker.add(() => this.gameLoop());
 
     this.gameState.playerLighting = new LightSource();
-    //this.stage.addChild(this.gameState.playerLighting);
+    // this.stage.addChild(this.gameState.playerLighting);
     this.addDreamShader();
 
     this.interactionHandler = new InteractionHandler(this.stage);
@@ -161,7 +167,7 @@ export class Game {
 
       const grid = this.buildCollisionGrid();
 
-      while (grid.collidesRect(this.player.myGetBounds(), this.player).length > 0) {
+      while (grid.getRectCollisions(this.player.myGetBounds(), this.player).length > 0) {
         this.player.y += 5;
       }
     } else {
@@ -189,7 +195,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(xVelocity);
 
-      if (grid.collidesRect(updatedBounds, entity).length > 0) {
+      if (grid.getRectCollisions(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(xVelocity);
       }
 
@@ -197,7 +203,7 @@ export class Game {
 
       updatedBounds = updatedBounds.add(yVelocity);
 
-      if (grid.collidesRect(updatedBounds, entity).length > 0) {
+      if (grid.getRectCollisions(updatedBounds, entity).length > 0) {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
@@ -236,6 +242,8 @@ export class Game {
   gameLoop = () => {
     const { entities } = this.gameState;
 
+    this.uniforms.u_time += 0.01;
+
     // console.log(Debug.GetDrawCount());
 
     Debug.Clear();
@@ -250,17 +258,15 @@ export class Game {
       entity.update(this.gameState);
     }
 
-    // remove all entities marked for destruction
-
-    const toBeDestroyed = this.gameState.toBeDestroyed;
-
-    this.gameState.entities = new HashSet(entities.values().filter(ent => !toBeDestroyed.includes(ent)));
+    this.gameState.entities = new HashSet(entities.values().filter(ent => !this.gameState.toBeDestroyed.includes(ent)));
 
     const grid = this.buildCollisionGrid();
 
-    this.resolveCollisions(grid);
+    for (const lightEntity of this.gameState.getLightEntities().values()) {
+      lightEntity.updateLight(this.gameState, grid);
+    }
 
-    this.uniforms.u_time += 0.01;
+    this.resolveCollisions(grid);
 
     this.renderLightingToTexture(this.renderTex, grid);
 
@@ -276,7 +282,7 @@ export class Game {
 
   renderLightingToTexture = (renderTexture: RenderTexture, grid: CollisionGrid) => {
     if (this.gameState.inDreamWorld) {
-      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(this.gameState, grid);
+      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(grid, this.player, this.camera.bounds().expand(100));
 
       // Note: we need to be careful not to render to negative coordinates on the
       // render texture because anything rendered at a negative coordinate is
@@ -294,9 +300,12 @@ export class Game {
   };
 
   addDreamShader = () => {
+    const width  = 2000;
+    const height = 2000;
+
     this.renderTex = RenderTexture.create({
-      width: this.gameState.map.width,
-      height: this.gameState.map.height,
+      width ,
+      height,
     });
     C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
 
@@ -345,7 +354,6 @@ export class Game {
       uniform float u_displacement_amt;
   
       void main() {
-
         float time_e      = u_time * 0.1;
 
         vec2 uv_t         = vec2(vUVs.s + time_e, vUVs.t + time_e);
@@ -362,12 +370,13 @@ export class Game {
   `;
 
     const stageBounds = new Geometry()
-      .addAttribute("aVertexPosition", [0, 0, this.gameState.map.width, 0, 0, this.gameState.map.height, this.gameState.map.width, this.gameState.map.height], 2)
+      .addAttribute("aVertexPosition", [0, 0, width, 0, 0, height, width, height], 2)
       .addAttribute("aUVs", [0, 0, 1, 0, 0, 1, 1, 1], 2)
       .addAttribute("aColor", [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1], 3)
       .addIndex([0, 1, 2, 1, 2, 3]);
 
     const shader = Shader.from(vertexSrc, fragSrc, this.uniforms);
+
     this.shadedLighting = new Mesh(stageBounds, shader);
     this.shadedLighting.blendMode = BLEND_MODES.ADD;
 

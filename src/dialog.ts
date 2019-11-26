@@ -23,7 +23,8 @@ export class Dialog extends InteractableEntity {
 
     this.text = new TypewriterText(
       "%1%This is some dialog text", {
-        1: { color: "white", fontSize: 18, align: "left" }
+        1: { color: "white", fontSize: 18, align: "left" },
+        2: { color: "red", fontSize: 18, align: "left" },
       }
     );
 

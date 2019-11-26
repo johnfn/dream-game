@@ -30,18 +30,21 @@ export abstract class Entity extends Container {
 
   protected _collideable: boolean;
   protected _interactable: boolean;
+  protected _isLight: boolean;
 
   constructor(props: {
+    collidable   : boolean;
     texture     ?: Texture;
     transparent ?: boolean;
     interactable?: boolean;
-    collidable   : boolean;
+    light       ?: boolean;
   }) {
     super();
 
     this.sprite        = new Sprite(props.texture);
     this._collideable  = props.collidable;
     this._interactable = props.interactable || false;
+    this._isLight        = props.light || false;
 
     this.startUpdating();
 
@@ -120,5 +123,9 @@ export abstract class Entity extends Container {
 
   isInteractable(): boolean {
     return this._interactable;
+  }
+
+  isLight(): boolean {
+    return this._isLight;
   }
 }

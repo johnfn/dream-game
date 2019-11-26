@@ -78,21 +78,24 @@ export class CollisionGrid {
    * entity is passed in, ignores that entity when checking for collisions.
    * (Does not add the rect to the grid.)
    */
-  collidesRect = (rect: Rect, entity?: Entity): CollisionResultRect[] => {
-    const corners = rect.getCorners();
-    const cells = corners.map(corner => this._cells.get(
-      Math.floor(corner.x / this._cellSize),
-      Math.floor(corner.y / this._cellSize),
-    ));
+  getRectCollisions = (rect: Rect, entity?: Entity): CollisionResultRect[] => {
+    const cells: Cell[] = [];
 
-    const collisions: CollisionResultRect[] = [];
-    const uniqueCells: { [key: string]: Cell } = {};
+    const lowX  = Math.floor(rect.x           / this._cellSize);
+    const highX = Math.ceil((rect.x + rect.w) / this._cellSize);
 
-    for (const cell of cells) {
-      uniqueCells[cell.hash()] = cell;
+    const lowY  = Math.floor(rect.y           / this._cellSize);
+    const highY = Math.ceil((rect.y + rect.h) / this._cellSize);
+
+    for (let x = lowX; x < highX; x++) {
+      for (let y = lowY; y < highY; y++) {
+        cells.push(this._cells.get(x, y));
+      }
     }
 
-    for (const cell of Object.values(uniqueCells)) {
+    const collisions: CollisionResultRect[] = [];
+
+    for (const cell of cells) {
       for (const { rect: rectInCell, entity: entityInCell } of cell.colliders) {
         if (entityInCell === entity) {
           continue;
@@ -152,7 +155,6 @@ export class CollisionGrid {
     return false;
   };
 
-  // NOTE: I haven't actually tested this
   collidesPoint = (point: Vector2, entity?: Entity): CollisionResultPoint[] => {
     const cell = this._cells.get(
       Math.floor(point.x / this._cellSize),
