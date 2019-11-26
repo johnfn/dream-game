@@ -160,14 +160,16 @@ export class DreamMap extends Entity {
     this.loadNextRegionIfNecessary(state);
   }; 
 
-  collisionBounds(): RectGroup {
+  collisionBounds(state: GameState): RectGroup {
     return this.map.getCollidersInRegionForLayer(
       this._camera.bounds().expand(1000),
       "Reality Ground Layer 1"
     )
   }
 
-  getCollidersInRegion(region: Rect): Rect[] {
-    return this.map.getCollidersInRegion(region);
+  getDreamCollidersInRegion(region: Rect): RectGroup {
+    return this.map.getCollidersInRegionForLayer(
+      region, "Dream Ground Layer 1"
+    )
   }
 }

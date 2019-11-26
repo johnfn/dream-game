@@ -160,7 +160,7 @@ export class Game {
       const grid = this.collisionHandler.buildCollisionGrid(this.state);
 
       while (
-        grid.getRectGroupCollisions(this.player.collisionBounds()).length > 0
+        grid.getRectGroupCollisions(this.player.collisionBounds(this.state)).length > 0
       ) {
         this.player.y += 5;
       }

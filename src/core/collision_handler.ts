@@ -19,12 +19,12 @@ export class CollisionHandler {
     });
 
     for (const entity of collideableEntities.values()) {
-      if (entity.collisionBounds().intersects(camera.bounds())) {
-        grid.addRectGroup(entity.collisionBounds(), entity);
+      if (entity.collisionBounds(state).intersects(camera.bounds())) {
+        grid.addRectGroup(entity.collisionBounds(state), entity);
       }
     }
 
-    const mapColliders = state.map.collisionBounds()
+    const mapColliders = state.map.collisionBounds(state);
     
     for (const mapCollider of mapColliders.getRects()) {
       grid.add(mapCollider, state.map);
@@ -43,7 +43,7 @@ export class CollisionHandler {
     for (const entity of movingEntities) {
       if (entity.velocity.x === 0 && entity.velocity.y === 0) { continue; }
 
-      let updatedBounds = entity.collisionBounds();
+      let updatedBounds = entity.collisionBounds(state);
 
       const xVelocity = new Vector2({ x: entity.velocity.x, y: 0 });
       const yVelocity = new Vector2({ x: 0, y: entity.velocity.y });

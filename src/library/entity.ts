@@ -75,7 +75,7 @@ export abstract class Entity extends Container {
     this.sprite.texture = newTexture;
   }
 
-  public collisionBounds(): RectGroup {
+  public collisionBounds(state: GameState): RectGroup {
     return new RectGroup([
       new Rect({
         x: this.x,

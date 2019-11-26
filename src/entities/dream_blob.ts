@@ -4,6 +4,7 @@ import { Entity } from "../library/entity";
 import { C } from "../constants";
 import { Rect } from "../library/rect";
 import { RectGroup } from "../library/rect_group";
+import { DreamMap } from "../map/dream_map";
 
 export class DreamBlob extends Entity {
   activeModes    = [GameMode.Normal];
@@ -13,20 +14,20 @@ export class DreamBlob extends Entity {
   blobWidth      = 800;
   blobHeight     = 800;
 
-  dreamBlob      : Sprite
+  dreamBlob      : Sprite;
   dreamBlobMask  : Graphics;
+  map           !: DreamMap;
 
   constructor(texture: Texture) {
     super({
-      collidable: false,
+      collidable: true,
       texture,
     });
 
     this.dreamBlob     = new Sprite();
-
     this.dreamBlobMask = new Graphics();
     this.dreamBlobMask.beginFill(0xff0000)
-    this.dreamBlobMask.drawRect(0, 0, 400, 400);
+    this.dreamBlobMask.drawRect(0, 0, 400, 700);
     this.dreamBlobMask.alpha = 0.1;
   }
 
@@ -59,7 +60,7 @@ export class DreamBlob extends Entity {
   update = (state: GameState) => {
     const activeCameraRegion = state.camera.currentRegion();
 
-    if (activeCameraRegion && this.collisionBounds().intersects(activeCameraRegion)) {
+    if (activeCameraRegion && this.collisionBounds(state).intersects(activeCameraRegion)) {
       if (this.needsToRender) {
         this.renderBlob(state, activeCameraRegion);
 
@@ -71,7 +72,12 @@ export class DreamBlob extends Entity {
     this.dreamBlobMask.height += (Math.random() - 0.5) * 1;
   };
 
-  // myGetBounds(): RectGroup {
-
-  // }
+  collisionBounds(state: GameState): RectGroup {
+    return state.map.getDreamCollidersInRegion(new Rect({
+      x: this.x + this.dreamBlobMask.x,
+      y: this.y + this.dreamBlobMask.y,
+      w: this.dreamBlobMask.width,
+      h: this.dreamBlobMask.height,
+    }))
+  }
 }
