@@ -4,6 +4,7 @@ import { Rect } from "../library/rect";
 import { TiledTilemap } from "../library/tilemap";
 import { C } from "../constants";
 import { CustomMapObjects } from "./custom_map_objects";
+import { RectGroup } from "../library/rect_group";
 
 type MapLevel = {
   dreamGroundLayer  : Entity | undefined;
@@ -154,6 +155,10 @@ export class DreamMap extends Entity {
   update = (state: GameState) => {
     this.loadNextRegionIfNecessary(state);
   }; 
+
+  // collisionBounds(): RectGroup {
+
+  // }
 
   getCollidersInRegion(region: Rect): Rect[] {
     return this.map.getCollidersInRegion(region);

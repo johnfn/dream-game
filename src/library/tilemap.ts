@@ -15,13 +15,13 @@ export type MapLayer = {
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
 
 export class TiledTilemap {
-  private _tileWidth: number;
-  private _tileHeight: number;
-  private _data: TiledJSON;
-  private _tilesets: Tileset[];
-  private _tileLayers: { [tilesetName: string]: Grid<Tile> };
-  private _renderer: Renderer;
-  private _objects: TiledTilemapObjects;
+  private _tileWidth  : number;
+  private _tileHeight : number;
+  private _data       : TiledJSON;
+  private _tilesets   : Tileset[];
+  private _tileLayers : { [tilesetName: string]: Grid<Tile> };
+  private _renderer   : Renderer;
+  private _objects    : TiledTilemapObjects;
 
   // (should be private, but cant be for organization reasons)
   _gidHasCollision: { [id: number]: boolean } = {};
@@ -274,7 +274,7 @@ export class TiledTilemap {
 
     // Load tile layers
 
-    for (const layerName of Object.keys(this._tileLayers)) {
+    for (const layerName of this.getLayerNames()) {
       const layer = this._tileLayers[layerName];
       const renderTexture = RenderTexture.create({
         width : region.w,
@@ -323,27 +323,33 @@ export class TiledTilemap {
     return layers;
   }
 
-  public getTilesAtAbs(x: number, y: number): Tile[] {
+  public getLayerNames(): string[] {
+    return Object.keys(this._tileLayers);
+  }
+
+  public getTilesAtAbsolutePosition(x: number, y: number): Tile[] {
+    return this.getLayerNames()
+      .map(layerName => this.getTileAtAbsolutePositionForLayer(x, y, layerName))
+      .filter(x => x) as Tile[];
+  }
+
+  public getTileAtAbsolutePositionForLayer(x: number, y: number, layerName: string): Tile | null {
     const tileWidth  = this._data.tilewidth;
     const tileHeight = this._data.tileheight;
 
-    const tiles: Tile[] = [];
-
-    for (const layerName of Object.keys(this._tileLayers)) {
-      const tile = this._tileLayers[layerName].get(
-        Math.floor(x / tileWidth),
-        Math.floor(y / tileHeight)
-      );
-
-      if (tile !== null) {
-        tiles.push(tile);
-      }
-    }
-
-    return tiles;
+    return this._tileLayers[layerName].get(
+      Math.floor(x / tileWidth),
+      Math.floor(y / tileHeight)
+    );
   }
 
   getCollidersInRegion(region: Rect): Rect[] {
+    return this.getLayerNames()
+      .map(layerName => this.getCollidersInRegionForLayer(region, layerName))
+      .flat();
+  }
+
+  getCollidersInRegionForLayer(region: Rect, layerName: string): Rect[] {
     const lowX = Math.floor(region.x / this._tileWidth);
     const lowY = Math.floor(region.y / this._tileHeight);
 
@@ -353,22 +359,20 @@ export class TiledTilemap {
     const colliders: Rect[] = [];
 
     for (let x = lowX; x <= highX; x++) {
-
-      outer:
       for (let y = lowY; y <= highY; y++) {
-        const tiles = this.getTilesAtAbs(x * this._tileWidth, y * this._tileHeight);
+        const tile = this.getTileAtAbsolutePositionForLayer(
+          x * this._tileWidth, 
+          y * this._tileHeight,
+          layerName
+        );
         
-        for (const tile of tiles) {
-          if (tile.isCollider) {
-            colliders.push(new Rect({
-              x: x * this._tileWidth,
-              y: y * this._tileHeight,
-              w: this._tileWidth,
-              h: this._tileHeight,
-            }));
-
-            continue outer;
-          }
+        if (tile && tile.isCollider) {
+          colliders.push(new Rect({
+            x: x * this._tileWidth,
+            y: y * this._tileHeight,
+            w: this._tileWidth,
+            h: this._tileHeight,
+          }));
         }
       }
     }
