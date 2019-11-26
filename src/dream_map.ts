@@ -12,6 +12,7 @@ import { Glass } from "./entities/glass";
 import { LockedDoor } from "./entities/locked_door";
 import { TreasureChest } from "./entities/treasure_chest";
 import { Light } from "./entities/light";
+import { Sign } from "./entities/sign";
 
 type MapLevel = {
   dreamGroundLayer  : Entity | undefined;
@@ -95,6 +96,13 @@ export class DreamMap extends Entity {
 
           name: "glass",
           getInstanceType: (tex: Texture) => new Glass(tex),
+        },
+
+        {
+          type: "single" as const,
+
+          name: "sign",
+          getInstanceType: (tex: Texture) => new Sign(tex),
         },
 
         {
