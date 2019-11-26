@@ -3,7 +3,6 @@ import { Texture } from "pixi.js";
 import { LightSource } from "../light_source";
 import { BaseLight } from "./base_light";
 import { CollisionGrid } from "../collision_grid";
-import { Vector2 } from "../library/vector2";
 import { Rect } from "../library/rect";
 
 export class Light extends BaseLight {
@@ -11,7 +10,8 @@ export class Light extends BaseLight {
   name         = "Light";
   lightSource  : LightSource;
   rendered     = false;
-  // lightGraphics: Graphics;
+  tick         = 0;
+  intensity    : number;
 
   constructor(texture: Texture, state: GameState, props: { [key: string]: unknown }) {
     super({
@@ -29,7 +29,9 @@ export class Light extends BaseLight {
     this.lightSource = new LightSource();
     this.lightSource.x = 0;
     this.lightSource.y = 0;
-    this.lightSource.alpha = 0.3;
+    this.lightSource.alpha = Number(intensity);
+
+    this.intensity = intensity;
 
     state.stage.addChild(this.lightSource);
   }
@@ -59,11 +61,27 @@ export class Light extends BaseLight {
     this.lightSource.y = offsetY;
   }
 
+  duration = 0;
+
   updateLight(state: GameState, grid: CollisionGrid): void {
+    ++this.tick;
+
     if (!this.rendered) {
       this.rendered = true;
 
       this.renderLight(state, grid);
+    }
+
+    console.log(this.duration);
+
+    if (--this.duration <= 0) {
+      this.duration = Math.random() * 80 + 10;
+
+      if (this.lightSource.alpha === 0) {
+        this.lightSource.alpha = this.intensity;
+      } else {
+        this.lightSource.alpha = 0;
+      }
     }
 
     // this.renderLight(state, grid);

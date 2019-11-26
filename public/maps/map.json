@@ -615,7 +615,7 @@
                                 {
                                  "name":"intensity",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"0.1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -670,7 +670,7 @@
          "y":0
         }],
  "nextlayerid":21,
- "nextobjectid":49,
+ "nextobjectid":50,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.2.3",
