@@ -13,7 +13,7 @@ export const ResourcesToLoad = {
   "art/temp.png"             : ResourceType.Image,
   "art/key.png"              : ResourceType.Image,
   "art/char.png"             : ResourceType.Image,
-  "art/char_spritesheet.json": ResourceType.Spritesheet,
+  "art/char_spritesheet.png" : ResourceType.Spritesheet,
   "maps/map.json"            : ResourceType.Tileset,
   "art/dialog_box.png"       : ResourceType.Image,
 };

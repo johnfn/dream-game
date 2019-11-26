@@ -111,8 +111,6 @@ export class Game {
 
     this.player = new Character({
       game: this,
-      spritesheet: C.Loader.getResource("art/char_spritesheet.json")
-        .spritesheet!
     });
 
     this.gameState.character = this.player;

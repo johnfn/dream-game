@@ -7,54 +7,132 @@ import { Rect } from "./library/rect";
 import { GameState, GameMode } from "./state";
 import { KeyboardState } from "./library/keyboard";
 import { MovingEntity } from "./library/moving_entity";
+import { C } from "./constants";
+import { Spritesheet, BaseTexture } from "pixi.js";
+import old_data from "./char_spritesheet.json";
 
 export class Character extends MovingEntity {
   activeModes = [GameMode.Normal];
-  name = "Character"
+  name = "Character";
 
   private _animFrame = 0; //0 to 60
-  private _totalNumFrames = 8; 
+  private _totalNumFrames = 8;
   protected _maxSpeed = 300;
   private _textures: { [key: string]: PIXI.Texture } = {};
 
-  constructor(props: { game: Game; spritesheet: PIXI.Spritesheet }) {
+  private _spriteSheet: Spritesheet;
+  private _lastNonzeroVelocity: Vector2 = Vector2.Zero; //Used to determine idle sprite's looking direction
+
+  constructor(props: { game: Game }) {
     super({
-      game      : props.game,
-      texture   : props.spritesheet.textures[`char_idle-0.png`],
-      collidable: true,
+      game: props.game,
+      texture: C.Loader.getResource("art/temp.png").texture,
+      collidable: true
     });
 
-    this._textures = props.spritesheet.textures;
+    const cellDim = new Vector2({ x: 64, y: 110 });
+    const sheetDim = new Vector2({ x: 512, y: 880 });
+    const numRows = sheetDim.y / cellDim.y;
+    const numCols = sheetDim.x / cellDim.x;
+    const frames: { [key: string]: {} } = {};
+    const frameNames: { [key: number]: string } = {
+      0: "char_idle_d",
+      1: "char_idle_u",
+      2: "char_idle_l",
+      3: "char_idle_r",
+      4: "char_walk_d",
+      5: "char_walk_u",
+      6: "char_walk_l",
+      7: "char_walk_r"
+    };
+    for (let y = 0; y < numRows; y++) {
+      for (let x = 0; x < numCols; x++) {
+        const idx = x + y * numCols;
+        const frameData = {
+          frame: {
+            x: x * cellDim.x,
+            y: y * cellDim.y,
+            w: cellDim.x,
+            h: cellDim.y
+          },
+          rotated: false,
+          trimmed: false,
+          spriteSourceSize: { x: 0, y: 0, w: cellDim.x, h: cellDim.y },
+          sourceSize: { w: cellDim.x, h: cellDim.y }
+        };
+        const frameName = frameNames[Math.floor(idx / 8)] + "-" + x + ".png";
+        frames[frameName] = frameData;
+      }
+    }
+    const data = {
+      frames: frames,
+      animations: {},
+      meta: {
+        app: "gabby",
+        version: "1.0",
+        image: "char_spritesheet.png",
+        format: "RGBA8888",
+        size: { w: 512, h: 1024 },
+        scale: "1"
+      }
+    };
+    const spriteSheet = new Spritesheet(
+      C.Loader.getResource("art/char_spritesheet.png").texture.baseTexture,
+      data
+    );
+    spriteSheet.parse(() => {});
+    this._spriteSheet = spriteSheet;
+    this._textures = spriteSheet.textures;
+    this.sprite.texture = this._textures["char_idle_d-0.png"];
   }
 
   // Assumes 60 FPS
-  getFrameNumber(currFrame: number, numAnimFrames: number, animSpeed: number ) {
-    return Math.floor(numAnimFrames * (animSpeed * currFrame / 60)) % numAnimFrames;
+  getFrameNumber(currFrame: number, numAnimFrames: number, animSpeed: number) {
+    return (
+      Math.floor(numAnimFrames * ((animSpeed * currFrame) / 60)) % numAnimFrames
+    );
   }
 
   updateSprite = (): void => {
-    const frameNumber = this.getFrameNumber(this._animFrame, this._totalNumFrames, 2);
+    const frameNumber = this.getFrameNumber(
+      this._animFrame,
+      this._totalNumFrames,
+      2
+    );
 
     if (this.velocity.equals(Vector2.Zero)) {
-      this.sprite.texture = this._textures[`char_idle-${frameNumber}.png`];
-    } else if (this.velocity.x > 0) {
-      this.sprite.texture = this._textures[`char_walk_right-${frameNumber}.png`];
-    } else if (this.velocity.x < 0) {
-      this.sprite.texture = this._textures[`char_walk_left-${frameNumber}.png`];
-    } else if (this.velocity.y < 0) {
-      this.sprite.texture = this._textures[`char_walk_up-${frameNumber}.png`];
-    } else if (this.velocity.y > 0) {
-      this.sprite.texture = this._textures[`char_walk_down-${frameNumber}.png`];
+      if (this._lastNonzeroVelocity.x > 0) {
+        this.sprite.texture = this._textures[`char_idle_r-${frameNumber}.png`];
+      } else if (this._lastNonzeroVelocity.x < 0) {
+        this.sprite.texture = this._textures[`char_idle_l-${frameNumber}.png`];
+      } else if (this._lastNonzeroVelocity.y < 0) {
+        this.sprite.texture = this._textures[`char_idle_u-${frameNumber}.png`];
+      } else if (this._lastNonzeroVelocity.y > 0) {
+        this.sprite.texture = this._textures[`char_idle_d-${frameNumber}.png`];
+      }
+    } else {
+      if (this.velocity.x > 0) {
+        this.sprite.texture = this._textures[`char_walk_r-${frameNumber}.png`];
+      } else if (this.velocity.x < 0) {
+        this.sprite.texture = this._textures[`char_walk_l-${frameNumber}.png`];
+      } else if (this.velocity.y < 0) {
+        this.sprite.texture = this._textures[`char_walk_u-${frameNumber}.png`];
+      } else if (this.velocity.y > 0) {
+        this.sprite.texture = this._textures[`char_walk_d-${frameNumber}.png`];
+      }
     }
   };
 
   update = (gameState: GameState) => {
     this.velocity = this.getVelocity(gameState.keys);
+    if (this.velocity.x !== 0 || this.velocity.y !== 0) {
+      this._lastNonzeroVelocity = this.velocity;
+    }
 
     if (gameState.keys.justDown.Spacebar) {
       gameState.inDreamWorld = !gameState.inDreamWorld;
 
-      gameState.dreamMapLayer.visible   = gameState.inDreamWorld;
+      gameState.dreamMapLayer.visible = gameState.inDreamWorld;
       gameState.realityMapLayer.visible = !gameState.inDreamWorld;
     }
 
