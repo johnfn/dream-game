@@ -25,9 +25,9 @@ import { MyName } from "./my_name";
 import { LightSource } from "./light_source";
 import { Debug } from "./library/debug";
 import { CharacterStart } from "./entities/character_start";
-import { InteractionHandler } from "./interaction_handler";
+import { InteractionHandler } from "./core/interaction_handler";
 import { HashSet } from "./library/hash";
-import { CollisionHandler } from "./collision_handler";
+import { CollisionHandler } from "./core/collision_handler";
 
 export class Game {
   static Instance: Game;

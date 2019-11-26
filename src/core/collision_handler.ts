@@ -1,9 +1,9 @@
-import { GameState } from "./state";
-import { CollisionGrid } from "./collision_grid";
-import { C } from "./constants";
-import { MovingEntity } from "./library/moving_entity";
-import { EntityType } from "./library/entity";
-import { Vector2 } from "./library/vector2";
+import { GameState } from "../state";
+import { CollisionGrid } from "../collision_grid";
+import { C } from "../constants";
+import { MovingEntity } from "../library/moving_entity";
+import { EntityType } from "../library/entity";
+import { Vector2 } from "../library/vector2";
 
 export class CollisionHandler {
   buildCollisionGrid = (state: GameState): CollisionGrid => {
