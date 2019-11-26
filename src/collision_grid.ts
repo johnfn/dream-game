@@ -26,7 +26,6 @@ type CollisionResultPoint = {
 
 export class CollisionGrid {
   private _position: Vector2 = Vector2.Zero;
-  private _game: Game;
   private _width: number;
   private _height: number;
   private _cellSize: number;
@@ -37,22 +36,22 @@ export class CollisionGrid {
   private _renderLines: Graphics | null = null;
 
   constructor(props: {
-    game: Game;
     width: number;
     height: number;
     cellSize: number;
     debug: boolean;
   }) {
-    const { game, width, height, cellSize, debug } = props;
+    const { width, height, cellSize, debug } = props;
 
-    this._game = game;
+    // this._game = game;
     this._width = width;
     this._height = height;
     this._cellSize = cellSize;
 
     if (debug) {
       this._renderLines = new Graphics();
-      this._game.stage.addChild(this._renderLines);
+
+      // this._game.stage.addChild(this._renderLines);
     }
 
     this._numCellsPerRow = Math.floor(width / cellSize);

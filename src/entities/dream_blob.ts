@@ -3,6 +3,7 @@ import { Texture, Graphics, RenderTexture, Sprite } from "pixi.js";
 import { Entity } from "../library/entity";
 import { C } from "../constants";
 import { Rect } from "../library/rect";
+import { RectGroup } from "../library/rect_group";
 
 export class DreamBlob extends Entity {
   activeModes    = [GameMode.Normal];
@@ -58,7 +59,7 @@ export class DreamBlob extends Entity {
   update = (state: GameState) => {
     const activeCameraRegion = state.camera.currentRegion();
 
-    if (activeCameraRegion && this.myGetBounds().intersects(activeCameraRegion)) {
+    if (activeCameraRegion && this.collisionBounds().intersects(activeCameraRegion)) {
       if (this.needsToRender) {
         this.renderBlob(state, activeCameraRegion);
 
@@ -69,4 +70,8 @@ export class DreamBlob extends Entity {
     this.dreamBlobMask.width  += (Math.random() - 0.5) * 1;
     this.dreamBlobMask.height += (Math.random() - 0.5) * 1;
   };
+
+  // myGetBounds(): RectGroup {
+
+  // }
 }

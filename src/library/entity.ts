@@ -56,11 +56,11 @@ export abstract class Entity extends Container {
   }
 
   startUpdating() {
-    Game.Instance.gameState.entities.put(this);
+    Game.Instance.state.entities.put(this);
   }
 
   stopUpdating() {
-    Game.Instance.gameState.entities.remove(this);
+    Game.Instance.state.entities.remove(this);
   }
 
   abstract activeModes: GameMode[];
@@ -75,8 +75,7 @@ export abstract class Entity extends Container {
     this.sprite.texture = newTexture;
   }
 
-  // TODO: rename once this isnt a name collision with superclass
-  public myGetBounds(): RectGroup {
+  public collisionBounds(): RectGroup {
     return new RectGroup([
       new Rect({
         x: this.x,
@@ -85,15 +84,6 @@ export abstract class Entity extends Container {
         h: this.height
       })
     ]);
-  }
-
-  public get bounds(): Rect {
-    return new Rect({
-      x: this.x,
-      y: this.y,
-      w: this.width,
-      h: this.height
-    });
   }
 
   public get center(): Vector2 {

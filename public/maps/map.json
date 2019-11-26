@@ -337,7 +337,7 @@
                  "startx":-32,
                  "starty":-32,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":64,
                  "x":0,
                  "y":0
@@ -802,7 +802,7 @@
                  "startx":-32,
                  "starty":-32,
                  "type":"tilelayer",
-                 "visible":true,
+                 "visible":false,
                  "width":48,
                  "x":0,
                  "y":0
@@ -937,6 +937,31 @@
                          "type":"string",
                          "value":"glass"
                         }]
+                }, 
+                {
+                 "id":29,
+                 "objectgroup":
+                    {
+                     "draworder":"index",
+                     "name":"",
+                     "objects":[
+                            {
+                             "height":64,
+                             "id":1,
+                             "name":"",
+                             "rotation":0,
+                             "type":"",
+                             "visible":true,
+                             "width":64,
+                             "x":0,
+                             "y":0
+                            }],
+                     "opacity":1,
+                     "type":"objectgroup",
+                     "visible":true,
+                     "x":0,
+                     "y":0
+                    }
                 }, 
                 {
                  "id":30,

@@ -13,15 +13,11 @@ import {
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
-import { EntityType } from "./library/entity";
 import { CollisionGrid } from "./collision_grid";
 import { Character } from "./character";
 import { FollowCamera } from "./camera";
 import { GameState } from "./state";
-import { MovingEntity } from "./library/moving_entity";
-import { Vector2 } from "./library/vector2";
 import { DreamShard } from "./dream_shard";
-import { BaseNPC } from "./base_npc";
 import { HeadsUpDisplay } from "./heads_up_display";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./dream_map";
@@ -31,34 +27,34 @@ import { Debug } from "./library/debug";
 import { CharacterStart } from "./entities/character_start";
 import { InteractionHandler } from "./interaction_handler";
 import { HashSet } from "./library/hash";
+import { CollisionHandler } from "./collision_handler";
 
 export class Game {
+  static Instance: Game;
+
   uniforms!: {
-    u_time: number;
-    u_lighting_tex: Texture;
-    u_displacement: Texture;
+    u_time            : number;
+    u_lighting_tex    : Texture;
+    u_displacement    : Texture;
     u_displacement_amt: number;
   };
 
-  renderTex!: RenderTexture;
-
-  dreamShader!: Sprite;
-  static Instance: Game;
-
-  app: PIXI.Application;
-  gameState: GameState;
-
+  app                : PIXI.Application;
+  renderTex         !: RenderTexture;
+  dreamShader       !: Sprite;
+  state              : GameState;
   debugMode          : boolean;
   player            !: Character;
   camera            !: FollowCamera;
   shadedLighting    !: Mesh;
   interactionHandler!: InteractionHandler;
+  collisionHandler  !: CollisionHandler;
+  hud               !: HeadsUpDisplay;
 
   /**
    * The stage of the game. Put everything in-game on here.
    */
-  stage          : Container;
-  hud           !: HeadsUpDisplay;
+  stage              : Container;
 
   /**
    * A stage for things in the game that don't move when the camera move and are
@@ -70,7 +66,7 @@ export class Game {
     Game.Instance = this;
 
     this.debugMode = true;
-    this.gameState = new GameState();
+    this.state = new GameState();
 
     this.app = new Application({
       width          : C.CANVAS_WIDTH,
@@ -83,7 +79,7 @@ export class Game {
     });
 
     this.stage = new Container();
-    this.gameState.stage = this.stage;
+    this.state.stage = this.stage;
 
     // this.stage.scale = new Point(0.4, 0.4)
 
@@ -116,63 +112,55 @@ export class Game {
         .spritesheet!
     });
 
-    this.gameState.character = this.player;
+    this.state.character = this.player;
 
-    this.gameState.map = new DreamMap(this.gameState);
-    this.stage.addChild(this.gameState.map);
+    this.state.map = new DreamMap(this.state);
+    this.stage.addChild(this.state.map);
 
     this.stage.addChild(this.player);
 
     this.camera = new FollowCamera({
       stage       : this.stage,
-      state       : this.gameState,
+      state       : this.state,
       followTarget: this.player,
       width       : C.CANVAS_WIDTH,
       height      : C.CANVAS_HEIGHT
     });
-    this.gameState.camera = this.camera;
+    this.state.camera = this.camera;
 
     const testShard = new DreamShard();
     testShard.position.set(5, 5);
     this.stage.addChild(testShard);
 
-    this.stage.addChild(this.gameState.shader);
-
-    // const text = new TypewriterText(
-    //   `blah blah this is some text`,
-    //   this,
-    // );
-    // this.fixedCameraStage.addChild(text);
-
-    const npc = new BaseNPC();
-    this.stage.addChild(npc);
+    this.stage.addChild(this.state.shader);
 
     this.hud = new HeadsUpDisplay();
-    this.gameState.hud = this.hud;
+    this.state.hud = this.hud;
     this.fixedCameraStage.addChild(this.hud);
 
-    this.gameState.dialog = new Dialog();
-    this.fixedCameraStage.addChild(this.gameState.dialog);
+    this.state.dialog = new Dialog();
+    this.fixedCameraStage.addChild(this.state.dialog);
 
     this.app.ticker.add(() => this.gameLoop());
 
-    this.gameState.playerLighting = new LightSource();
+    this.state.playerLighting = new LightSource();
     // this.stage.addChild(this.gameState.playerLighting);
     this.addDreamShader();
 
     this.interactionHandler = new InteractionHandler(this.stage);
+    this.collisionHandler   = new CollisionHandler();
 
     if (MyName === "grant") {
-      // this.player.x = Number(window.localStorage.getItem("characterx")) || CharacterStart.Instance.x;
-      // this.player.y = Number(window.localStorage.getItem("charactery")) || CharacterStart.Instance.y;
+      this.player.x = Number(window.localStorage.getItem("characterx")) || CharacterStart.Instance.x;
+      this.player.y = Number(window.localStorage.getItem("charactery")) || CharacterStart.Instance.y;
 
-      this.player.x = 600;
-      this.player.y = 600;
+      // this.player.x = 600;
+      // this.player.y = 600;
 
-      const grid = this.buildCollisionGrid();
+      const grid = this.collisionHandler.buildCollisionGrid(this.state);
 
       while (
-        grid.getRectGroupCollisions(this.player.myGetBounds()).length > 0
+        grid.getRectGroupCollisions(this.player.collisionBounds()).length > 0
       ) {
         this.player.y += 5;
       }
@@ -182,77 +170,8 @@ export class Game {
     }
   };
 
-  private resolveCollisions = (grid: CollisionGrid) => {
-    const collideableEntities = this.gameState.getCollideableEntities();
-
-    const movingEntities: MovingEntity[] = collideableEntities.values().filter(
-      ent => ent.entityType === EntityType.MovingEntity && ent.activeModes.includes(this.gameState.mode)
-    ) as MovingEntity[];
-
-    for (const entity of movingEntities) {
-      if (entity.velocity.x === 0 && entity.velocity.y === 0) { continue; }
-
-      let updatedBounds = entity.myGetBounds();
-
-      const xVelocity = new Vector2({ x: entity.velocity.x, y: 0 });
-      const yVelocity = new Vector2({ x: 0, y: entity.velocity.y });
-
-      let delta = Vector2.Zero;
-
-      // resolve x-axis
-
-      delta = delta.add(xVelocity);
-      updatedBounds = updatedBounds.add(xVelocity);
-
-      if (grid.getRectGroupCollisions(updatedBounds, entity).length > 0) {
-        delta = delta.subtract(xVelocity);
-        updatedBounds = updatedBounds.subtract(xVelocity);
-      }
-
-      // resolve y-axis
-
-      delta = delta.add(yVelocity);
-      updatedBounds = updatedBounds.add(yVelocity);
-
-      if (grid.getRectGroupCollisions(updatedBounds, entity).length > 0) {
-        delta = delta.subtract(yVelocity);
-        updatedBounds = updatedBounds.subtract(yVelocity);
-      }
-
-      entity.position.set(entity.position.x + delta.x, entity.position.y + delta.y);
-    }
-  };
-
-  buildCollisionGrid = (): CollisionGrid => {
-    const collideableEntities = this.gameState.getCollideableEntities();
-
-    const grid = new CollisionGrid({
-      game    : this,
-      width   : 2 * C.CANVAS_WIDTH,
-      height  : 2 * C.CANVAS_HEIGHT,
-      cellSize: 8 * C.TILE_WIDTH,
-      debug   : false,
-    });
-
-    for (const entity of collideableEntities.values()) {
-      if (entity.myGetBounds().intersects(this.camera.bounds())) {
-        grid.addRectGroup(entity.myGetBounds(), entity);
-      }
-    }
-
-    const mapColliders = this.gameState.map.getCollidersInRegion(
-      this.camera.bounds().expand(1000)
-    );
-
-    for (const mapCollider of mapColliders) {
-      grid.add(mapCollider, this.gameState.map);
-    }
-
-    return grid;
-  };
-
   gameLoop = () => {
-    const { entities } = this.gameState;
+    const { entities } = this.state;
 
     this.uniforms.u_time += 0.01;
 
@@ -260,41 +179,41 @@ export class Game {
 
     Debug.Clear();
 
-    this.gameState.keys.update();
+    this.state.keys.update();
 
     const activeEntities = entities.values().filter(entity =>
-      entity.activeModes.includes(this.gameState.mode)
+      entity.activeModes.includes(this.state.mode)
     );
 
     for (const entity of activeEntities) {
-      entity.update(this.gameState);
+      entity.update(this.state);
     }
 
-    this.gameState.entities = new HashSet(entities.values().filter(ent => !this.gameState.toBeDestroyed.includes(ent)));
+    this.state.entities = new HashSet(entities.values().filter(ent => !this.state.toBeDestroyed.includes(ent)));
 
-    const grid = this.buildCollisionGrid();
+    const grid = this.collisionHandler.buildCollisionGrid(this.state);
 
-    for (const lightEntity of this.gameState.getLightEntities().values()) {
-      lightEntity.updateLight(this.gameState, grid);
+    for (const lightEntity of this.state.getLightEntities().values()) {
+      lightEntity.updateLight(this.state, grid);
     }
 
-    this.resolveCollisions(grid);
+    this.collisionHandler.resolveCollisions(this.state, grid);
 
     this.renderLightingToTexture(this.renderTex, grid);
 
-    this.camera.update(this.gameState);
+    this.camera.update(this.state);
 
     this.interactionHandler.update({
-      activeEntities: this.gameState.getInteractableEntities(),
-      gameState     : this.gameState,
+      activeEntities: this.state.getInteractableEntities(),
+      gameState     : this.state,
     });
 
     Debug.ClearDrawCount();
   };
 
   renderLightingToTexture = (renderTexture: RenderTexture, grid: CollisionGrid) => {
-    if (this.gameState.inDreamWorld) {
-      const { graphics, offsetX, offsetY } = this.gameState.playerLighting.buildLighting(grid, this.player, this.camera.bounds().expand(100));
+    if (this.state.inDreamWorld) {
+      const { graphics, offsetX, offsetY } = this.state.playerLighting.buildLighting(grid, this.player, this.camera.bounds().expand(100));
 
       // Note: we need to be careful not to render to negative coordinates on the
       // render texture because anything rendered at a negative coordinate is
@@ -319,7 +238,7 @@ export class Game {
       width ,
       height,
     });
-    C.Renderer.render(this.gameState.playerLighting.graphics, this.renderTex);
+    C.Renderer.render(this.state.playerLighting.graphics, this.renderTex);
 
     const displacementSprite: Sprite = Sprite.from(
       "https://res.cloudinary.com/dvxikybyi/image/upload/v1486634113/2yYayZk_vqsyzx.png"
