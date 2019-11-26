@@ -102,7 +102,6 @@ export class LightSource extends Entity {
       }
     }
 
-
     // Step 2: Build lines for boundaries of the room.
 
     // Step 2a: Find all line segments of our boundaries.
@@ -414,7 +413,7 @@ export class LightSource extends Entity {
     return {
       graphics: this.graphics,
       offsetX : minX,
-      offsetY : minY
+      offsetY : minY,
     };
   }
 
