@@ -5,6 +5,7 @@ import { Game } from "../game";
 import { Entity } from "./entity";
 import { GameState } from "../state";
 import { Rect } from "./rect";
+import { RectGroup } from "./rect_group";
 
 const MAX_LEN = 500;
 
@@ -83,11 +84,15 @@ export class Debug {
     }
   }
 
-  public static DrawBounds(entity: Entity | Sprite | Graphics, state: GameState) {
+  public static DrawBounds(entity: Entity | Sprite | Graphics | RectGroup, state: GameState) {
     if (entity instanceof Entity) {
       const group = entity.collisionBounds(state);
 
       for (const rect of group.getRects()) {
+        Debug.DrawRect(rect);
+      }
+    } else if (entity instanceof RectGroup) {
+      for (const rect of entity.getRects()) {
         Debug.DrawRect(rect);
       }
     } else {
@@ -153,16 +158,25 @@ export class Debug {
       if (state.keys.down.W) {
         state.stage.y += 20;
       }
+
       if (state.keys.down.S) {
         state.stage.y -= 20;
       }
+
       if (state.keys.down.D) {
         state.stage.x -= 20;
       }
+
       if (state.keys.down.A) {
         state.stage.x += 20;
       }
     }
+  }
+
+  public static DebugShowRect(state: GameState, rect: Rect) {
+    state.stage.scale = new Point(0.2, 0.2);
+    state.stage.x = -rect.x * 0.2;
+    state.stage.y = -rect.y * 0.2;
   }
 }
 

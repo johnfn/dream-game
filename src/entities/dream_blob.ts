@@ -16,29 +16,33 @@ export class DreamBlob extends Entity {
   dreamMap             : Sprite;
   dreamMapMask         : Graphics;
 
-  dreamBlobInverse     : Sprite;
-  dreamBlobInverseMask : Graphics;
+  dreamMapOuter        : Sprite;
+  dreamMapOuterMask    : Graphics;
   map                 !: DreamMap;
 
   xRelativeToRegion    : number = 0;
   yRelativeToRegion    : number = 0;
+  associatedRegion     : Rect = new Rect({ x: 0, y: 0, w: 1, h: 1 });
 
   constructor(texture: Texture) {
     super({
       collidable: true,
-      texture   ,
+      texture   : undefined,
     });
 
     this.dreamMap     = new Sprite();
     this.dreamMapMask = new Graphics();
 
-    this.dreamBlobInverse     = new Sprite();
-    this.dreamBlobInverseMask = new Graphics();
+    this.dreamMapOuter     = new Sprite();
+    this.dreamMapOuterMask = new Graphics();
   }
 
   collide = () => {};
 
-  renderBlob(state: GameState, activeCameraRegion: Rect): Sprite {
+  renderBlob(state: GameState, activeCameraRegion: Rect): {
+    dreamMap: Sprite;
+    dreamMapOuter: Sprite;
+  } {
     this.xRelativeToRegion = this.x - activeCameraRegion.x;
     this.yRelativeToRegion = this.y - activeCameraRegion.y;
 
@@ -62,6 +66,19 @@ export class DreamBlob extends Entity {
       layer.entity.y = oldY;
     }
 
+    // Outer region
+
+    const dreamMapOuter = new Sprite(dreamMapTexture);
+
+    state.stage.addChild(dreamMapOuter);
+    
+    dreamMapOuter.x = activeCameraRegion.x;
+    dreamMapOuter.y = activeCameraRegion.y;
+
+    dreamMapOuter.alpha = 0.1;
+
+    // Inner region 
+
     const dreamMap = new Sprite(dreamMapTexture);
 
     state.stage.addChild(dreamMap);
@@ -71,12 +88,7 @@ export class DreamBlob extends Entity {
 
     this.dreamMapMask = new Graphics();
 
-    this.dreamMapMask.x = activeCameraRegion.x;
-    this.dreamMapMask.y = activeCameraRegion.y;
-
-    state.stage.addChild(this.dreamMapMask);
-
-    return dreamMap;
+    return { dreamMap, dreamMapOuter };
   }
 
   tick = 0;
@@ -84,23 +96,25 @@ export class DreamBlob extends Entity {
   update = (state: GameState) => {
     ++this.tick;
 
-    const activeCameraRegion = state.camera.currentRegion();
+    this.associatedRegion = state.map.getCameraRegions().find(region => region.contains(this.positionVector()))!;
 
-    if (activeCameraRegion && this.collisionBounds(state).intersects(activeCameraRegion)) {
-      if (this.needsToRender) {
-        this.dreamMap = this.renderBlob(state, activeCameraRegion);
+    if (this.needsToRender) {
+      const { dreamMap, dreamMapOuter } = this.renderBlob(state, this.associatedRegion);
 
-        this.needsToRender = false;
-      }
+      this.dreamMap      = dreamMap;
+      this.dreamMapOuter = dreamMapOuter;
+
+      this.needsToRender = false;
     }
 
-    const blobWidth  = 300 + Math.sin(this.tick / 300) * 300; 
-    const blobHeight = 300;
+    this.blobWidth  = 300 + Math.sin(this.tick / 300) * 300; 
+    this.blobHeight = 300;
 
     this.dreamMapMask.clear();
     this.dreamMapMask.beginFill(0xff0000);
-    this.dreamMapMask.drawRect(this.xRelativeToRegion, this.yRelativeToRegion, blobWidth, blobHeight);
+    this.dreamMapMask.drawRect(this.xRelativeToRegion, this.yRelativeToRegion, this.blobWidth, this.blobHeight);
 
+    this.dreamMap.addChild(this.dreamMapMask);
     this.dreamMap.mask = this.dreamMapMask;
 
     // this.dreamBlobInverseMask.clear();
@@ -111,12 +125,16 @@ export class DreamBlob extends Entity {
     // this.dreamBlobInverseMask.endHole()
   };
 
+  bounds(): Rect {
+    return new Rect({
+      x: this.associatedRegion.x + this.xRelativeToRegion,
+      y: this.associatedRegion.y + this.yRelativeToRegion,
+      w: this.blobWidth,
+      h: this.blobHeight,
+    });
+  }
+
   collisionBounds(state: GameState): RectGroup {
-    return state.map.getDreamCollidersInRegion(new Rect({
-      x: this.x + this.dreamMapMask.x,
-      y: this.y + this.dreamMapMask.y,
-      w: this.dreamMapMask.width,
-      h: this.dreamMapMask.height,
-    }))
+    return state.map.getDreamCollidersInRegion(this.bounds())
   }
 }
