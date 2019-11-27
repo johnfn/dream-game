@@ -2,6 +2,9 @@ import { Vector2 } from "./vector2";
 import { Graphics, Sprite, Container } from "pixi.js";
 import { Line } from "./line";
 import { Game } from "../game";
+import { Entity } from "./entity";
+import { GameState } from "../state";
+import { Rect } from "./rect";
 
 const MAX_LEN = 500;
 
@@ -69,6 +72,29 @@ export class Debug {
 
       toBeRemoved.parent.removeChild(toBeRemoved);
       toBeRemoved.destroy();
+    }
+  }
+
+  public static DrawRect(rect: Rect) {
+    for (const line of rect.getLinesFromRect()) {
+      Debug.DrawLine(line);
+    }
+  }
+
+  public static DrawBounds(entity: Entity | Sprite | Graphics, state: GameState) {
+    if (entity instanceof Entity) {
+      const group = entity.collisionBounds(state);
+
+      for (const rect of group.getRects()) {
+        Debug.DrawRect(rect);
+      }
+    } else {
+      Debug.DrawRect(new Rect({
+        x: entity.x,
+        y: entity.y,
+        w: entity.width,
+        h: entity.height,
+      }));
     }
   }
 

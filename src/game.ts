@@ -9,6 +9,7 @@ import {
   Sprite,
   RenderTexture,
   WRAP_MODES,
+  Point,
 } from "pixi.js";
 import { C } from "./constants";
 import { TypesafeLoader } from "./library/typesafe_loader";
@@ -80,8 +81,6 @@ export class Game {
 
     this.stage = new Container();
     this.state.stage = this.stage;
-
-    // this.stage.scale = new Point(0.4, 0.4)
 
     this.app.stage.addChild(this.stage);
 
