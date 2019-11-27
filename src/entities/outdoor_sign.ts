@@ -25,7 +25,19 @@ export class OutdoorSign extends InteractableEntity {
 
   canInteract = () => true;
   interact = (player: Character, state: GameState) => {
-    Dialog.StartDialog(state, "%1%Test test test");
+    Dialog.StartDialog(state, [{
+        speaker: "Sign",
+        text   : "%1%Welcome to Slime Dream Lab, Inc!",
+      }, 
+      {
+        speaker: "You",
+        text   : "%1%...",
+      },
+      {
+        speaker: "You",
+        text   : "%1%What is Slime Dream Lab, Inc?",
+      },
+    ]);
   };
   interactRange = C.INTERACTION_RANGE;
   interactText = () => "Read sign";

@@ -25,7 +25,10 @@ export class TrashBin extends InteractableEntity {
 
   canInteract = () => true;
   interact = (player: Character, state: GameState) => {
-    Dialog.StartDialog(state, "%1%Some old trash.");
+    Dialog.StartDialog(state, [{
+      speaker: "Trash Can",
+      text   : "%1%Some old trash.",
+    }]);
   };
   interactRange = C.INTERACTION_RANGE;
   interactText = () => "Search trash";

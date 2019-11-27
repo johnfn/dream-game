@@ -29,7 +29,10 @@ export class Door extends InteractableEntity {
   interact(other: Entity, state: GameState) {
     if (this.open) {
       if (other.collisionBounds(state).intersects(this.collisionBounds(state))) {
-        Dialog.StartDialog(state, "%1%What? Close the door? On myself? NO!!");
+        Dialog.StartDialog(state, [{
+          speaker: "You",
+          text   : "%1%What? Close the door? On myself? NO!!",
+        }]);
       } else {
         this.open = false;
         this.setCollideable(true);

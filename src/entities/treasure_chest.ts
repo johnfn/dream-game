@@ -43,15 +43,21 @@ export class TreasureChest extends InteractableEntity {
     }
   }
 
-  interact(other: Entity, gameState: GameState) {
+  interact(other: Entity, state: GameState) {
     if (this.open) {
-      Dialog.StartDialog(gameState, "%1%This is an empty chest.");
+      Dialog.StartDialog(state, [{
+        speaker: "Treasure Chest",
+        text   : "%1%This is an empty chest",
+      }]);
     } else {
       this.open = true;
 
-      Dialog.StartDialog(gameState, "%1%You open the chest!");
+      Dialog.StartDialog(state, [{
+        speaker: "Treasure Chest",
+        text   : "%1%You open the chest! TODO say something more.",
+      }]);
 
-      this.giveItemToCharacter(gameState);
+      this.giveItemToCharacter(state);
     }
   }
 

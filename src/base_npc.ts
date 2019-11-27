@@ -22,7 +22,10 @@ export class BaseNPC extends InteractableEntity {
   }
 
   interact = (player: Character, state: GameState) => {
-    Dialog.StartDialog(state, "%1%Hello! I am an NPC.");
+    Dialog.StartDialog(state, [{
+      speaker: "Trash Can",
+      text: "%1%Hello! I am an NPC.",
+    }]);
   };
 
   interactRange = C.INTERACTION_RANGE;
