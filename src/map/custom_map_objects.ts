@@ -9,11 +9,12 @@ import { TreasureChest } from "../entities/treasure_chest";
 import { Light } from "../entities/light";
 import { Glass } from "../entities/glass";
 import { Sign } from "../entities/sign";
+import { TrashBin } from "../entities/trash_bin";
 import { DreamBlob } from "../entities/dream_blob";
 
 export const CustomMapObjects: TilemapCustomObjects[] = [
   {
-    type: "group" as const,
+    type: "group",
 
     names: ["downStair"],
     getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "downStair" }),
@@ -21,7 +22,7 @@ export const CustomMapObjects: TilemapCustomObjects[] = [
   },
 
   {
-    type: "group" as const,
+    type: "group",
 
     names: ["upStair1", "upStair2"],
     getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "upStair" }),
@@ -29,7 +30,7 @@ export const CustomMapObjects: TilemapCustomObjects[] = [
   },
 
   {
-    type: "group" as const,
+    type: "group",
 
     names: ["doorLeft", "doorRight"],
     getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "door" }),
@@ -37,7 +38,7 @@ export const CustomMapObjects: TilemapCustomObjects[] = [
   },
 
   {
-    type: "group" as const,
+    type: "group",
 
     names: ["lockedDoorLeft", "lockedDoorRight"],
     getInstanceType: (tex: Texture) => new TextureEntity({ texture: tex, name: "door" }),
@@ -45,49 +46,57 @@ export const CustomMapObjects: TilemapCustomObjects[] = [
   },
 
   {
-    type: "single" as const,
+    type: "single",
 
     name: "characterStart",
     getInstanceType: (tex: Texture) => new CharacterStart(),
   },
   
   {
-    type: "single" as const,
+    type: "single",
 
     name: "treasureChest",
     getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new TreasureChest(tex, props),
   },
 
   {
-    type: "single" as const,
+    type: "single",
 
     name: "light",
     getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new Light(tex, props),
   },
 
   {
-    type: "single" as const,
+    type: "single",
 
     name: "glass",
     getInstanceType: (tex: Texture) => new Glass(tex),
   },
 
   {
-    type: "single" as const,
+    type: "single",
 
     name: "sign",
     getInstanceType: (tex: Texture) => new Sign(tex),
   },
 
   {
-    type: "single" as const,
+    type: "single",
+
+    name: "trashBin",
+    getInstanceType: (tex: Texture) => new TrashBin(tex),
+  },
+
+
+  {
+    type: "single",
 
     name: "dreamBlob",
     getInstanceType: (tex: Texture) => new DreamBlob(tex),
   },
 
   {
-    type     : "rect" as const,
+    type     : "rect",
     layerName: "Camera Bounds",
     process  : () => {}, // handled in dream_map.ts
   },

@@ -765,6 +765,18 @@
                          "width":64,
                          "x":-1152,
                          "y":-1216
+                        }, 
+                        {
+                         "gid":39,
+                         "height":64,
+                         "id":64,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":64,
+                         "y":704
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -850,7 +862,7 @@
          "y":0
         }],
  "nextlayerid":21,
- "nextobjectid":64,
+ "nextobjectid":65,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.2.3",
@@ -997,6 +1009,15 @@
                          "name":"type",
                          "type":"string",
                          "value":"dreamBlob"
+                        }]
+                }, 
+                {
+                 "id":38,
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"trashBin"
                         }]
                 }, 
                 {
