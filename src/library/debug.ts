@@ -1,5 +1,5 @@
 import { Vector2 } from "./vector2";
-import { Graphics, Sprite, Container } from "pixi.js";
+import { Graphics, Sprite, Container, Point } from "pixi.js";
 import { Line } from "./line";
 import { Game } from "../game";
 import { Entity } from "./entity";
@@ -9,6 +9,8 @@ import { Rect } from "./rect";
 const MAX_LEN = 500;
 
 export class Debug {
+  public static DebugMode = false;
+
   public static DebugGraphicStack: Graphics[] = [];
 
   public static Clear(): void {
@@ -131,6 +133,36 @@ export class Debug {
       (Sprite as any).drawCount + 
       (Container as any).drawCount
     );
+  }
+
+  public static DebugStuff(state: GameState) {
+    if (state.keys.justDown.Z) {
+      Debug.DebugMode = true;
+
+      state.stage.x = 0;
+      state.stage.y = 0;
+
+      if (state.stage.scale.x === 0.2) {
+        state.stage.scale = new Point(1, 1);
+      } else {
+        state.stage.scale = new Point(0.2, 0.2);
+      }
+    }
+
+    if (Debug.DebugMode) {
+      if (state.keys.down.W) {
+        state.stage.y += 20;
+      }
+      if (state.keys.down.S) {
+        state.stage.y -= 20;
+      }
+      if (state.keys.down.D) {
+        state.stage.x -= 20;
+      }
+      if (state.keys.down.A) {
+        state.stage.x += 20;
+      }
+    }
   }
 }
 

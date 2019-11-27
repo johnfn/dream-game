@@ -208,6 +208,10 @@ export class Game {
     });
 
     Debug.ClearDrawCount();
+
+    if (C.DEBUG) {
+      Debug.DebugStuff(this.state);
+    }
   };
 
   renderLightingToTexture = (renderTexture: RenderTexture, grid: CollisionGrid) => {

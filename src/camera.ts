@@ -4,6 +4,7 @@ import { Vector2 } from "./library/vector2";
 import { Entity } from "./library/entity";
 import { Rect } from "./library/rect";
 import { GameState } from "./state";
+import { Debug } from "./library/debug";
 
 export class FollowCamera {
   private static LERP_SPEED = 0.09;
@@ -108,6 +109,10 @@ export class FollowCamera {
   };
 
   update = (state: GameState) => {
+    if (Debug.DebugMode) {
+      return;
+    }
+
     const desiredPosition = this.calculateDesiredPosition(state);
 
     this._position = this._position.lerp(desiredPosition, FollowCamera.LERP_SPEED);
