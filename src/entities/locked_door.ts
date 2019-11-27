@@ -1,7 +1,7 @@
 import { GameState, GameMode } from "../state";
 import { C } from "../constants";
 import { Entity } from "../library/entity";
-import { Dialog } from "../dialog";
+import { Dialog, DialogSpeaker } from "../dialog";
 import { Door } from "./door";
 
 export class LockedDoor extends Door {
@@ -28,9 +28,15 @@ export class LockedDoor extends Door {
   interact(other: Entity, gameState: GameState) {
     if (this.locked) {
       if (gameState.keyCount === 0) {
-        Dialog.StartDialog(gameState, "%1%This door is locked!");
+        Dialog.StartDialog(gameState, [{
+          speaker: DialogSpeaker.DoorAngry,
+          text   : "%1%This door is locked!",
+        }]);
       } else {
-        Dialog.StartDialog(gameState, "%1%You unlock the door. Once you finish unlocking it, you retrieve the key. Why would you expect otherwise? As you're retrieving it, the key falls down a nearby sewer.");
+        Dialog.StartDialog(gameState, [{
+          speaker: DialogSpeaker.Door,
+          text   : "%1%You unlock the door!",
+        }]);
 
         gameState.keyCount--;
         this.locked = false;

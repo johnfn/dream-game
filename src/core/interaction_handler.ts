@@ -1,9 +1,9 @@
 import { Container } from "pixi.js";
-import { InteractableEntity } from "./library/interactable_entity";
-import { Vector2 } from "./library/vector2";
-import { GameState } from "./state";
-import { InteractiveText } from "./entities/interactive_text";
-import { HashSet } from "./library/hash";
+import { InteractableEntity } from "../library/interactable_entity";
+import { Vector2 } from "../library/vector2";
+import { GameState } from "../state";
+import { InteractiveText } from "../entities/interactive_text";
+import { HashSet } from "../library/hash";
 
 export class InteractionHandler {
   stage: Container;

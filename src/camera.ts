@@ -1,9 +1,10 @@
+import * as PIXI from "pixi.js";
+
 import { Vector2 } from "./library/vector2";
 import { Entity } from "./library/entity";
-import * as PIXI from "pixi.js";
 import { Rect } from "./library/rect";
 import { GameState } from "./state";
-import { C } from "./constants";
+import { Debug } from "./library/debug";
 
 export class FollowCamera {
   private static LERP_SPEED = 0.09;
@@ -16,12 +17,20 @@ export class FollowCamera {
   private _stage   : PIXI.Container;
   private _width   : number;
   private _height  : number;
+  private _state   : GameState;
 
-  constructor(props: { stage: PIXI.Container; followTarget: Entity, width: number; height: number }) {
+  constructor(props: { 
+    stage       : PIXI.Container; 
+    followTarget: Entity;
+    width       : number; 
+    height      : number;
+    state       : GameState;
+  }) {
     this._stage  = props.stage;
     this._width  = props.width;
     this._height = props.height;
     this._target = props.followTarget;
+    this._state  = props.state;
 
     this.centerOn(new Vector2(this._target.position));
   }
@@ -53,6 +62,12 @@ export class FollowCamera {
     this._position = position.subtract(this.halfDimensions());
   };
 
+  currentRegion(): Rect | undefined {
+    const mapRegions = this._state.map.getCameraRegions();
+
+    return mapRegions.find(region => region.contains(this._target.positionVector()));
+  }
+
   calculateDesiredPosition = (state: GameState): Vector2 => {
     let desiredPosition = Vector2.Zero;
 
@@ -60,8 +75,7 @@ export class FollowCamera {
       desiredPosition = this._target.center.subtract(this.halfDimensions());
     }
 
-    const mapRegions    = state.map.getCameraRegions();
-    const currentRegion = mapRegions.find(region => region.contains(this._target.positionVector()));
+    const currentRegion = this.currentRegion();
 
     if (!currentRegion) {
       console.error("no region for camera!");
@@ -95,6 +109,10 @@ export class FollowCamera {
   };
 
   update = (state: GameState) => {
+    if (Debug.DebugMode) {
+      return;
+    }
+
     const desiredPosition = this.calculateDesiredPosition(state);
 
     this._position = this._position.lerp(desiredPosition, FollowCamera.LERP_SPEED);

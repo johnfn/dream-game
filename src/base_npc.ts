@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 import { GameState, GameMode } from "./state";
 import { InteractableEntity } from "./library/interactable_entity";
 import { Character } from "./character";
-import { Dialog } from "./dialog";
+import { Dialog, DialogSpeaker } from "./dialog";
 import { C } from "./constants";
 
 export class BaseNPC extends InteractableEntity {
@@ -22,7 +22,10 @@ export class BaseNPC extends InteractableEntity {
   }
 
   interact = (player: Character, state: GameState) => {
-    Dialog.StartDialog(state, "%1%Hello! I am an NPC.");
+    Dialog.StartDialog(state, [{
+      speaker: DialogSpeaker.TrashCan,
+      text: "%1%Hello! I am an NPC.",
+    }]);
   };
 
   interactRange = C.INTERACTION_RANGE;

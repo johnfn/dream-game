@@ -5,6 +5,7 @@ import { Vector2 } from "./library/vector2";
 import { Entity } from "./library/entity";
 import { DefaultGrid } from "./library/default_grid";
 import { Graphics } from "pixi.js";
+import { RectGroup } from "./library/rect_group";
 
 type CollisionResultRect = {
   firstRect    : Rect;
@@ -25,7 +26,6 @@ type CollisionResultPoint = {
 
 export class CollisionGrid {
   private _position: Vector2 = Vector2.Zero;
-  private _game: Game;
   private _width: number;
   private _height: number;
   private _cellSize: number;
@@ -36,22 +36,22 @@ export class CollisionGrid {
   private _renderLines: Graphics | null = null;
 
   constructor(props: {
-    game: Game;
     width: number;
     height: number;
     cellSize: number;
     debug: boolean;
   }) {
-    const { game, width, height, cellSize, debug } = props;
+    const { width, height, cellSize, debug } = props;
 
-    this._game = game;
+    // this._game = game;
     this._width = width;
     this._height = height;
     this._cellSize = cellSize;
 
     if (debug) {
       this._renderLines = new Graphics();
-      this._game.stage.addChild(this._renderLines);
+
+      // this._game.stage.addChild(this._renderLines);
     }
 
     this._numCellsPerRow = Math.floor(width / cellSize);
@@ -119,6 +119,12 @@ export class CollisionGrid {
 
     return collisions;
   };
+
+  getRectGroupCollisions = (group: RectGroup, entity?: Entity): CollisionResultRect[] => {
+    return group.getRects()
+      .map(rect => this.getRectCollisions(rect, entity))
+      .flat();
+  }
 
   /** 
    * Same as collidesRect but immediately returns true if there's a collision.
@@ -237,6 +243,12 @@ export class CollisionGrid {
       ).add(rect, associatedEntity);
     }
   };
+
+  addRectGroup = (group: RectGroup, associatedEntity?: Entity) => {
+    for (const rect of group.getRects()) {
+      this.add(rect, associatedEntity);
+    }
+  }
 
   // Shows the grid outline for debugging
   drawGrid = () => {

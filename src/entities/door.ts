@@ -2,7 +2,7 @@ import { GameState, GameMode } from "../state";
 import { InteractableEntity } from "../library/interactable_entity";
 import { C } from "../constants";
 import { Entity } from "../library/entity";
-import { Dialog } from "../dialog";
+import { Dialog, DialogSpeaker } from "../dialog";
 
 export class Door extends InteractableEntity {
   activeModes = [GameMode.Normal];
@@ -28,8 +28,11 @@ export class Door extends InteractableEntity {
 
   interact(other: Entity, state: GameState) {
     if (this.open) {
-      if (other.myGetBounds().intersects(this.myGetBounds())) {
-        Dialog.StartDialog(state, "%1%What? Close the door? On myself? NO!!");
+      if (other.collisionBounds(state).intersects(this.collisionBounds(state))) {
+        Dialog.StartDialog(state, [{
+          speaker: DialogSpeaker.DoorAngry,
+          text   : "%1%What? Close the door? On myself? NO!!",
+        }]);
       } else {
         this.open = false;
         this.setCollideable(true);

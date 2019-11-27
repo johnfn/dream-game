@@ -3,7 +3,7 @@ import { C } from "./constants";
 
 import * as PIXI from "pixi.js";
 import { Dialog } from "./dialog";
-import { DreamMap } from "./dream_map";
+import { DreamMap } from "./map/dream_map";
 import { Entity } from "./library/entity";
 import { LightSource } from "./light_source";
 import { Character } from "./character";
@@ -47,7 +47,7 @@ export class GameState {
   /**
    * number of keys we've picked up in game
    */
-  keyCount         = 1;
+  keyCount         = 0;
   
   constructor() {
     this.mode          = GameMode.Normal

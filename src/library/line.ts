@@ -315,7 +315,7 @@ export class Line {
   }
 
   drawOnto(graphics: Graphics, color = 0xff0000) {
-    graphics.lineStyle(1, color, 1);
+    graphics.lineStyle(5, color, 1);
 
     graphics.moveTo(this.x1, this.y1);
     graphics.lineTo(this.x2, this.y2);

@@ -17,7 +17,7 @@ export class TypewriterText extends TextEntity {
   started   = false;
   state     = TypewritingState.Writing;
 
-  constructor(text: string, styles: TextStyles, width = 400, height = 300) {
+  constructor(text: string, styles: TextStyles = TextEntity.StandardStyles, width = 400, height = 300) {
     super("", styles, width, height);
 
     this.finalText     = text;
@@ -40,7 +40,7 @@ export class TypewriterText extends TextEntity {
     return this.state;
   }
 
-  start(newText: string) {
+  startTypewriting(newText: string) {
     this.clear();
 
     this.setText("");

@@ -1,11 +1,17 @@
 import { Vector2 } from "./vector2";
-import { Graphics, Sprite, Container } from "pixi.js";
+import { Graphics, Sprite, Container, Point } from "pixi.js";
 import { Line } from "./line";
 import { Game } from "../game";
+import { Entity } from "./entity";
+import { GameState } from "../state";
+import { Rect } from "./rect";
+import { RectGroup } from "./rect_group";
 
 const MAX_LEN = 500;
 
 export class Debug {
+  public static DebugMode = false;
+
   public static DebugGraphicStack: Graphics[] = [];
 
   public static Clear(): void {
@@ -72,6 +78,33 @@ export class Debug {
     }
   }
 
+  public static DrawRect(rect: Rect) {
+    for (const line of rect.getLinesFromRect()) {
+      Debug.DrawLine(line);
+    }
+  }
+
+  public static DrawBounds(entity: Entity | Sprite | Graphics | RectGroup, state: GameState) {
+    if (entity instanceof Entity) {
+      const group = entity.collisionBounds(state);
+
+      for (const rect of group.getRects()) {
+        Debug.DrawRect(rect);
+      }
+    } else if (entity instanceof RectGroup) {
+      for (const rect of entity.getRects()) {
+        Debug.DrawRect(rect);
+      }
+    } else {
+      Debug.DrawRect(new Rect({
+        x: entity.x,
+        y: entity.y,
+        w: entity.width,
+        h: entity.height,
+      }));
+    }
+  }
+
   private static profiles: { [key: string]: number[] } = {};
 
   public static Profile(name: string, cb: () => void): void {
@@ -105,6 +138,45 @@ export class Debug {
       (Sprite as any).drawCount + 
       (Container as any).drawCount
     );
+  }
+
+  public static DebugStuff(state: GameState) {
+    if (state.keys.justDown.Z) {
+      Debug.DebugMode = true;
+
+      state.stage.x = 0;
+      state.stage.y = 0;
+
+      if (state.stage.scale.x === 0.2) {
+        state.stage.scale = new Point(1, 1);
+      } else {
+        state.stage.scale = new Point(0.2, 0.2);
+      }
+    }
+
+    if (Debug.DebugMode) {
+      if (state.keys.down.W) {
+        state.stage.y += 20;
+      }
+
+      if (state.keys.down.S) {
+        state.stage.y -= 20;
+      }
+
+      if (state.keys.down.D) {
+        state.stage.x -= 20;
+      }
+
+      if (state.keys.down.A) {
+        state.stage.x += 20;
+      }
+    }
+  }
+
+  public static DebugShowRect(state: GameState, rect: Rect) {
+    state.stage.scale = new Point(0.2, 0.2);
+    state.stage.x = -rect.x * 0.2;
+    state.stage.y = -rect.y * 0.2;
   }
 }
 

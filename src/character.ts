@@ -9,15 +9,16 @@ import { KeyboardState } from "./library/keyboard";
 import { MovingEntity } from "./library/moving_entity";
 import { C } from "./constants";
 import { Spritesheet, BaseTexture } from "pixi.js";
-import old_data from "./char_spritesheet.json";
 
 export class Character extends MovingEntity {
   activeModes = [GameMode.Normal];
   name = "Character";
 
-  private _animFrame = 0; //0 to 60
-  private _totalNumFrames = 8;
-  protected _maxSpeed = 300;
+  static Speed = 5;
+
+  private _animFrame      = 0; //0 to 60
+  private _totalNumFrames = 8; 
+  protected _maxSpeed     = 300;
   private _textures: { [key: string]: PIXI.Texture } = {};
 
   private _spriteSheet: Spritesheet;
@@ -172,6 +173,8 @@ export class Character extends MovingEntity {
       velocity = new Vector2({ x: 1, y: velocity.y });
     }
 
-    return velocity.normalize().multiply(5);
+    return velocity.normalize().multiply(
+      (keys.down.L && C.DEBUG) ? 20 : Character.Speed
+    );
   };
 }
