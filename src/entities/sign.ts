@@ -2,7 +2,7 @@ import { GameState, GameMode } from "../state";
 import { Texture } from "pixi.js";
 import { InteractableEntity } from "../library/interactable_entity";
 import { C } from "../constants";
-import { Dialog } from "../dialog";
+import { Dialog, DialogSpeaker } from "../dialog";
 import { Character } from "../character";
 
 export class Sign extends InteractableEntity {
@@ -26,7 +26,7 @@ export class Sign extends InteractableEntity {
   canInteract = () => true;
   interact = (player: Character, state: GameState) => {
     Dialog.StartDialog(state, [{
-      speaker: "Door",
+      speaker: DialogSpeaker.Sign,
       text   : "%1% 3F<br /> 2F<br />%%2%1F (you are here)%%1% 0F<br />-1F",
     }]);
   };

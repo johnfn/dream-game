@@ -2,15 +2,28 @@ import { GameState, GameMode } from "./state";
 import { Entity } from "./library/entity";
 import { C } from "./constants";
 import { InteractableEntity } from "./library/interactable_entity";
-import { TypewriterText, TypewritingState } from "./entities/typewriter_text";
+import { TypewriterText } from "./entities/typewriter_text";
 import { TextStyles, TextEntity } from "./library/text_entity";
+import { ResourcesToLoad } from "./resources";
+import { Sprite } from "pixi.js";
 
-export type DialogSpeaker =
-  | "You"
-  | "Sign"
-  | "Door"
-  | "Trash Can"
-  | "Treasure Chest"
+export enum DialogSpeaker {
+  You           = "You",
+  Sign          = "Sign",
+  Door          = "Door",
+  DoorAngry     = "DoorAngry",
+  TrashCan      = "TrashCan",
+  TreasureChest = "TreasureChest",
+}
+
+const SpeakerToPortrait: { [key in DialogSpeaker]: keyof typeof ResourcesToLoad } = {
+  [DialogSpeaker.You]          : "art/portrait_you.png",
+  [DialogSpeaker.Sign]         : "art/portrait_sign.png",
+  [DialogSpeaker.Door]         : "art/portrait_door.png",
+  [DialogSpeaker.DoorAngry]    : "art/portrait_door_angry.png",
+  [DialogSpeaker.TrashCan]     : "art/portrait_trashcan.png",
+  [DialogSpeaker.TreasureChest]: "art/portrait_treasurechest.png",
+};
 
 export type DialogSegment = {
   speaker : DialogSpeaker;
@@ -25,6 +38,7 @@ export class Dialog extends InteractableEntity {
   dialogText  : TypewriterText;
   portraitText: TextEntity;
   segments    : DialogSegment[];
+  portrait    : Sprite;
 
   constructor() {
     super({
@@ -62,6 +76,12 @@ export class Dialog extends InteractableEntity {
 
     this.addChild(this.portraitText);
 
+    this.portrait = new Sprite();
+    this.portrait.x = 10;
+    this.portrait.y = 10;
+
+    this.addChild(this.portrait);
+
     this.visible = false;
   }
 
@@ -76,6 +96,7 @@ export class Dialog extends InteractableEntity {
 
     this.dialogText.startTypewriting(nextDialog.text);
     this.portraitText.setText(`%1%${ nextDialog.speaker }`);
+    this.portrait.texture = C.Loader.getResource(SpeakerToPortrait[nextDialog.speaker]).texture;
   }
 
   collide = () => {};

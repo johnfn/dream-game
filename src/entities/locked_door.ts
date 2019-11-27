@@ -1,7 +1,7 @@
 import { GameState, GameMode } from "../state";
 import { C } from "../constants";
 import { Entity } from "../library/entity";
-import { Dialog } from "../dialog";
+import { Dialog, DialogSpeaker } from "../dialog";
 import { Door } from "./door";
 
 export class LockedDoor extends Door {
@@ -29,12 +29,12 @@ export class LockedDoor extends Door {
     if (this.locked) {
       if (gameState.keyCount === 0) {
         Dialog.StartDialog(gameState, [{
-          speaker: "Door",
+          speaker: DialogSpeaker.DoorAngry,
           text   : "%1%This door is locked!",
         }]);
       } else {
         Dialog.StartDialog(gameState, [{
-          speaker: "Door",
+          speaker: DialogSpeaker.Door,
           text   : "%1%You unlock the door!",
         }]);
 

@@ -2,7 +2,7 @@ import { GameState, GameMode } from "../state";
 import { Texture } from "pixi.js";
 import { InteractableEntity } from "../library/interactable_entity";
 import { C } from "../constants";
-import { Dialog } from "../dialog";
+import { Dialog, DialogSpeaker } from "../dialog";
 import { Character } from "../character";
 
 export class TrashBin extends InteractableEntity {
@@ -26,7 +26,7 @@ export class TrashBin extends InteractableEntity {
   canInteract = () => true;
   interact = (player: Character, state: GameState) => {
     Dialog.StartDialog(state, [{
-      speaker: "Trash Can",
+      speaker: DialogSpeaker.TrashCan,
       text   : "%1%Some old trash.",
     }]);
   };

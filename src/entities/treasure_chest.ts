@@ -3,7 +3,7 @@ import { InteractableEntity } from "../library/interactable_entity";
 import { Entity } from "../library/entity";
 import { C } from "../constants";
 import { Texture } from "pixi.js";
-import { Dialog } from "../dialog";
+import { Dialog, DialogSpeaker } from "../dialog";
 
 type TreasureChestContents =
   | "key"
@@ -46,14 +46,14 @@ export class TreasureChest extends InteractableEntity {
   interact(other: Entity, state: GameState) {
     if (this.open) {
       Dialog.StartDialog(state, [{
-        speaker: "Treasure Chest",
+        speaker: DialogSpeaker.TreasureChest,
         text   : "%1%This is an empty chest",
       }]);
     } else {
       this.open = true;
 
       Dialog.StartDialog(state, [{
-        speaker: "Treasure Chest",
+        speaker: DialogSpeaker.TreasureChest,
         text   : "%1%You open the chest! TODO say something more.",
       }]);
 
