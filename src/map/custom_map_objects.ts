@@ -11,6 +11,7 @@ import { Glass } from "../entities/glass";
 import { Sign } from "../entities/sign";
 import { TrashBin } from "../entities/trash_bin";
 import { DreamBlob } from "../entities/dream_blob";
+import { OutdoorSign } from "../entities/outdoor_sign";
 
 export const CustomMapObjects: TilemapCustomObjects[] = [
   {
@@ -87,6 +88,12 @@ export const CustomMapObjects: TilemapCustomObjects[] = [
     getInstanceType: (tex: Texture) => new TrashBin(tex),
   },
 
+  {
+    type: "single",
+
+    name: "outdoorSign",
+    getInstanceType: (tex: Texture) => new OutdoorSign(tex),
+  },
 
   {
     type: "single",

@@ -22,11 +22,11 @@ type DreamMapLayer = {
 };
 
 export class DreamMap extends Entity {
-  activeModes           = [GameMode.Normal];
-  map                   : TiledTilemap;
-  levels                : { [key: number]: MapLevel } = [];
-  activeRegion          : Rect | null;
-  mapLayers             : DreamMapLayer[] = [];
+  activeModes  = [GameMode.Normal];
+  map          : TiledTilemap;
+  levels       : { [key: number]: MapLevel } = [];
+  activeRegion : Rect | null;
+  mapLayers    : DreamMapLayer[] = [];
 
   private _cameraRegions: Rect[] = [];
   private _camera       : FollowCamera;

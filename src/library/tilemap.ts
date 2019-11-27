@@ -55,7 +55,7 @@ export class TiledTilemap {
   loadRegionLayer(layerName: string): Rect[] {
     const layers = this.getAllLayers(this._data.layers);
 
-    const layer = layers.find(layer => layer.name = layerName);
+    const layer = layers.find(layer => layer.name === layerName);
 
     if (!layer) {
       throw new Error(`Cant find a layer named ${ layerName }`);
