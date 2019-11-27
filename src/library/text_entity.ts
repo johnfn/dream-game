@@ -41,12 +41,17 @@ export const AdvanceState = (currentState: TextSegmentState): TextSegmentState =
 export class TextEntity extends BaseTextEntity {
   styles: TextStyles;
 
+  public static StandardStyles: TextStyles = {
+    1: { color: "white", fontSize: 18, align: "left" },
+    2: { color: "red"  , fontSize: 18, align: "left" },
+  };
+
   /**
    * Format: 
    * 
    * "%1%This is some red text% normal text %2%blue text!%".
    */
-  constructor(text: string, styles: TextStyles, width = 500, height = 300) {
+  constructor(text: string, styles: TextStyles = TextEntity.StandardStyles, width = 500, height = 300) {
     super("" , width, height);
 
     this.styles = styles;

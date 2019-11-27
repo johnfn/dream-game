@@ -3,7 +3,7 @@ import { Entity } from "./library/entity";
 import { C } from "./constants";
 import { InteractableEntity } from "./library/interactable_entity";
 import { TypewriterText, TypewritingState } from "./entities/typewriter_text";
-import { TextStyles } from "./library/text_entity";
+import { TextStyles, TextEntity } from "./library/text_entity";
 
 export type DialogSpeaker =
   | "You"
@@ -22,7 +22,8 @@ export class Dialog extends InteractableEntity {
   static Instance: Dialog;
 
   activeModes = [GameMode.Dialog];
-  text        : TypewriterText;
+  dialogText  : TypewriterText;
+  portraitText: TextEntity;
   segments    : DialogSegment[];
 
   constructor() {
@@ -37,16 +38,30 @@ export class Dialog extends InteractableEntity {
     this.position.set(200, 300)
     this.sprite.width = 400;
 
-    console.log("Construct")
-
-    this.text = new TypewriterText(
+    this.dialogText = new TypewriterText(
       "%1%This is some dialog text", {
         1: { color: "white", fontSize: 18, align: "left" },
         2: { color: "red"  , fontSize: 18, align: "left" },
-      }
+      },
+      300
     );
 
-    this.addChild(this.text);
+    this.dialogText.x = 100;
+
+    this.addChild(this.dialogText);
+
+    this.portraitText = new TextEntity(
+      `%1%Name here`, {
+        1: { color: "white", fontSize: 14, align: "center" },
+      },
+      100,
+    );
+
+    this.portraitText.x = 0;
+    this.portraitText.y = 100;
+
+    this.addChild(this.portraitText);
+
     this.visible = false;
   }
 
@@ -59,7 +74,8 @@ export class Dialog extends InteractableEntity {
   startNextDialogSegment(): void {
     const nextDialog = this.segments.shift()!;
 
-    this.text.start(nextDialog.text);
+    this.dialogText.startTypewriting(nextDialog.text);
+    this.portraitText.setText(`%1%${ nextDialog.speaker }`);
   }
 
   collide = () => {};
@@ -68,14 +84,14 @@ export class Dialog extends InteractableEntity {
   };
 
   interact = (other: Entity, gameState: GameState) => {
-    if (this.text.isDone()) {
+    if (this.dialogText.isDone()) {
       if (this.segments.length > 0) {
         this.startNextDialogSegment();
       } else {
         Dialog.EndDialog(gameState);
       }
     } else {
-      this.text.finishText();
+      this.dialogText.finishText();
     }
   };
 
