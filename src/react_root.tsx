@@ -1,7 +1,7 @@
 import React from 'react';
 import { Game } from './game';
 import { Entity } from './library/entity';
-import { Container } from 'pixi.js';
+import { Container, autoDetectRenderer } from 'pixi.js';
 
 type HP = { root: Entity | Container };
 
@@ -14,13 +14,25 @@ class Hierarchy extends React.Component<HP, { hover: boolean }> {
     };
   }
 
+  mouseOver = () => {
+    this.setState({ hover: true })
+
+    this.props.root.alpha = 0.5;
+  };
+
+  mouseOut = () => {
+    this.setState({ hover: false })
+
+    this.props.root.alpha = 1.0;
+  };
+
   render() {
     const root = this.props.root;
 
     return (
       <div 
-        onMouseOver={() => this.setState({ hover: true })}
-        onMouseOut={() => this.setState({ hover: false })}
+        onMouseEnter={this.mouseOver}
+        onMouseLeave={this.mouseOut}
         style={{ paddingLeft: "10px", backgroundColor: this.state.hover ? "#eee" : "#fff" }}
       >
         { root.name } { root.zIndex }
@@ -83,7 +95,10 @@ class ReactWrapper extends React.Component<{}, { }> {
         <canvas id="canvas">
 
         </canvas>
-        <div>
+        <div style={{
+          overflow: "auto",
+          height: "100vh",
+        }}>
           { this.game && this.game.stage && <Hierarchy root={this.game.stage} /> }
         </div>
       </div>

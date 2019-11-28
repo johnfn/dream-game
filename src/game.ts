@@ -165,6 +165,8 @@ export class Game {
       this.player.x = 950;
       this.player.y = 1595;
     }
+
+    this.stage.sortableChildren = true;
   };
 
   gameLoop = () => {

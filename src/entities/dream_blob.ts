@@ -14,7 +14,7 @@ export class DreamBlob extends Entity {
   needsToRender        = true;
   blobWidth            = 800;
   blobHeight           = 800;
-  dreamMap             : Sprite;
+  dreamMap             : Entity;
   dreamMapMask         : Graphics;
 
   dreamMapOuter        : Entity;
@@ -31,7 +31,7 @@ export class DreamBlob extends Entity {
       texture   : undefined,
     });
 
-    this.dreamMap     = new Sprite();
+    this.dreamMap     = new TextureEntity({});
     this.dreamMapMask = new Graphics();
 
     this.dreamMapOuter     = new TextureEntity({});
@@ -41,7 +41,7 @@ export class DreamBlob extends Entity {
   collide = () => {};
 
   renderBlob(state: GameState, activeCameraRegion: Rect): {
-    dreamMap     : Sprite;
+    dreamMap     : Entity;
     dreamMapOuter: Entity;
   } {
     this.xRelativeToRegion = this.x - activeCameraRegion.x;
@@ -83,7 +83,10 @@ export class DreamBlob extends Entity {
 
     // Inner region 
 
-    const dreamMap = new Sprite(dreamMapTexture);
+    const dreamMap = new TextureEntity({
+      name   : "DreamMapMain",
+      texture: dreamMapTexture
+    });
 
     state.stage.addChild(dreamMap);
     
