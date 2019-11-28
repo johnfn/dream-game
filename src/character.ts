@@ -109,7 +109,7 @@ export class Character extends MovingEntity {
     const frameNumber = this.getFrameNumber({
       currFrame: this._animFrame,
       numAnimFrames: this._totalNumFrames,
-      animSpeed: 1.5
+      animSpeed: 2
     });
 
     if (this.velocity.equals(Vector2.Zero)) {
