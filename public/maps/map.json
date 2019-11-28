@@ -69,7 +69,7 @@
          "name":"L2",
          "opacity":1,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -160,7 +160,7 @@
          "name":"L0",
          "opacity":1,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -344,7 +344,7 @@
                  "startx":-32,
                  "starty":-48,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":80,
                  "x":0,
                  "y":0
@@ -822,7 +822,7 @@
                  "startx":-32,
                  "starty":-32,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":48,
                  "x":0,
                  "y":0
@@ -1008,7 +1008,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],
@@ -1016,7 +1016,7 @@
  "nextobjectid":88,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.2.4",
+ "tiledversion":"1.2.3",
  "tileheight":64,
  "tilesets":[
         {

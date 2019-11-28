@@ -11,10 +11,10 @@ import { C } from "./constants";
 import { Spritesheet, BaseTexture } from "pixi.js";
 
 export class Character extends MovingEntity {
-  activeModes = [GameMode.Normal];
-  name = "Character";
-
   static Speed = 5;
+
+  activeModes = [GameMode.Normal];
+  name        = "Character"
 
   private _animFrame      = 0; //0 to 60
   private _totalNumFrames = 8; 
@@ -85,6 +85,7 @@ export class Character extends MovingEntity {
     this._spriteSheet = spriteSheet;
     this._textures = spriteSheet.textures;
     this.sprite.texture = this._textures["char_idle_d-0.png"];
+    this.zIndex = C.Depths.Player;
   }
 
   // Assumes 60 FPS

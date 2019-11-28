@@ -32,6 +32,7 @@ export type DialogSegment = {
 };
 
 export class Dialog extends InteractableEntity {
+  name = "Dialog";
   static Instance: Dialog;
 
   activeModes = [GameMode.Dialog];

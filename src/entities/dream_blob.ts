@@ -5,6 +5,7 @@ import { C } from "../constants";
 import { Rect } from "../library/rect";
 import { RectGroup } from "../library/rect_group";
 import { DreamMap } from "../map/dream_map";
+import { TextureEntity } from "../texture_entity";
 
 export class DreamBlob extends Entity {
   activeModes          = [GameMode.Normal];
@@ -16,7 +17,7 @@ export class DreamBlob extends Entity {
   dreamMap             : Sprite;
   dreamMapMask         : Graphics;
 
-  dreamMapOuter        : Sprite;
+  dreamMapOuter        : Entity;
   dreamMapOuterMask    : Graphics;
   map                 !: DreamMap;
 
@@ -33,15 +34,15 @@ export class DreamBlob extends Entity {
     this.dreamMap     = new Sprite();
     this.dreamMapMask = new Graphics();
 
-    this.dreamMapOuter     = new Sprite();
+    this.dreamMapOuter     = new TextureEntity({});
     this.dreamMapOuterMask = new Graphics();
   }
 
   collide = () => {};
 
   renderBlob(state: GameState, activeCameraRegion: Rect): {
-    dreamMap: Sprite;
-    dreamMapOuter: Sprite;
+    dreamMap     : Sprite;
+    dreamMapOuter: Entity;
   } {
     this.xRelativeToRegion = this.x - activeCameraRegion.x;
     this.yRelativeToRegion = this.y - activeCameraRegion.y;
@@ -68,7 +69,10 @@ export class DreamBlob extends Entity {
 
     // Outer region
 
-    const dreamMapOuter = new Sprite(dreamMapTexture);
+    const dreamMapOuter = new TextureEntity({ 
+      name   : "DreamMapOuter",
+      texture: dreamMapTexture,
+    });
 
     state.stage.addChild(dreamMapOuter);
     

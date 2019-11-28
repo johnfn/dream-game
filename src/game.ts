@@ -76,7 +76,8 @@ export class Game {
       transparent    : false,
       resolution     : window.devicePixelRatio,
       autoDensity    : true,
-      backgroundColor: 0x666666
+      backgroundColor: 0x666666,
+      view           : document.getElementById("canvas")! as any,
     });
 
     this.stage = new Container();
@@ -100,7 +101,6 @@ export class Game {
     C.Loader = new TypesafeLoader(ResourcesToLoad);
     C.Stage = this.stage;
 
-    document.body.appendChild(this.app.view);
     C.Loader.onLoadComplete(this.startGame);
   }
 

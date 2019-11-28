@@ -22,6 +22,7 @@ type DreamMapLayer = {
 };
 
 export class DreamMap extends Entity {
+  name         = "DreamMap";
   activeModes  = [GameMode.Normal];
   map          : TiledTilemap;
   levels       : { [key: number]: MapLevel } = [];
@@ -47,6 +48,7 @@ export class DreamMap extends Entity {
     this._cameraRegions = this.map.loadRegionLayer("Camera Bounds");
     this.activeRegion   = null;
     this._camera        = state.camera;
+    this.zIndex         = 0;
 
     this.loadNextRegionIfNecessary(state);
   }
