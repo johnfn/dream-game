@@ -10,7 +10,7 @@ import { Light } from "../entities/light";
 import { Glass } from "../entities/glass";
 import { Sign } from "../entities/sign";
 import { TrashBin } from "../entities/trash_bin";
-import { DreamBlob } from "../entities/dream_blob";
+import { DreamBlobSine } from "../entities/dream_blob_sine";
 import { OutdoorSign } from "../entities/outdoor_sign";
 
 export const CustomMapObjects: TilemapCustomObjects[] = [
@@ -99,7 +99,7 @@ export const CustomMapObjects: TilemapCustomObjects[] = [
     type: "single",
 
     name: "dreamBlob",
-    getInstanceType: (tex: Texture) => new DreamBlob(tex),
+    getInstanceType: (tex: Texture) => new DreamBlobSine(),
   },
 
   {

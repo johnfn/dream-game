@@ -1,5 +1,5 @@
 import { GameState, GameMode } from "../state";
-import { Texture, Graphics, RenderTexture, Sprite } from "pixi.js";
+import { Graphics, RenderTexture } from "pixi.js";
 import { Entity } from "../library/entity";
 import { C } from "../constants";
 import { Rect } from "../library/rect";
@@ -8,24 +8,24 @@ import { DreamMap } from "../map/dream_map";
 import { TextureEntity } from "../texture_entity";
 
 export class DreamBlob extends Entity {
-  activeModes          = [GameMode.Normal];
-  name                 = "DreamBlob";
-  open                 = false;
-  needsToRender        = true;
-  blobWidth            = 800;
-  blobHeight           = 800;
-  dreamMap             : Entity;
-  dreamMapMask         : Graphics;
+  activeModes       = [GameMode.Normal];
+  name              = "DreamBlob";
+  open              = false;
+  needsToRender     = true;
+  blobWidth         = 800;
+  blobHeight        = 800;
+  dreamMap          : Entity;
+  dreamMapMask      : Graphics;
 
-  dreamMapOuter        : Entity;
-  dreamMapOuterMask    : Graphics;
-  map                 !: DreamMap;
+  dreamMapOuter     : Entity;
+  dreamMapOuterMask : Graphics;
+  map              !: DreamMap;
 
-  xRelativeToRegion    : number = 0;
-  yRelativeToRegion    : number = 0;
-  associatedRegion     : Rect = new Rect({ x: 0, y: 0, w: 1, h: 1 });
+  xRelativeToRegion : number = 0;
+  yRelativeToRegion : number = 0;
+  associatedRegion  : Rect = new Rect({ x: 0, y: 0, w: 1, h: 1 });
 
-  constructor(texture: Texture) {
+  constructor() {
     super({
       collidable: true,
       texture   : undefined,
@@ -131,7 +131,7 @@ export class DreamBlob extends Entity {
       this.needsToRender = false;
     }
 
-    this.blobWidth  = 300 + Math.sin(this.tick / 300) * 300; 
+    this.blobWidth  = 500 + Math.sin(this.tick / 300) * 500; 
     this.blobHeight = 300;
 
     this.dreamMapMask.clear();
