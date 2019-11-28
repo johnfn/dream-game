@@ -10,7 +10,7 @@ import { TextureEntity } from "../texture_entity";
 type TilemapCustomObjectSingle = {
   type            : "single";
   name            : string;
-  getInstanceType : (tex: Texture, tileProperties: { [key: string]: unknown }) => Entity;
+  getInstanceType : (tex: Texture, tileProperties: { [key: string]: unknown }, layerName: string) => Entity;
 };
 
 type TilemapCustomObjectGroup = {
@@ -31,7 +31,7 @@ export type TilemapCustomObjects =
   | TilemapCustomObjectSingle
   | TilemapCustomObjectRect
 
-type ObjectInfo = { entity: Entity; layerName: string };
+export type ObjectInfo = { entity: Entity; layerName: string };
 
 export class TiledTilemapObjects {
   private _layers: TiledObjectLayerJSON[];
@@ -179,7 +179,7 @@ export class TiledTilemapObjects {
         if (associatedObject.name === tileType) {
           const spriteTex = TextureCache.GetTextureForTile(tile); 
 
-          newObj = associatedObject.getInstanceType(spriteTex, allProperties);
+          newObj = associatedObject.getInstanceType(spriteTex, allProperties, layer.name);
         }
       } else if (associatedObject.type === "group") {
         // add to the list of grouped objects, which we will process later.
@@ -319,5 +319,9 @@ export class TiledTilemapObjects {
     }
 
     return results;
+  }
+
+  getAllObjects(): ObjectInfo[] {
+    return this._allObjects;
   }
 }

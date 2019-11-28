@@ -5,7 +5,7 @@ import { TextureCache } from './texture_cache';
 import { Entity } from './entity';
 import { TextureEntity } from '../texture_entity';
 import { Grid } from './grid';
-import { TiledTilemapObjects, TilemapCustomObjects } from './tilemap_objects'
+import { TiledTilemapObjects, TilemapCustomObjects, ObjectInfo } from './tilemap_objects'
 import { RectGroup } from './rect_group';
 
 export type MapLayer = {
@@ -383,5 +383,9 @@ export class TiledTilemap {
   
   turnOffAllObjects() {
     this._objects.turnOffAllObjects();
+  }
+
+  getAllObjects(): ObjectInfo[] {
+    return this._objects.getAllObjects();
   }
 }

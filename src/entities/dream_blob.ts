@@ -67,6 +67,22 @@ export class DreamBlob extends Entity {
       layer.entity.y = oldY;
     }
 
+    for (const object of this.map.getAllObjects()) {
+      object.entity.x -= activeCameraRegion.x;
+      object.entity.y -= activeCameraRegion.y;
+
+      let oldVisible = object.entity.visible;
+
+      object.entity.visible = true;
+
+      C.Renderer.render(object.entity, dreamMapTexture, false);
+
+      object.entity.visible = oldVisible;
+      
+      object.entity.x += activeCameraRegion.x;
+      object.entity.y += activeCameraRegion.y;
+    }
+
     // Outer region
 
     const dreamMapOuter = new TextureEntity({ 
@@ -103,6 +119,7 @@ export class DreamBlob extends Entity {
   update = (state: GameState) => {
     ++this.tick;
 
+    this.map = state.map;
     this.associatedRegion = state.map.getCameraRegions().find(region => region.contains(this.positionVector()))!;
 
     if (this.needsToRender) {

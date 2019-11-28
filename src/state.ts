@@ -14,6 +14,7 @@ import { InteractableEntity } from "./library/interactable_entity";
 import { HashSet } from "./library/hash";
 import { BaseLight as BaseLightEntity } from "./entities/base_light";
 import { Container } from "pixi.js";
+import { DreamBlob } from "./entities/dream_blob";
 
 export enum GameMode {
   Normal,
@@ -85,6 +86,12 @@ export class GameState {
   getLightEntities(): HashSet<BaseLightEntity> {
     return new HashSet(
       this.entities.values().filter(ent => ent.isLight()) as BaseLightEntity[]
+    );
+  }
+
+  getDreamBlobs(): HashSet<DreamBlob> {
+    return new HashSet(
+      this.entities.values().filter(ent => ent instanceof DreamBlob) as DreamBlob[]
     );
   }
 }

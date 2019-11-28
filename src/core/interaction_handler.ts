@@ -6,7 +6,7 @@ import { InteractiveText } from "../entities/interactive_text";
 import { HashSet } from "../library/hash";
 
 export class InteractionHandler {
-  stage: Container;
+  stage       : Container;
   interactText: InteractiveText;
 
   constructor(stage: Container) {
@@ -18,16 +18,16 @@ export class InteractionHandler {
 
   update(props: {
     activeEntities: HashSet<InteractableEntity>;
-    gameState     : GameState;
+    state         : GameState;
   }) {
-    const { activeEntities, gameState } = props;
-    const { character } = gameState;
+    const { activeEntities, state } = props;
+    const { character } = state;
 
     // find potential interactor
 
     const sortedInteractors = activeEntities
       .values()
-      .filter(ent => ent.canInteract() && new Vector2(ent.position).diagonalDistance(character.positionVector()) < ent.interactRange)
+      .filter(ent => ent.canInteract(state) && new Vector2(ent.position).diagonalDistance(character.positionVector()) < ent.interactRange)
       .slice()
       .sort(
         (a, b) =>
@@ -40,14 +40,14 @@ export class InteractionHandler {
       );
 
     const sortedInteractorsWithMode = sortedInteractors
-      .filter(ent => ent.activeModes.includes(gameState.mode))
+      .filter(ent => ent.activeModes.includes(state.mode))
 
     let targetInteractor: InteractableEntity | null = sortedInteractorsWithMode[0];
 
     // Found it. interact
 
-    if (targetInteractor && gameState.keys.justDown.E) {
-      targetInteractor.interact(character, gameState);
+    if (targetInteractor && state.keys.justDown.E) {
+      targetInteractor.interact(character, state);
     }
 
     // We relax our restrictions for showing text a little
@@ -61,7 +61,7 @@ export class InteractionHandler {
       this.interactText.visible = true;
       this.interactText.setTarget(targetInteractorText);
 
-      this.interactText.setText(`%1%${ targetInteractorText.interactText(gameState) }`);
+      this.interactText.setText(`%1%${ targetInteractorText.interactText(state) }`);
     } else {
       this.interactText.visible = false;
       this.interactText.setText(`%1%`);

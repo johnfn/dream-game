@@ -13,12 +13,19 @@ export class TreasureChest extends InteractableEntity {
   name        = "TreasureChest";
   open        = false;
   contents    : TreasureChestContents;
+  inDream     : boolean;
 
-  constructor(texture: Texture, props: { [key: string]: unknown }) {
+  constructor(
+    texture  : Texture, 
+    props    : { [key: string]: unknown },
+    layerName: string,
+  ) {
     super({
       collidable: true,
       texture   ,
     });
+
+    this.inDream = layerName.startsWith("Dream Object");
 
     const contents = props.contents;
 
@@ -35,7 +42,16 @@ export class TreasureChest extends InteractableEntity {
 
   };
 
-  canInteract = () => true;
+  canInteract = (state: GameState) => {
+    if (this.inDream) {
+      const blobs = state.getDreamBlobs();
+      const touchesBlob = blobs.values().find(blob => blob.bounds().contains(this.positionVector())) !== undefined;
+
+      return touchesBlob;
+    } else {
+      return true;
+    }
+  }
 
   giveItemToCharacter(gameState: GameState) {
     if (this.contents === "key") {

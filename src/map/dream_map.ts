@@ -6,6 +6,7 @@ import { C } from "../constants";
 import { CustomMapObjects } from "./custom_map_objects";
 import { RectGroup } from "../library/rect_group";
 import { FollowCamera } from "../camera";
+import { ObjectInfo } from "../library/tilemap_objects";
 
 type MapLevel = {
   dreamGroundLayer  : Entity | undefined;
@@ -134,6 +135,7 @@ export class DreamMap extends Entity {
         this.levels[layerLevel].realityGroundLayer = entity;
       } else if (layerType === "Dream Object") {
         this.levels[layerLevel].dreamObjectLayer = entity;
+        this.levels[layerLevel].dreamObjectLayer!.visible = false
       } else if (layerType === "Reality Object") {
         this.levels[layerLevel].realityObjectLayer = entity;
       }
@@ -173,5 +175,9 @@ export class DreamMap extends Entity {
     return this.map.getCollidersInRegionForLayer(
       region, "Dream Ground Layer 1"
     )
+  }
+
+  getAllObjects(): ObjectInfo[] {
+    return this.map.getAllObjects();
   }
 }

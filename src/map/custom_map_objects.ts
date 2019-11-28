@@ -57,7 +57,7 @@ export const CustomMapObjects: TilemapCustomObjects[] = [
     type: "single",
 
     name: "treasureChest",
-    getInstanceType: (tex: Texture, props: { [key: string]: unknown }) => new TreasureChest(tex, props),
+    getInstanceType: (tex: Texture, props: { [key: string]: unknown }, layerName: string) => new TreasureChest(tex, props, layerName),
   },
 
   {

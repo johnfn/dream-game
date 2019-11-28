@@ -204,7 +204,7 @@ export class Game {
 
     this.interactionHandler.update({
       activeEntities: this.state.getInteractableEntities(),
-      gameState     : this.state,
+      state         : this.state,
     });
 
     Debug.ClearDrawCount();
