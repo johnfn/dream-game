@@ -158,9 +158,6 @@ export class Game {
       ) {
         this.player.y += 5;
       }
-
-      // this.player.x -= 100;
-      // this.player.y -= 100;
     } else {
       this.player.x = 950;
       this.player.y = 1595;

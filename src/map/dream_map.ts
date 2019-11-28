@@ -165,10 +165,30 @@ export class DreamMap extends Entity {
   }; 
 
   collisionBounds(state: GameState): RectGroup {
-    return this.map.getCollidersInRegionForLayer(
+    const rects = this.map.getCollidersInRegionForLayer(
       this._camera.bounds().expand(1000),
       "Reality Ground Layer 1"
-    )
+    );
+
+    const blobs = state.getDreamBlobs();
+    const rectsNotInBlob: Rect[] = [];
+
+    nextRect:
+    for (const rect of rects.getRects()) {
+      for (const blob of blobs.values()) { 
+        if (rect.intersects(blob.bounds())) {
+          const tiles = this.map.getTilesAtAbsolutePosition(rect.x, rect.y);
+
+          if (tiles.length > 1) {
+            continue nextRect;
+          }
+        }
+      }
+
+      rectsNotInBlob.push(rect);
+    }
+
+    return new RectGroup(rectsNotInBlob);
   }
 
   getDreamCollidersInRegion(region: Rect): RectGroup {
