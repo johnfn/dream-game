@@ -151,9 +151,6 @@ export class Game {
       this.player.x = Number(window.localStorage.getItem("characterx")) || CharacterStart.Instance.x;
       this.player.y = Number(window.localStorage.getItem("charactery")) || CharacterStart.Instance.y;
 
-      // this.player.x = 600;
-      // this.player.y = 600;
-
       const grid = this.collisionHandler.buildCollisionGrid(this.state);
 
       while (
