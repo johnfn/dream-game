@@ -7,12 +7,15 @@ import { CustomMapObjects } from "./custom_map_objects";
 import { RectGroup } from "../library/rect_group";
 import { FollowCamera } from "../camera";
 import { ObjectInfo } from "../library/tilemap_objects";
+import { DreamShard } from "../dream_shard";
 
 type MapLevel = {
-  dreamGroundLayer  : Entity | undefined;
   realityGroundLayer: Entity | undefined;
-  dreamObjectLayer  : Entity | undefined;
+  realityWallLayer  : Entity | undefined;
   realityObjectLayer: Entity | undefined;
+  dreamGroundLayer  : Entity | undefined;
+  dreamWallLayer  : Entity | undefined;
+  dreamObjectLayer  : Entity | undefined;
 };
 
 type DreamMapLayer = {
@@ -62,10 +65,11 @@ export class DreamMap extends Entity {
     if (level < 0 || level > 2) return;
 
     this.removeChild(
-      this.levels[gameState.level].dreamGroundLayer!,
       this.levels[gameState.level].realityGroundLayer!,
+      this.levels[gameState.level].realityWallLayer!,
+      this.levels[gameState.level].realityObjectLayer!,
+      this.levels[gameState.level].dreamGroundLayer!,
       this.levels[gameState.level].dreamObjectLayer!,
-      this.levels[gameState.level].realityObjectLayer!
     );
 
     gameState.level = level;
@@ -76,10 +80,11 @@ export class DreamMap extends Entity {
     ].realityGroundLayer!;
 
     this.addChild(
-      this.levels[gameState.level].dreamGroundLayer!,
       this.levels[gameState.level].realityGroundLayer!,
+      this.levels[gameState.level].realityWallLayer!,
+      this.levels[gameState.level].realityObjectLayer!,
+      this.levels[gameState.level].dreamGroundLayer!,
       this.levels[gameState.level].dreamObjectLayer!,
-      this.levels[gameState.level].realityObjectLayer!
     );
   };
 
@@ -117,28 +122,44 @@ export class DreamMap extends Entity {
     for (let { layerName, entity } of layers) {
       const s = layerName.split(" ");
 
-      const layerType = s[0] + " " + s[1]; // ie. 'Reality Object'
-      const layerLevel = Number(s[s.length - 1]);
+      
+    const awakeType = s[0]; //Dream or Reality
+    const layerType = s[1]; //Ground, Wall, or Object
+    const layerLevel = Number(s[s.length - 1]);
+
+    //if (!(["Dream", "Reality"].includes(awakeType))) {console.error("awaketype is " + awakeType)}
+    //if (!(["Object", "Ground", "Wall"].includes(layerType))) {console.error("layertype is " + layerType)}
 
       if (!(layerLevel in this.levels)) {
         this.levels[layerLevel] = {
-          dreamGroundLayer  : undefined,
+          realityObjectLayer: undefined,
           realityGroundLayer: undefined,
+          realityWallLayer  : undefined,
+          dreamGroundLayer  : undefined,
           dreamObjectLayer  : undefined,
-          realityObjectLayer: undefined
+          dreamWallLayer  : undefined,
+          
         };
       }
-
-      if (layerType === "Dream Ground") {
-        this.levels[layerLevel].dreamGroundLayer = entity;
-      } else if (layerType === "Reality Ground") {
-        this.levels[layerLevel].realityGroundLayer = entity;
-      } else if (layerType === "Dream Object") {
-        this.levels[layerLevel].dreamObjectLayer = entity;
-        this.levels[layerLevel].dreamObjectLayer!.visible = false
-      } else if (layerType === "Reality Object") {
-        this.levels[layerLevel].realityObjectLayer = entity;
+      if (awakeType === "Dream") {
+        if (layerType === "Ground") {
+          this.levels[layerLevel].dreamGroundLayer = entity;
+        } else if (layerType === "Wall") {
+          this.levels[layerLevel].dreamWallLayer = entity;
+        } else if (layerType === "Object") {
+          this.levels[layerLevel].dreamObjectLayer = entity;
+        }
+      } else if (awakeType === "Reality") {
+        if (layerType === "Ground") {
+          this.levels[layerLevel].realityGroundLayer = entity;
+        } else if (layerType === "Wall") {
+          this.levels[layerLevel].realityWallLayer = entity;
+        } else if (layerType === "Object") {
+          this.levels[layerLevel].realityObjectLayer = entity;
+        }
       }
+      console.log(this.levels[layerLevel]);
+
     }
 
     this.updateLevel(state.level, state);
