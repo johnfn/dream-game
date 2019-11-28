@@ -96,12 +96,27 @@ export class LightSource extends Entity {
       }
     }
 
+    const getAngle = (v1: Vector2, v2: Vector2) => {
+      const dy = v2.y - v1.y;
+      const dx = v2.x - v1.x;
+
+      let theta = Math.atan2(dy, dx);
+
+      theta *= 180 / Math.PI;
+
+      if (theta < 0) {
+        theta = 360 + theta;
+      }
+
+      return theta;
+    };
+
     const anglesToVertices: {[angle: number]: Vector2 } = {};
 
     for (const vertex of allVisibleVertices.values()) {
-      const line = new Line({ one: source.positionVector(), two: vertex });
+      const angle = getAngle(source.positionVector(), vertex);
 
-      anglesToVertices[line.angleInDegrees] = vertex;
+      anglesToVertices[angle] = vertex;
     }
 
     const verticesSortedByAngle = Object.keys(anglesToVertices).map(s => Number(s)).sort((a, b) => a - b).map(angle => anglesToVertices[angle]);

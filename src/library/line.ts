@@ -59,6 +59,7 @@ export class Line {
       y2 = p.two.y;
     }
 
+    // TODO: This is wrong but some code depends on it... lol
     if (x1 === x2 || y1 === y2) {
       this._x1 = Math.min(x1, x2);
       this._x2 = Math.max(x1, x2);
