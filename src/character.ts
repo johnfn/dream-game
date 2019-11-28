@@ -14,11 +14,11 @@ export class Character extends MovingEntity {
   static Speed = 5;
 
   activeModes = [GameMode.Normal];
-  name        = "Character"
+  name = "Character";
 
-  private _animFrame      = 0; //0 to 60
-  private _totalNumFrames = 8; 
-  protected _maxSpeed     = 300;
+  private _animFrame = 0; //0 to 60
+  private _totalNumFrames = 8;
+  protected _maxSpeed = 300;
   private _textures: { [key: string]: PIXI.Texture } = {};
 
   private _spriteSheet: Spritesheet;
@@ -26,15 +26,15 @@ export class Character extends MovingEntity {
 
   constructor(props: { game: Game }) {
     super({
-      game      : props.game,
-      texture   : C.Loader.getResource("art/temp.png").texture,
+      game: props.game,
+      texture: C.Loader.getResource("art/temp.png").texture,
       collidable: true
     });
 
-    const cellDim  = new Vector2({ x: 64, y: 110 });
-    const sheetDim = new Vector2({ x: 512, y: 880 });
-    const numRows  = sheetDim.y / cellDim.y;
-    const numCols  = sheetDim.x / cellDim.x;
+    const cellDim = new Vector2({ x: 64, y: 110 });
+    const sheetDim = new Vector2({ x: 512, y: 1320 });
+    const numRows = sheetDim.y / cellDim.y;
+    const numCols = sheetDim.x / cellDim.x;
     const frames: { [key: string]: {} } = {};
     const frameNames: { [key: number]: string } = {
       0: "char_idle_d",
@@ -44,7 +44,11 @@ export class Character extends MovingEntity {
       4: "char_walk_d",
       5: "char_walk_u",
       6: "char_walk_l",
-      7: "char_walk_r"
+      7: "char_walk_r",
+      8: "char_walk_rd",
+      9: "char_walk_ld",
+      10: "char_walk_ru",
+      11: "char_walk_lu"
     };
     for (let y = 0; y < numRows; y++) {
       for (let x = 0; x < numCols; x++) {
@@ -73,7 +77,7 @@ export class Character extends MovingEntity {
         version: "1.0",
         image: "char_spritesheet.png",
         format: "RGBA8888",
-        size: { w: 512, h: 880 },
+        size: { w: sheetDim.x, h: sheetDim.y },
         scale: "1"
       }
     };
@@ -89,18 +93,24 @@ export class Character extends MovingEntity {
   }
 
   // Assumes 60 FPS
-  getFrameNumber(currFrame: number, numAnimFrames: number, animSpeed: number) {
+  getFrameNumber(props: {
+    currFrame: number;
+    numAnimFrames: number;
+    animSpeed: number;
+  }) {
     return (
-      Math.floor(numAnimFrames * ((animSpeed * currFrame) / 60)) % numAnimFrames
+      Math.floor(
+        props.numAnimFrames * ((props.animSpeed * props.currFrame) / 60)
+      ) % props.numAnimFrames
     );
   }
 
   updateSprite = (): void => {
-    const frameNumber = this.getFrameNumber(
-      this._animFrame,
-      this._totalNumFrames,
-      2
-    );
+    const frameNumber = this.getFrameNumber({
+      currFrame: this._animFrame,
+      numAnimFrames: this._totalNumFrames,
+      animSpeed: 2
+    });
 
     if (this.velocity.equals(Vector2.Zero)) {
       if (this._lastNonzeroVelocity.x > 0) {
@@ -114,9 +124,33 @@ export class Character extends MovingEntity {
       }
     } else {
       if (this.velocity.x > 0) {
-        this.sprite.texture = this._textures[`char_walk_r-${frameNumber}.png`];
+        if (this.velocity.y > 0) {
+          this.sprite.texture = this._textures[
+            `char_walk_rd-${frameNumber}.png`
+          ];
+        } else if (this.velocity.y < 0) {
+          this.sprite.texture = this._textures[
+            `char_walk_ru-${frameNumber}.png`
+          ];
+        } else {
+          this.sprite.texture = this._textures[
+            `char_walk_r-${frameNumber}.png`
+          ];
+        }
       } else if (this.velocity.x < 0) {
-        this.sprite.texture = this._textures[`char_walk_l-${frameNumber}.png`];
+        if (this.velocity.y > 0) {
+          this.sprite.texture = this._textures[
+            `char_walk_ld-${frameNumber}.png`
+          ];
+        } else if (this.velocity.y < 0) {
+          this.sprite.texture = this._textures[
+            `char_walk_lu-${frameNumber}.png`
+          ];
+        } else {
+          this.sprite.texture = this._textures[
+            `char_walk_l-${frameNumber}.png`
+          ];
+        }
       } else if (this.velocity.y < 0) {
         this.sprite.texture = this._textures[`char_walk_u-${frameNumber}.png`];
       } else if (this.velocity.y > 0) {
@@ -174,8 +208,8 @@ export class Character extends MovingEntity {
       velocity = new Vector2({ x: 1, y: velocity.y });
     }
 
-    return velocity.normalize().multiply(
-      (keys.down.L && C.DEBUG) ? 20 : Character.Speed
-    );
+    return velocity
+      .normalize()
+      .multiply(keys.down.L && C.DEBUG ? 20 : Character.Speed);
   };
 }
