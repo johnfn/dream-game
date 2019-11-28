@@ -42,10 +42,11 @@ export abstract class Entity extends Container {
   }) {
     super();
 
-    this.sprite        = new Sprite(props.texture);
-    this._collideable  = props.collidable;
-    this._interactable = props.interactable || false;
-    this._isLight        = props.light || false;
+    this.sprite           = new Sprite(props.texture);
+    this.sortableChildren = true;
+    this._collideable     = props.collidable;
+    this._interactable    = props.interactable || false;
+    this._isLight         = props.light || false;
 
     this.startUpdating();
 

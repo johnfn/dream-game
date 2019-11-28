@@ -311,7 +311,7 @@ export class TiledTilemap {
       layers.push({
         entity   : layerEntity,
         layerName,
-      })
+      });
     }
 
     // Load object layers

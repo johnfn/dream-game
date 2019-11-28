@@ -8,6 +8,7 @@ import { InteractableEntity } from "./library/interactable_entity";
 
 // TODO: Allow shard color customization in constructor
 export class DreamShard extends InteractableEntity {
+  name = "DreamShard";
   activeModes = [GameMode.Normal];
 
   private _animFrame: number = 0;

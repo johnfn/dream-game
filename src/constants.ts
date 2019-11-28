@@ -22,4 +22,8 @@ export class C {
   public static Stage: Container;
 
   public static DreamFilters: Filter[] = [ ];
+
+  public static Depths = {
+    Player: 10,
+  };
 }

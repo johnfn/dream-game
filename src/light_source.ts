@@ -11,6 +11,7 @@ import { Rect } from "./library/rect";
 import { Debug } from "./library/debug";
 
 export class LightSource extends Entity {
+  name = "LightSource"
   activeModes = [GameMode.Normal];
   graphics    : Graphics;
   loggedOnce  = false;
