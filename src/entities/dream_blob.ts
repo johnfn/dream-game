@@ -21,8 +21,6 @@ export class DreamBlob extends Entity {
   dreamMapOuterMask : Graphics;
   map              !: DreamMap;
 
-  xRelativeToRegion : number = 0;
-  yRelativeToRegion : number = 0;
   associatedRegion  : Rect = new Rect({ x: 0, y: 0, w: 1, h: 1 });
 
   constructor() {
@@ -40,26 +38,23 @@ export class DreamBlob extends Entity {
 
   collide = () => {};
 
-  renderBlob(state: GameState, activeCameraRegion: Rect): {
+  renderBlob(state: GameState): {
     dreamMap     : Entity;
     dreamMapOuter: Entity;
   } {
-    this.xRelativeToRegion = this.x - activeCameraRegion.x;
-    this.yRelativeToRegion = this.y - activeCameraRegion.y;
-
     const layers = state.map.getActiveDreamLayers();
 
     const dreamMapTexture = RenderTexture.create({
-      width : activeCameraRegion.w,
-      height: activeCameraRegion.h,
+      width : 2000,
+      height: 2000,
     });
 
     for (const layer of layers) {
       const oldX = layer.entity.x;
       const oldY = layer.entity.y;
 
-      layer.entity.x = 0;
-      layer.entity.y = 0;
+      layer.entity.x -= this.x;
+      layer.entity.y -= this.y;
 
       C.Renderer.render(layer.entity, dreamMapTexture, false);
 
@@ -68,8 +63,13 @@ export class DreamBlob extends Entity {
     }
 
     for (const object of this.map.getAllObjects()) {
-      object.entity.x -= activeCameraRegion.x;
-      object.entity.y -= activeCameraRegion.y;
+      if (object.entity === this) { continue; } // lol
+
+      const oldX = object.entity.x;
+      const oldY = object.entity.y;
+
+      object.entity.x -= this.x;
+      object.entity.y -= this.y;
 
       let oldVisible = object.entity.visible;
 
@@ -79,8 +79,8 @@ export class DreamBlob extends Entity {
 
       object.entity.visible = oldVisible;
       
-      object.entity.x += activeCameraRegion.x;
-      object.entity.y += activeCameraRegion.y;
+      object.entity.x = oldX;
+      object.entity.y = oldY;
     }
 
     // Outer region
@@ -91,9 +91,9 @@ export class DreamBlob extends Entity {
     });
 
     state.stage.addChild(dreamMapOuter);
-    
-    dreamMapOuter.x = activeCameraRegion.x;
-    dreamMapOuter.y = activeCameraRegion.y;
+
+    dreamMapOuter.x = this.x;
+    dreamMapOuter.y = this.y;
 
     dreamMapOuter.alpha = 0.1;
 
@@ -106,8 +106,8 @@ export class DreamBlob extends Entity {
 
     state.stage.addChild(dreamMap);
     
-    dreamMap.x = activeCameraRegion.x;
-    dreamMap.y = activeCameraRegion.y;
+    dreamMap.x = this.x;
+    dreamMap.y = this.y;
 
     this.dreamMapMask = new Graphics();
 
@@ -117,13 +117,15 @@ export class DreamBlob extends Entity {
   tick = 0;
 
   update = (state: GameState) => {
+    console.log("hewo", this.x, this.y);
+
     ++this.tick;
 
     this.map = state.map;
     this.associatedRegion = state.map.getCameraRegions().find(region => region.contains(this.positionVector()))!;
 
     if (this.needsToRender) {
-      const { dreamMap, dreamMapOuter } = this.renderBlob(state, this.associatedRegion);
+      const { dreamMap, dreamMapOuter } = this.renderBlob(state);
 
       this.dreamMap      = dreamMap;
       this.dreamMapOuter = dreamMapOuter;
@@ -136,23 +138,16 @@ export class DreamBlob extends Entity {
 
     this.dreamMapMask.clear();
     this.dreamMapMask.beginFill(0xff0000);
-    this.dreamMapMask.drawRect(this.xRelativeToRegion, this.yRelativeToRegion, this.blobWidth, this.blobHeight);
+    this.dreamMapMask.drawRect(0, 0, this.blobWidth, this.blobHeight);
 
     this.dreamMap.addChild(this.dreamMapMask);
     this.dreamMap.mask = this.dreamMapMask;
-
-    // this.dreamBlobInverseMask.clear();
-    // this.dreamBlobInverseMask.beginFill(0xff0000);
-    // this.dreamBlobInverseMask.drawRect(0, 0, 800, 800);
-    // this.dreamBlobInverseMask.beginHole()
-    // this.dreamBlobInverseMask.drawRect(0, 0, blobWidth, blobHeight);
-    // this.dreamBlobInverseMask.endHole()
   };
 
   bounds(): Rect {
     return new Rect({
-      x: this.associatedRegion.x + this.xRelativeToRegion,
-      y: this.associatedRegion.y + this.yRelativeToRegion,
+      x: this.x,
+      y: this.y,
       w: this.blobWidth,
       h: this.blobHeight,
     });
