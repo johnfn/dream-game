@@ -7,7 +7,6 @@ import { CustomMapObjects } from "./custom_map_objects";
 import { RectGroup } from "../library/rect_group";
 import { FollowCamera } from "../camera";
 import { ObjectInfo } from "../library/tilemap_objects";
-import { DreamShard } from "../dream_shard";
 
 type MapLevel = {
   realityGroundLayer: Entity | undefined;
@@ -19,10 +18,11 @@ type MapLevel = {
 };
 
 type DreamMapLayer = {
-  entity   : Entity;
-  layerName: string;
-  region   : Rect;
-  active   : boolean;
+  entity       : Entity;
+  layerName    : string;
+  region       : Rect;
+  active       : boolean;
+  objectLayer  : boolean;
 };
 
 export class DreamMap extends Entity {
@@ -99,36 +99,47 @@ export class DreamMap extends Entity {
   loadNewRegion = (region: Rect, state: GameState) => {
     // Step 1: Clear out old region
 
-    // TODO: There's like no way this will work. How does this work?
-
-    const layers = this.map.loadRegion(region);
-
     for (const oldLayer of this.mapLayers) {
       oldLayer.entity.alpha = 0.15;
       oldLayer.active = false;
     }
 
-    for (const layer of layers) {
-      this.mapLayers.push({
-        entity   : layer.entity,
-        layerName: layer.layerName,
-        region   : region,
-        active   : true,
+    let layers = this.mapLayers.filter(layer => layer.region.equals(region));
+
+    if (layers.length === 0) {
+      layers = this.map.loadRegion(region).map(mapLayer => {
+        return {
+          entity     : mapLayer.entity,
+          layerName  : mapLayer.layerName,
+          region     : region,
+          active     : true,
+          objectLayer: mapLayer.objectLayer,
+        };
       });
+
+      for (const layer of layers) {
+        if (!layer.objectLayer) {
+          this.mapLayers.push(layer);
+        }
+      }
+    }
+
+    for (const layer of layers) {
+      layer.entity.alpha = 1;
+      layer.active = true;
     }
 
     // Step 2: Load next region
 
     for (let { layerName, entity } of layers) {
       const s = layerName.split(" ");
-
       
-    const awakeType = s[0]; //Dream or Reality
-    const layerType = s[1]; //Ground, Wall, or Object
-    const layerLevel = Number(s[s.length - 1]);
+      const awakeType  = s[0]; // Dream or Reality
+      const layerType  = s[1]; // Ground, Wall, or Object
+      const layerLevel = Number(s[s.length - 1]);
 
-    //if (!(["Dream", "Reality"].includes(awakeType))) {console.error("awaketype is " + awakeType)}
-    //if (!(["Object", "Ground", "Wall"].includes(layerType))) {console.error("layertype is " + layerType)}
+      //if (!(["Dream", "Reality"].includes(awakeType))) {console.error("awaketype is " + awakeType)}
+      //if (!(["Object", "Ground", "Wall"].includes(layerType))) {console.error("layertype is " + layerType)}
 
       if (!(layerLevel in this.levels)) {
         this.levels[layerLevel] = {
@@ -137,10 +148,10 @@ export class DreamMap extends Entity {
           realityWallLayer  : undefined,
           dreamGroundLayer  : undefined,
           dreamObjectLayer  : undefined,
-          dreamWallLayer  : undefined,
-          
+          dreamWallLayer    : undefined,
         };
       }
+
       if (awakeType === "Dream") {
         if (layerType === "Ground") {
           this.levels[layerLevel].dreamGroundLayer = entity;

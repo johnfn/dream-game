@@ -7,10 +7,12 @@ import { TextureEntity } from '../texture_entity';
 import { Grid } from './grid';
 import { TiledTilemapObjects, TilemapCustomObjects, ObjectInfo } from './tilemap_objects'
 import { RectGroup } from './rect_group';
+import { C } from '../constants';
 
 export type MapLayer = {
-  layerName: string;
-  entity   : Entity;
+  layerName  : string;
+  entity     : Entity;
+  objectLayer: boolean;
 };
 
 // TODO: Handle the weird new file format where tilesets link to ANOTHER json file
@@ -271,7 +273,7 @@ export class TiledTilemap {
   }
 
   public loadRegion(region: Rect): MapLayer[] {
-    let layers: MapLayer[] = [];
+    let tileLayers: MapLayer[] = [];
 
     // Load tile layers
 
@@ -303,25 +305,37 @@ export class TiledTilemap {
         }
       }
 
-      const layerEntity = new TextureEntity({ texture: renderTexture, name: "map layer" });
+      const layerEntity = new TextureEntity({ 
+        texture: renderTexture, 
+        name   : layerName,
+      });
 
       layerEntity.x = region.x;
       layerEntity.y = region.y;
 
-      layers.push({
-        entity   : layerEntity,
-        layerName,
+      tileLayers.push({
+        entity     : layerEntity,
+        layerName  ,
+        objectLayer: false,
       });
     }
 
     // Load object layers
     // TODO: only load objects in this region - not the entire layer!!!
 
-    const objectLayers = this._objects.loadObjectLayers()
+    const objectLayers = this._objects.loadObjectLayers();
 
-    layers = [...layers, ...objectLayers];
+    for (const objectLayer of objectLayers) {
+      objectLayer.entity.zIndex = C.Depths.ObjectLayerDepth;
+    }
 
-    return layers;
+    for (const tileLayer of tileLayers) {
+      tileLayer.entity.zIndex = C.Depths.TileLayerDepth;
+    }
+
+    tileLayers = [...tileLayers, ...objectLayers];
+
+    return tileLayers;
   }
 
   public getLayerNames(): string[] {

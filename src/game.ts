@@ -76,7 +76,7 @@ export class Game {
       transparent    : false,
       resolution     : window.devicePixelRatio,
       autoDensity    : true,
-      backgroundColor: 0x666666,
+      backgroundColor: 0x000,
       view           : document.getElementById("canvas")! as any,
     });
 

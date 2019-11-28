@@ -40,8 +40,9 @@ export class Light extends BaseLight {
 
   renderLight(state: GameState, grid: CollisionGrid): void {
     this.lightSource = new LightSource();
-    this.lightSource.x = 0;
-    this.lightSource.y = 0;
+
+    this.lightSource.x     = 0;
+    this.lightSource.y     = 0;
     this.lightSource.alpha = Number(this.intensity);
 
     this.parent.addChild(this.lightSource);

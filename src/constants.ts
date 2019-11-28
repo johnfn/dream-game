@@ -25,5 +25,7 @@ export class C {
 
   public static Depths = {
     Player: 10,
+    ObjectLayerDepth: 10,
+    TileLayerDepth: 0,
   };
 }

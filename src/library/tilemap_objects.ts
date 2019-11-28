@@ -4,7 +4,7 @@ import { TiledObjectLayerJSON, Tile } from "./tilemap_types";
 import { TextureCache } from "./texture_cache";
 import { Grid } from "./grid";
 import { Texture } from "pixi.js";
-import { TiledTilemap } from "./tilemap";
+import { TiledTilemap, MapLayer } from "./tilemap";
 import { TextureEntity } from "../texture_entity";
 
 type TilemapCustomObjectSingle = {
@@ -69,15 +69,16 @@ export class TiledTilemapObjects {
     }
   }
 
-  loadObjectLayers(): { entity: Entity, layerName: string }[] {
+  loadObjectLayers(): MapLayer[] {
     this.turnOffAllObjects();
 
-    let result: { entity: Entity, layerName: string }[] = [];
+    let result: MapLayer[] = [];
 
     for (const layer of this._layers) {
       result.push({
-        entity   : new TextureEntity({ name: "objectLayer" }),
-        layerName: layer.name,
+        entity     : new TextureEntity({ name: layer.name }),
+        layerName  : layer.name,
+        objectLayer: true,
       });
     }
 
