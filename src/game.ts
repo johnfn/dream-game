@@ -153,6 +153,9 @@ export class Game {
 
       const grid = this.collisionHandler.buildCollisionGrid(this.state);
 
+      // this.player.x += 100;
+      // this.player.y += 100;
+
       while (
         grid.getRectGroupCollisions(this.player.collisionBounds(this.state)).length > 0
       ) {

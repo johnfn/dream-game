@@ -154,6 +154,11 @@ export class Debug {
       }
     }
 
+    if (state.keys.justDown.X) {
+      state.character.x += 100;
+      state.character.y += 100;
+    }
+
     if (Debug.DebugMode) {
       if (state.keys.down.W) {
         state.stage.y += 20;

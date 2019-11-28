@@ -158,8 +158,6 @@ export class DreamMap extends Entity {
           this.levels[layerLevel].realityObjectLayer = entity;
         }
       }
-      console.log(this.levels[layerLevel]);
-
     }
 
     this.updateLevel(state.level, state);
@@ -186,16 +184,22 @@ export class DreamMap extends Entity {
   }; 
 
   collisionBounds(state: GameState): RectGroup {
-    const rects = this.map.getCollidersInRegionForLayer(
-      this._camera.bounds().expand(1000),
+    const bounds = this._camera.bounds().expand(1000);
+    const groundRects = this.map.getCollidersInRegionForLayer(
+      bounds,
       "Reality Ground Layer 1"
     );
+    const wallRects = this.map.getCollidersInRegionForLayer(
+      bounds,
+      "Reality Wall Layer 1"
+    );
+    const allRects = new RectGroup(groundRects.getRects().concat(wallRects.getRects()));
 
     const blobs = state.getDreamBlobs();
     const rectsNotInBlob: Rect[] = [];
 
     nextRect:
-    for (const rect of rects.getRects()) {
+    for (const rect of allRects.getRects()) {
       for (const blob of blobs.values()) { 
         if (rect.intersects(blob.bounds())) {
           const tiles = this.map.getTilesAtAbsolutePosition(rect.x, rect.y);
