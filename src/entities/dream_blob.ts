@@ -7,21 +7,17 @@ import { RectGroup } from "../library/rect_group";
 import { DreamMap } from "../map/dream_map";
 import { TextureEntity } from "../texture_entity";
 
-export class DreamBlob extends Entity {
+export abstract class DreamBlob extends Entity {
   activeModes       = [GameMode.Normal];
   name              = "DreamBlob";
   open              = false;
   needsToRender     = true;
-  blobWidth         = 800;
-  blobHeight        = 800;
   dreamMap          : Entity;
   dreamMapMask      : Graphics;
 
   dreamMapOuter     : Entity;
   dreamMapOuterMask : Graphics;
   map              !: DreamMap;
-
-  associatedRegion  : Rect = new Rect({ x: 0, y: 0, w: 1, h: 1 });
 
   constructor() {
     super({
@@ -38,7 +34,7 @@ export class DreamBlob extends Entity {
 
   collide = () => {};
 
-  renderBlob(state: GameState): {
+  renderDreamMaps(state: GameState): {
     dreamMap     : Entity;
     dreamMapOuter: Entity;
   } {
@@ -116,16 +112,13 @@ export class DreamBlob extends Entity {
 
   tick = 0;
 
-  update = (state: GameState) => {
-    console.log("hewo", this.x, this.y);
-
+  update(state: GameState) {
     ++this.tick;
 
     this.map = state.map;
-    this.associatedRegion = state.map.getCameraRegions().find(region => region.contains(this.positionVector()))!;
 
     if (this.needsToRender) {
-      const { dreamMap, dreamMapOuter } = this.renderBlob(state);
+      const { dreamMap, dreamMapOuter } = this.renderDreamMaps(state);
 
       this.dreamMap      = dreamMap;
       this.dreamMapOuter = dreamMapOuter;
@@ -133,25 +126,20 @@ export class DreamBlob extends Entity {
       this.needsToRender = false;
     }
 
-    this.blobWidth  = 500 + Math.sin(this.tick / 300) * 500; 
-    this.blobHeight = 300;
-
     this.dreamMapMask.clear();
     this.dreamMapMask.beginFill(0xff0000);
-    this.dreamMapMask.drawRect(0, 0, this.blobWidth, this.blobHeight);
+    this.dreamMapMask.drawRect(
+      this.bounds().x - this.x, 
+      this.bounds().y - this.y, 
+      this.bounds().w, 
+      this.bounds().h
+    );
 
     this.dreamMap.addChild(this.dreamMapMask);
     this.dreamMap.mask = this.dreamMapMask;
   };
 
-  bounds(): Rect {
-    return new Rect({
-      x: this.x,
-      y: this.y,
-      w: this.blobWidth,
-      h: this.blobHeight,
-    });
-  }
+  abstract bounds(): Rect;
 
   collisionBounds(state: GameState): RectGroup {
     return state.map.getDreamCollidersInRegion(this.bounds())

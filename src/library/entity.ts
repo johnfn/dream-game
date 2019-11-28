@@ -65,7 +65,7 @@ export abstract class Entity extends Container {
   }
 
   abstract activeModes: GameMode[];
-  abstract update: (state: GameState) => void;
+  abstract update(state: GameState): void;
   abstract collide: (other: Entity, intersection: Rect) => void;
 
   setCollideable(isCollideable: boolean) {

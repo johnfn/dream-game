@@ -151,9 +151,6 @@ export class Game {
       this.player.x = Number(window.localStorage.getItem("characterx")) || CharacterStart.Instance.x;
       this.player.y = Number(window.localStorage.getItem("charactery")) || CharacterStart.Instance.y;
 
-      this.player.x += 600;
-      this.player.y += 600;
-
       const grid = this.collisionHandler.buildCollisionGrid(this.state);
 
       while (
@@ -161,6 +158,9 @@ export class Game {
       ) {
         this.player.y += 5;
       }
+
+      // this.player.x -= 100;
+      // this.player.y -= 100;
     } else {
       this.player.x = 950;
       this.player.y = 1595;
