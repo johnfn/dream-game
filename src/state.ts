@@ -1,7 +1,7 @@
+import * as PIXI from "pixi.js";
+
 import { KeyboardState } from "./library/keyboard";
 import { C } from "./constants";
-
-import * as PIXI from "pixi.js";
 import { Dialog } from "./dialog";
 import { DreamMap } from "./map/dream_map";
 import { Entity } from "./library/entity";
@@ -38,7 +38,7 @@ export class GameState {
   dialog          !: Dialog;
   hud             !: HeadsUpDisplay;
   entities         = new HashSet<Entity>();
-  toBeDestroyed : Entity[];
+  toBeDestroyed    : Entity[];
 
   lightingGrid    !: CollisionGrid;
 

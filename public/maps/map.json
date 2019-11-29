@@ -1079,6 +1079,34 @@
         }, 
         {
          "draworder":"topdown",
+         "id":22,
+         "name":"Triggers",
+         "objects":[
+                {
+                 "height":512,
+                 "id":90,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"trigger",
+                         "type":"string",
+                         "value":"firstDialog"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":768,
+                 "x":-192,
+                 "y":3328
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":20,
          "name":"Camera Bounds",
          "objects":[
@@ -1220,8 +1248,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":22,
- "nextobjectid":90,
+ "nextlayerid":23,
+ "nextobjectid":91,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.2.3",

@@ -6,6 +6,7 @@ import { Grid } from "./grid";
 import { Texture } from "pixi.js";
 import { TiledTilemap, MapLayer } from "./tilemap";
 import { TextureEntity } from "../texture_entity";
+import { CustomMapObjects } from "../map/custom_map_objects";
 
 type TilemapCustomObjectSingle = {
   type            : "single";
@@ -127,7 +128,7 @@ export class TiledTilemapObjects {
           }
         }
 
-        throw new Error("you probably have a rect region in your tilemap that's not being processed in dream_map");
+        throw new Error(`on layer ${ layer.name } you probably have a rect region that's not being processed in dream_map`);
       }
 
       const { spritesheet, tileProperties } = this._map.gidInfo(obj.gid);

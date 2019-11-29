@@ -107,4 +107,10 @@ export const CustomMapObjects: TilemapCustomObjects[] = [
     layerName: "Camera Bounds",
     process  : () => {}, // handled in dream_map.ts
   },
+
+  {
+    type     : "rect",
+    layerName: "Triggers",
+    process  : () => {}, // handled in dream_map.ts
+  },
 ];

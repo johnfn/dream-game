@@ -25,6 +25,11 @@ type DreamMapLayer = {
   objectLayer  : boolean;
 };
 
+type Trigger = {
+  rect       : Rect;
+  triggerName: string;
+}
+
 export class DreamMap extends Entity {
   name         = "DreamMap";
   activeModes  = [GameMode.Normal];
@@ -32,6 +37,7 @@ export class DreamMap extends Entity {
   levels       : { [key: number]: MapLevel } = [];
   activeRegion : Rect | null;
   mapLayers    : DreamMapLayer[] = [];
+  _triggers    : Trigger[] = [];
 
   private _cameraRegions: Rect[] = [];
   private _camera       : FollowCamera;
@@ -55,6 +61,8 @@ export class DreamMap extends Entity {
     this.zIndex         = 0;
 
     this.loadNextRegionIfNecessary(state);
+
+    console.log(this.map.loadRegionLayer("Triggers"));
   }
 
   getCameraRegions(): Rect[] {

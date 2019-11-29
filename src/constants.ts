@@ -18,8 +18,8 @@ export class C {
   public static INTERACTION_RANGE = 200;
 
   public static Renderer: Renderer;
-  public static Loader: TypesafeLoader<typeof ResourcesToLoad>;
-  public static Stage: Container;
+  public static Loader  : TypesafeLoader<typeof ResourcesToLoad>;
+  public static Stage   : Container;
 
   public static DreamFilters: Filter[] = [ ];
 
