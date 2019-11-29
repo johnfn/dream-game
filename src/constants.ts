@@ -15,7 +15,7 @@ export class C {
   public static TILE_WIDTH = 32;
   public static TILE_HEIGHT = 32;
 
-  public static INTERACTION_RANGE = 100;
+  public static INTERACTION_RANGE = 200;
 
   public static Renderer: Renderer;
   public static Loader: TypesafeLoader<typeof ResourcesToLoad>;
