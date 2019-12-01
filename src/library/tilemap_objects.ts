@@ -6,7 +6,6 @@ import { Grid } from "./grid";
 import { Texture } from "pixi.js";
 import { TiledTilemap, MapLayer } from "./tilemap";
 import { TextureEntity } from "../texture_entity";
-import { CustomMapObjects } from "../map/custom_map_objects";
 
 type TilemapCustomObjectSingle = {
   type            : "single";
@@ -131,7 +130,7 @@ export class TiledTilemapObjects {
         throw new Error(`on layer ${ layer.name } you probably have a rect region that's not being processed in dream_map`);
       }
 
-      const { spritesheet, tileProperties } = this._map.gidInfo(obj.gid);
+      const { spritesheet, tileProperties } = this._map._data.gidInfo(obj.gid);
       const objProperties: { [key: string]: unknown } = {};
 
       for (const { name, value } of (obj.properties || [])) {
@@ -150,7 +149,7 @@ export class TiledTilemapObjects {
         // tiled pivot point is (0, 1) so we need to subtract by tile height.
         y             : obj.y - spritesheet.tileheight,
         tile          : spritesheet,
-        isCollider    : this._map._gidHasCollision[obj.gid] || false,
+        isCollider    : this._map._data._gidHasCollision[obj.gid] || false,
         gid           : obj.gid,
         tileProperties: allProperties,
       };

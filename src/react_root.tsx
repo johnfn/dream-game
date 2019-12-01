@@ -14,25 +14,23 @@ class Hierarchy extends React.Component<HP, { hover: boolean }> {
     };
   }
 
-  oldAlpha: { [key: number]: number } = {};
+  oldTint: { [key: number]: number } = {};
 
   mouseOver = () => {
     this.setState({ hover: true })
 
     if (this.props.root instanceof Entity) {
-      this.oldAlpha[this.props.root.id] = this.props.root.alpha;
-    }
+      this.oldTint[this.props.root.id] = this.props.root.sprite.tint;
 
-    this.props.root.alpha = 0.5;
+      this.props.root.sprite.tint = 0x000099;
+    }
   };
 
   mouseOut = () => {
     this.setState({ hover: false })
 
     if (this.props.root instanceof Entity) {
-      this.props.root.alpha = this.oldAlpha[this.props.root.id];
-    } else {
-      this.props.root.alpha = 1.0;
+      this.props.root.sprite.tint = this.oldTint[this.props.root.id];
     }
   };
 

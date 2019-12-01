@@ -1,6 +1,7 @@
 import { Loader, LoaderResource } from 'pixi.js'
 import { ResourceName, ResourcesToLoad, ResourceType } from '../resources';
 import { TiledTilemap } from './tilemap';
+import { TilemapData } from './tilemap_data';
 
 /** 
  * TypeSafe loader is intended to be a wrapper around PIXI.Loader which gives a
@@ -37,8 +38,10 @@ export class TypesafeLoader<Resources> {
       const pathToTilemap = resource.substring(0, resource.lastIndexOf("/"))
 
       if (ResourcesToLoad[castedResource] === ResourceType.Tileset) {
+        const tilemapData = new TilemapData({ data: this.getResource(castedResource).data, pathToTilemap });
+
         allTilemapDependencyPaths = allTilemapDependencyPaths.concat(
-          TiledTilemap.GetAllTilesetsOf(pathToTilemap, this.getResource(castedResource).data)
+          tilemapData.getTilesets().map(tileset => tileset.imageUrlRelativeToGame)
         );
       }
     }

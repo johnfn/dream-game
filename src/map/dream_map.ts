@@ -204,11 +204,11 @@ export class DreamMap extends Entity {
 
   collisionBounds(state: GameState): RectGroup {
     const bounds = this._camera.bounds().expand(1000);
-    const groundRects = this.map.getCollidersInRegionForLayer(
+    const groundRects = this.map._data.getCollidersInRegionForLayer(
       bounds,
       "Reality Ground Layer 1"
     );
-    const wallRects = this.map.getCollidersInRegionForLayer(
+    const wallRects = this.map._data.getCollidersInRegionForLayer(
       bounds,
       "Reality Wall Layer 1"
     );
@@ -221,7 +221,7 @@ export class DreamMap extends Entity {
     for (const rect of allRects.getRects()) {
       for (const blob of blobs.values()) { 
         if (rect.intersects(blob.bounds())) {
-          const tiles = this.map.getTilesAtAbsolutePosition(rect.x, rect.y);
+          const tiles = this.map._data.getTilesAtAbsolutePosition(rect.x, rect.y);
 
           if (tiles.length > 1) {
             continue nextRect;
@@ -236,7 +236,7 @@ export class DreamMap extends Entity {
   }
 
   getDreamCollidersInRegion(region: Rect): RectGroup {
-    return this.map.getCollidersInRegionForLayer(
+    return this.map._data.getCollidersInRegionForLayer(
       region, "Dream Ground Layer 1"
     )
   }
