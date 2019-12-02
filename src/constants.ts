@@ -5,6 +5,7 @@ import {
 } from "pixi.js";
 import { TypesafeLoader } from "./library/typesafe_loader";
 import { ResourcesToLoad } from "./resources";
+import { Entity } from "./library/entity";
 
 export class C {
   public static DEBUG = true;
@@ -19,13 +20,14 @@ export class C {
 
   public static Renderer: Renderer;
   public static Loader  : TypesafeLoader<typeof ResourcesToLoad>;
-  public static Stage   : Container;
+  public static Stage   : Entity;
 
   public static DreamFilters: Filter[] = [ ];
 
   public static Depths = {
-    Player: 10,
+    Player          : 10,
     ObjectLayerDepth: 10,
-    TileLayerDepth: 0,
+    TileLayerDepth  : 0,
+    LightDepth      : 20,
   };
 }

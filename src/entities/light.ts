@@ -4,6 +4,7 @@ import { LightSource } from "../light_source";
 import { BaseLight } from "./base_light";
 import { CollisionGrid } from "../collision_grid";
 import { Rect } from "../library/rect";
+import { C } from "../constants";
 
 export class Light extends BaseLight {
   activeModes  = [GameMode.Normal];
@@ -41,14 +42,16 @@ export class Light extends BaseLight {
   renderLight(state: GameState, grid: CollisionGrid): void {
     this.lightSource = new LightSource();
 
-    this.lightSource.x     = 0;
-    this.lightSource.y     = 0;
-    this.lightSource.alpha = Number(this.intensity);
+    this.lightSource.x      = 0;
+    this.lightSource.y      = 0;
+    this.lightSource.alpha  = Number(this.intensity);
+    this.lightSource.zIndex = C.Depths.LightDepth;
 
-    this.parent.addChild(this.lightSource);
+    state.stage.addChild(this.lightSource);
 
     const w = 1500;
     const h = 1500;
+
     const boundary = new Rect({
       x: this.x - w / 2,
       y: this.y - h / 2,
@@ -56,10 +59,6 @@ export class Light extends BaseLight {
       h: h,
     });
     const { graphics, offsetX, offsetY } = this.lightSource.buildLighting(grid, this, boundary);
-
-    // sort to top lol
-    state.stage.removeChild(this.lightSource);
-    state.stage.addChild(this.lightSource);
 
     this.lightSource.x = offsetX;
     this.lightSource.y = offsetY;

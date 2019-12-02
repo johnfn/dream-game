@@ -46,13 +46,10 @@ class Hierarchy extends React.Component<HP, { hover: boolean }> {
         { root.name } { root.zIndex }
 
         {
-          root.children.length > 0 &&
-            root.children.map(child => {
-              if (child instanceof Entity) {
-                return <Hierarchy root={ child } />
-              } else {
-                return null;
-              }
+          root instanceof Entity &&
+          root.children().length > 0 &&
+            root.children().map(child => {
+              return <Hierarchy root={ child } />
             })
         }
       </div>

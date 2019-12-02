@@ -6,6 +6,7 @@ import { TypewriterText } from "./entities/typewriter_text";
 import { TextStyles, TextEntity } from "./library/text_entity";
 import { ResourcesToLoad } from "./resources";
 import { Sprite } from "pixi.js";
+import { TextureEntity } from "./texture_entity";
 
 export enum DialogSpeaker {
   You           = "You",
@@ -39,7 +40,7 @@ export class Dialog extends InteractableEntity {
   dialogText  : TypewriterText;
   portraitText: TextEntity;
   segments    : DialogSegment[];
-  portrait    : Sprite;
+  portrait    : TextureEntity;
 
   constructor() {
     super({
@@ -50,7 +51,8 @@ export class Dialog extends InteractableEntity {
     Dialog.Instance = this;
 
     this.segments = [];
-    this.position.set(200, 300)
+    this.x = 200;
+    this.y = 200;
     this.sprite.width = 400;
 
     this.dialogText = new TypewriterText(
@@ -77,7 +79,7 @@ export class Dialog extends InteractableEntity {
 
     this.addChild(this.portraitText);
 
-    this.portrait = new Sprite();
+    this.portrait = new TextureEntity({});
     this.portrait.x = 10;
     this.portrait.y = 10;
 

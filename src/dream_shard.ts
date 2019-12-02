@@ -56,10 +56,10 @@ export class DreamShard extends InteractableEntity {
   toggleDream = (gameState: GameState) => {
     if (!gameState.inDreamWorld) {
       gameState.inDreamWorld = true;
-      C.Stage.filters = C.DreamFilters;
+      // C.Stage.filters = C.DreamFilters;
     } else {
       gameState.inDreamWorld = false;
-      C.Stage.filters = [];
+      // C.Stage.filters = [];
     }
 
     gameState.dreamMapLayer.visible   = gameState.inDreamWorld;

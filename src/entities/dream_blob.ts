@@ -52,7 +52,7 @@ export abstract class DreamBlob extends Entity {
       layer.entity.x -= this.x;
       layer.entity.y -= this.y;
 
-      C.Renderer.render(layer.entity, dreamMapTexture, false);
+      C.Renderer.render(layer.entity.sprite, dreamMapTexture, false);
 
       layer.entity.x = oldX;
       layer.entity.y = oldY;
@@ -71,7 +71,7 @@ export abstract class DreamBlob extends Entity {
 
       object.entity.visible = true;
 
-      C.Renderer.render(object.entity, dreamMapTexture, false);
+      C.Renderer.render(object.entity.sprite, dreamMapTexture, false);
 
       object.entity.visible = oldVisible;
       
@@ -135,7 +135,8 @@ export abstract class DreamBlob extends Entity {
       this.bounds().h
     );
 
-    this.dreamMap.addChild(this.dreamMapMask);
+    // TODO: Figure out how to handle graphics
+    this.dreamMap.sprite.addChild(this.dreamMapMask);
     this.dreamMap.mask = this.dreamMapMask;
   };
 

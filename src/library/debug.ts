@@ -45,7 +45,7 @@ export class Debug {
       y2: point.y + 10,
     }).drawOnto(graphics, color);
 
-    Game.Instance.stage.addChild(graphics);
+    Game.Instance.stage.sprite.addChild(graphics);
 
     this.DebugGraphicStack.push(graphics);
 
@@ -66,7 +66,7 @@ export class Debug {
 
     line.drawOnto(graphics, color);
 
-    Game.Instance.stage.addChild(graphics);
+    Game.Instance.stage.sprite.addChild(graphics);
 
     this.DebugGraphicStack.push(graphics);
 
@@ -148,9 +148,9 @@ export class Debug {
       state.stage.y = 0;
 
       if (state.stage.scale.x === 0.2) {
-        state.stage.scale = new Point(1, 1);
+        state.stage.scale = new Vector2({ x: 1, y: 1 });
       } else {
-        state.stage.scale = new Point(0.2, 0.2);
+        state.stage.scale = new Vector2({ x: 0.2, y: 0.2 });
       }
     }
 
@@ -179,7 +179,7 @@ export class Debug {
   }
 
   public static DebugShowRect(state: GameState, rect: Rect) {
-    state.stage.scale = new Point(0.2, 0.2);
+    state.stage.scale = new Vector2({ x: 0.2, y: 0.2 });
     state.stage.x = -rect.x * 0.2;
     state.stage.y = -rect.y * 0.2;
   }

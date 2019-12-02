@@ -29,6 +29,8 @@ import { CharacterStart } from "./entities/character_start";
 import { InteractionHandler } from "./core/interaction_handler";
 import { HashSet } from "./library/hash";
 import { CollisionHandler } from "./core/collision_handler";
+import { TextureEntity } from "./texture_entity";
+import { Entity } from "./library/entity";
 
 export class Game {
   static Instance: Game;
@@ -55,13 +57,13 @@ export class Game {
   /**
    * The stage of the game. Put everything in-game on here.
    */
-  stage              : Container;
+  stage              : Entity;
 
   /**
    * A stage for things in the game that don't move when the camera move and are
    * instead fixed to the screen. For example, the HUD.
    */
-  fixedCameraStage: Container;
+  fixedCameraStage: Entity;
 
   constructor() {
     Game.Instance = this;
@@ -80,13 +82,13 @@ export class Game {
       view           : document.getElementById("canvas")! as any,
     });
 
-    this.stage = new Container();
+    this.stage = new TextureEntity({});
     this.state.stage = this.stage;
 
-    this.app.stage.addChild(this.stage);
+    this.app.stage.addChild(this.stage.sprite);
 
-    this.fixedCameraStage = new Container();
-    this.app.stage.addChild(this.fixedCameraStage);
+    this.fixedCameraStage = new TextureEntity({});
+    this.app.stage.addChild(this.fixedCameraStage.sprite);
 
     // This is insanity:
 
@@ -126,10 +128,12 @@ export class Game {
     this.stage.addChild(this.player);
 
     const testShard = new DreamShard();
-    testShard.position.set(5, 5);
+    testShard.x = 5;
+    testShard.y = 5;
     this.stage.addChild(testShard);
 
-    this.stage.addChild(this.state.shader);
+    // TODO: Figure this out
+    this.stage.sprite.addChild(this.state.shader);
 
     this.hud = new HeadsUpDisplay();
     this.state.hud = this.hud;
@@ -165,8 +169,6 @@ export class Game {
       this.player.x = 950;
       this.player.y = 1595;
     }
-
-    this.stage.sortableChildren = true;
   };
 
   gameLoop = () => {
@@ -314,6 +316,7 @@ export class Game {
     this.shadedLighting = new Mesh(stageBounds, shader);
     this.shadedLighting.blendMode = BLEND_MODES.ADD;
 
-    this.stage.addChild(this.shadedLighting);
+    // TODO
+    this.stage.sprite.addChild(this.shadedLighting);
   };
 }

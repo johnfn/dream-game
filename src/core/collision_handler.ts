@@ -70,7 +70,8 @@ export class CollisionHandler {
         updatedBounds = updatedBounds.subtract(yVelocity);
       }
 
-      entity.position.set(entity.position.x + delta.x, entity.position.y + delta.y);
+      entity.x = entity.x + delta.x;
+      entity.y = entity.y + delta.y;
     }
   };
 }

@@ -4,12 +4,13 @@ import { Vector2 } from "../library/vector2";
 import { GameState } from "../state";
 import { InteractiveText } from "../entities/interactive_text";
 import { HashSet } from "../library/hash";
+import { Entity } from "../library/entity";
 
 export class InteractionHandler {
-  stage       : Container;
+  stage       : Entity;
   interactText: InteractiveText;
 
-  constructor(stage: Container) {
+  constructor(stage: Entity) {
     this.stage = stage;
 
     this.interactText = new InteractiveText();

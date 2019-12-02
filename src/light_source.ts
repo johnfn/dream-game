@@ -22,7 +22,8 @@ export class LightSource extends Entity {
     });
 
     this.graphics = new Graphics();
-    this.addChild(this.graphics);
+    // TODO
+    this.sprite.addChild(this.graphics);
   }
 
   buildLighting(

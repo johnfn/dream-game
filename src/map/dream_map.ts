@@ -72,13 +72,11 @@ export class DreamMap extends Entity {
   updateLevel = (level: number, gameState: GameState) => {
     if (level < 0 || level > 2) return;
 
-    this.removeChild(
-      this.levels[gameState.level].realityGroundLayer!,
-      this.levels[gameState.level].realityWallLayer!,
-      this.levels[gameState.level].realityObjectLayer!,
-      this.levels[gameState.level].dreamGroundLayer!,
-      this.levels[gameState.level].dreamObjectLayer!,
-    );
+    this.removeChild(this.levels[gameState.level].realityGroundLayer!);
+    this.removeChild(this.levels[gameState.level].realityWallLayer!);
+    this.removeChild(this.levels[gameState.level].realityObjectLayer!);
+    this.removeChild(this.levels[gameState.level].dreamGroundLayer!);
+    this.removeChild(this.levels[gameState.level].dreamObjectLayer!);
 
     gameState.level = level;
 
@@ -87,13 +85,11 @@ export class DreamMap extends Entity {
       gameState.level
     ].realityGroundLayer!;
 
-    this.addChild(
-      this.levels[gameState.level].realityGroundLayer!,
-      this.levels[gameState.level].realityWallLayer!,
-      this.levels[gameState.level].realityObjectLayer!,
-      this.levels[gameState.level].dreamGroundLayer!,
-      this.levels[gameState.level].dreamObjectLayer!,
-    );
+    this.addChild(this.levels[gameState.level].realityGroundLayer!);
+    this.addChild(this.levels[gameState.level].realityWallLayer!);
+    this.addChild(this.levels[gameState.level].realityObjectLayer!);
+    this.addChild(this.levels[gameState.level].dreamGroundLayer!);
+    this.addChild(this.levels[gameState.level].dreamObjectLayer!);
   };
 
   getActiveLayers = (): DreamMapLayer[] => {

@@ -3,6 +3,7 @@ import * as PIXI from "pixi.js";
 import { Entity } from "./library/entity";
 import { GameState, GameMode } from "./state";
 
+// TODO merge with Entity
 export class TextureEntity extends Entity {
   activeModes = [GameMode.Normal];
 

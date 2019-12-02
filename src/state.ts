@@ -13,7 +13,6 @@ import { CollisionGrid } from "./collision_grid";
 import { InteractableEntity } from "./library/interactable_entity";
 import { HashSet } from "./library/hash";
 import { BaseLight as BaseLightEntity } from "./entities/base_light";
-import { Container } from "pixi.js";
 import { DreamBlob } from "./entities/dream_blob";
 
 export enum GameMode {
@@ -26,7 +25,7 @@ export class GameState {
   keys             : KeyboardState;
   map             !: DreamMap;
 
-  stage           !: Container;
+  stage           !: Entity;
   character       !: Character;
   camera          !: FollowCamera;
   level           !: number;

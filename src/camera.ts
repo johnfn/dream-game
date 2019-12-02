@@ -14,13 +14,13 @@ export class FollowCamera {
    */
   private _position: Vector2 = Vector2.Zero;
   private _target  : Entity;
-  private _stage   : PIXI.Container;
+  private _stage   : Entity;
   private _width   : number;
   private _height  : number;
   private _state   : GameState;
 
   constructor(props: { 
-    stage       : PIXI.Container; 
+    stage       : Entity;
     followTarget: Entity;
     width       : number; 
     height      : number;
@@ -117,9 +117,7 @@ export class FollowCamera {
 
     this._position = this._position.lerp(desiredPosition, FollowCamera.LERP_SPEED);
 
-    this._stage.position = new PIXI.Point(
-      Math.floor(-this._position.x), 
-      Math.floor(-this._position.y)
-    );
+    this._stage.x = Math.floor(-this._position.x);
+    this._stage.y = Math.floor(-this._position.y);
   };
 }
